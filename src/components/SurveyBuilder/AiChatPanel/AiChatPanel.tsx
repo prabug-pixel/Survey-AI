@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store';
-import { chatActions } from '../../../store/chatSlice';
-import { surveyActions } from '../../../store/surveySlice';
-import { SAMPLE_CHAT_CSAT } from '../../../constants/sampleSurvey';
+import { processMessage } from '../../../store/chatSlice';
 import TabSwitcher from '../TabSwitcher/TabSwitcher';
 import ChatMessage from './ChatMessage/ChatMessage';
 import ChatInput from './ChatInput/ChatInput';
@@ -20,40 +18,17 @@ const AiChatPanel: React.FC = () => {
   }, [messages, isTyping]);
 
   const handleQuickAction = (actionId: string) => {
-    // Simulate selecting CSAT Survey and generating
-    dispatch(chatActions.addUserMessage(
-      actionId === 'csat' ? 'CSAT Survey' :
-      actionId === 'nps' ? 'NPS Survey' :
-      actionId === 'post_purchase' ? 'Post purchase survey' : 'Others'
-    ));
-
-    // Simulate AI conversation flow
-    dispatch(chatActions.setTyping(true));
-    setTimeout(() => {
-      dispatch(chatActions.setTyping(false));
-      dispatch(chatActions.setChatHistory(SAMPLE_CHAT_CSAT));
-      dispatch(surveyActions.loadSampleSurvey());
-    }, 800);
+    const labels: Record<string, string> = {
+      csat: 'CSAT Survey',
+      nps: 'NPS Survey',
+      post_purchase: 'Post purchase survey',
+      others: 'I want to create a custom survey',
+    };
+    dispatch(processMessage(labels[actionId] || actionId) as never);
   };
 
   const handleSend = (message: string) => {
-    dispatch(chatActions.addUserMessage(message));
-
-    // Simulate AI response
-    dispatch(chatActions.setTyping(true));
-    setTimeout(() => {
-      dispatch(chatActions.setTyping(false));
-
-      if (!surveyGenerated) {
-        // First message triggers survey generation flow
-        dispatch(chatActions.setChatHistory(SAMPLE_CHAT_CSAT));
-        dispatch(surveyActions.loadSampleSurvey());
-      } else {
-        dispatch(chatActions.addAiMessage({
-          content: "Great suggestion, I've added a few targeted questions to help identify issues and capture staff-specific feedback.",
-        }));
-      }
-    }, 800);
+    dispatch(processMessage(message) as never);
   };
 
   return (
