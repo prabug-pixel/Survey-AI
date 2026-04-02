@@ -1,0 +1,130 @@
+@use '../../../../styles/variables' as *;
+
+.chatInputWrapper {
+  padding: $spacing-12 $spacing-16;
+  border-top: 1px solid $color-border;
+  background: $color-white;
+}
+
+.mentionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-6;
+  padding: $spacing-4 $spacing-10;
+  background: $color-primary-light;
+  border: 1px solid #8fbcf5;
+  border-radius: $radius-full;
+  margin-bottom: $spacing-8;
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
+.mentionNumber {
+  width: 18px;
+  height: 18px;
+  border-radius: $radius-full;
+  background: $color-primary;
+  color: $color-white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mentionIcon {
+  font-size: $font-size-sm;
+}
+
+.mentionText {
+  font-weight: $font-weight-regular;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mentionClose {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
+
+.inputRow {
+  display: flex;
+  align-items: flex-start;
+}
+
+.textarea {
+  flex: 1;
+  border: none;
+  resize: none;
+  font-size: $font-size-base;
+  font-weight: $font-weight-light;
+  color: $color-gray-800;
+  line-height: $line-height-normal;
+  min-height: 36px;
+  max-height: 100px;
+  background: transparent;
+
+  &::placeholder {
+    color: $color-gray-400;
+    font-weight: $font-weight-light;
+  }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-8;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.toolBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.sendBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  transition: all $transition-fast;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &.active {
+    background: $color-primary-light;
+
+    &:hover {
+      background: #d1e3fc;
+    }
+  }
+}

@@ -1,0 +1,140 @@
+@use '../../../styles/variables' as *;
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-40 $spacing-24;
+  overflow-y: auto;
+}
+
+.illustration {
+  margin-bottom: $spacing-32;
+  padding: $spacing-32;
+  background: $color-gray-100;
+  border-radius: $radius-2xl;
+}
+
+.illustrationCard {
+  display: flex;
+  gap: $spacing-12;
+  background: $color-white;
+  border-radius: $radius-lg;
+  padding: $spacing-20;
+  box-shadow: $shadow-sm;
+  width: 200px;
+}
+
+.cardLeft {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+  align-items: center;
+}
+
+.aiLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+  background: $color-primary-light;
+  padding: $spacing-4 $spacing-8;
+  border-radius: $radius-sm;
+}
+
+.barShort {
+  width: 32px;
+  height: 4px;
+  background: $color-primary;
+  border-radius: $radius-full;
+}
+
+.cardRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.lineLong {
+  height: 6px;
+  background: $color-gray-200;
+  border-radius: $radius-full;
+  width: 100%;
+}
+
+.dotRow {
+  display: flex;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: $color-gray-300;
+  border-radius: $radius-full;
+}
+
+.lineMedium {
+  height: 6px;
+  background: $color-gray-200;
+  border-radius: $radius-full;
+  width: 80%;
+}
+
+.lineShort {
+  height: 6px;
+  background: $color-gray-200;
+  border-radius: $radius-full;
+  width: 50%;
+}
+
+.cta {
+  font-size: $font-size-md;
+  color: $color-gray-700;
+  font-weight: $font-weight-regular;
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.sparkle {
+  font-size: $font-size-lg;
+  color: $color-primary;
+}
+
+.link {
+  color: $color-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.divider {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+  font-weight: $font-weight-light;
+  margin: $spacing-12 0;
+}
+
+.libraryLabel {
+  font-size: $font-size-md;
+  color: $color-gray-700;
+  font-weight: $font-weight-regular;
+  margin-bottom: $spacing-20;
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.chevron {
+  font-size: $font-size-lg;
+  line-height: 1;
+}

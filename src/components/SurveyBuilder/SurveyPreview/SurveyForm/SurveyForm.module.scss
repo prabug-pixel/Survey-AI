@@ -1,0 +1,72 @@
+@use '../../../../styles/variables' as *;
+
+.surveyForm {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: $spacing-24 $spacing-16 $spacing-48;
+}
+
+.surveyHeader {
+  text-align: center;
+  padding: $spacing-32 $spacing-24;
+  margin-bottom: $spacing-24;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto $spacing-12;
+  object-fit: contain;
+}
+
+.logoPlaceholder {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto $spacing-12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-regular;
+  color: #e6a817;
+  letter-spacing: 1px;
+}
+
+.companyName {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-regular;
+  color: $color-gray-900;
+  margin-bottom: $spacing-6;
+}
+
+.subtitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-light;
+  color: $color-gray-600;
+}
+
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+.addPageBtn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-6;
+  margin: $spacing-24 auto 0;
+  padding: $spacing-8 $spacing-16;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-primary-light;
+  }
+}

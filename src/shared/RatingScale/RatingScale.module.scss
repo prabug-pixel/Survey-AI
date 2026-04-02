@@ -1,0 +1,52 @@
+@use '../../styles/variables' as *;
+
+.ratingScale {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.buttons {
+  display: flex;
+  gap: $spacing-8;
+}
+
+.ratingBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-lg;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+  border: 2px solid transparent;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: $shadow-sm;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &.selected {
+    border-width: 2px;
+    transform: scale(1.05);
+  }
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 $spacing-2;
+}
+
+.label {
+  font-size: $font-size-xs;
+  color: $color-gray-500;
+  font-weight: $font-weight-light;
+}

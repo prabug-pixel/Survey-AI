@@ -1,0 +1,21 @@
+@use '../../styles/variables' as *;
+
+.surveyBuilder {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.contentArea {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+}

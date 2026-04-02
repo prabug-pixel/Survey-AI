@@ -1,0 +1,18 @@
+@use '../../../styles/variables' as *;
+
+// Wrapper for Elemental TabHeader — constrains to chat panel context
+.tabSwitcher {
+  padding: $spacing-4 $spacing-16 0;
+  border-bottom: 1px solid $color-border;
+
+  // Override Elemental TabHeader font weights to match design system
+  :global {
+    .tab-header-wrapper {
+      font-weight: $font-weight-regular;
+    }
+
+    .tab-header-wrapper .tab-active {
+      font-weight: $font-weight-regular;
+    }
+  }
+}

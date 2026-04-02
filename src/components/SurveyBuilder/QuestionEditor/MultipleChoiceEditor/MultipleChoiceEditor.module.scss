@@ -1,0 +1,72 @@
+@use '../../../../styles/variables' as *;
+
+.choiceEditor {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-10;
+}
+
+.radio {
+  width: 16px;
+  height: 16px;
+  border: 2px solid $color-gray-400;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+
+.optionInput {
+  flex: 1;
+  padding: $spacing-8 $spacing-12;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+
+  &:focus {
+    border-color: $color-border-focus;
+  }
+}
+
+.removeBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  transition: background $transition-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-6;
+  padding: $spacing-8 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-primary-light;
+  }
+}

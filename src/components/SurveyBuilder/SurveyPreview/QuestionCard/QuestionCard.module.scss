@@ -1,0 +1,114 @@
+@use '../../../../styles/variables' as *;
+
+.card {
+  background: $color-white;
+  border: 2px solid transparent;
+  border-radius: $radius-xl;
+  padding: $spacing-20 $spacing-24;
+  transition: all $transition-fast;
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    border-color: $color-gray-300;
+  }
+
+  &.active {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 1px $color-primary;
+  }
+}
+
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-8;
+  cursor: grab;
+}
+
+.questionHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-8;
+  margin-bottom: $spacing-16;
+}
+
+.questionNumber {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+  flex-shrink: 0;
+  padding-top: $spacing-2;
+}
+
+.questionText {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+  line-height: $line-height-normal;
+}
+
+.questionInput {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: $spacing-2 0;
+  line-height: $line-height-normal;
+}
+
+.required {
+  color: $color-error;
+  margin-left: $spacing-4;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.questionBody {
+  padding-left: $spacing-20;
+}
+
+.textArea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-12;
+  font-size: $font-size-base;
+  font-weight: $font-weight-light;
+  color: $color-gray-800;
+  resize: vertical;
+
+  &::placeholder {
+    color: $color-gray-400;
+    font-weight: $font-weight-light;
+  }
+
+  &:disabled {
+    background: $color-white;
+    cursor: default;
+  }
+}

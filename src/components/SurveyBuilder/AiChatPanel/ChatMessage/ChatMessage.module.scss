@@ -1,0 +1,93 @@
+@use '../../../../styles/variables' as *;
+
+.messageRow {
+  display: flex;
+  gap: $spacing-8;
+  padding: $spacing-4 0;
+
+  &.user {
+    flex-direction: row-reverse;
+
+    .content {
+      align-items: flex-end;
+    }
+  }
+}
+
+.avatar {
+  flex-shrink: 0;
+  padding-top: $spacing-2;
+}
+
+.aiAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: $color-primary-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: $color-gray-600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+  max-width: 85%;
+}
+
+.bubble {
+  padding: $spacing-10 $spacing-14;
+  font-size: $font-size-base;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-relaxed;
+  border-radius: $radius-xl;
+  word-wrap: break-word;
+}
+
+.aiBubble {
+  background: $color-white;
+  color: $color-gray-800;
+  border: 1px solid $color-border;
+  border-top-left-radius: $radius-sm;
+}
+
+.userBubble {
+  background: $color-user-bubble;
+  color: $color-gray-800;
+  border-top-right-radius: $radius-sm;
+}
+
+.quickActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-8;
+  padding-left: $spacing-4;
+}
+
+.quickActionBtn {
+  padding: $spacing-6 $spacing-14;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-full;
+  transition: all $transition-fast;
+  white-space: nowrap;
+
+  &:hover {
+    background: $color-bg-hover;
+    border-color: $color-gray-400;
+  }
+}

@@ -1,0 +1,75 @@
+@use '../../../styles/variables' as *;
+
+.chatPanel {
+  width: $chat-panel-width;
+  min-width: $chat-panel-width;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: $color-white;
+  border-right: 1px solid $color-border;
+}
+
+.messagesArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-16;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.typingRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-4 0;
+}
+
+.typingAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: $color-primary-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.typingIndicator {
+  display: flex;
+  gap: $spacing-4;
+  padding: $spacing-10 $spacing-14;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-xl;
+  border-top-left-radius: $radius-sm;
+
+  span {
+    width: 6px;
+    height: 6px;
+    border-radius: $radius-full;
+    background: $color-gray-400;
+    animation: typing 1.2s infinite ease-in-out;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}

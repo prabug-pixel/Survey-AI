@@ -1,0 +1,129 @@
+@use '../../../styles/variables' as *;
+
+.editor {
+  width: $editor-panel-width;
+  min-width: $editor-panel-width;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: $color-white;
+  border-left: 1px solid $color-border;
+  z-index: $z-editor;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-16 $spacing-20;
+  border-bottom: 1px solid $color-border;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-regular;
+  color: $color-gray-900;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-20;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-20;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-gray-700;
+}
+
+.required {
+  color: $color-error;
+}
+
+// SingleSelect from Elemental — wrapper alignment
+.singleSelect {
+  width: 100%;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggleLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+}
+
+// Toggle from Elemental — wrapper alignment
+.toggleWrap {
+  display: flex;
+  align-items: center;
+}
+
+.logicSection {
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-16;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.logicTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-800;
+  margin-bottom: $spacing-4;
+}
+
+.logicBtn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-4;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-primary-light;
+  }
+}
+
+.footer {
+  padding: $spacing-16 $spacing-20;
+  border-top: 1px solid $color-border;
+}
+
+// Done button uses Elemental Button with expanded prop
+.doneBtn {
+  width: 100%;
+}

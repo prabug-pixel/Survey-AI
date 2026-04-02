@@ -1,0 +1,75 @@
+@use '../../../styles/variables' as *;
+
+.sidebar {
+  width: $sidebar-width;
+  height: 100vh;
+  background: $color-bg-sidebar;
+  border-right: 1px solid $color-border;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-12 0;
+  flex-shrink: 0;
+  z-index: $z-sidebar;
+}
+
+.logo {
+  padding: $spacing-8 0 $spacing-16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navList {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-4;
+  overflow-y: auto;
+  padding: $spacing-4 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.navItem {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+  position: relative;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+
+  &.active {
+    background: $color-primary-light;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 20px;
+      background: $color-primary;
+      border-radius: 0 $radius-sm $radius-sm 0;
+    }
+  }
+}
+
+.bottomNav {
+  padding-top: $spacing-8;
+  border-top: 1px solid $color-border;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-4;
+}

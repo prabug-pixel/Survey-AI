@@ -1,0 +1,35 @@
+@use '../../../styles/variables' as *;
+
+.preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.previewArea {
+  flex: 1;
+  overflow-y: auto;
+  background: $color-bg-page;
+  padding: 0 $spacing-16;
+
+  &.mobile {
+    display: flex;
+    justify-content: center;
+
+    .formContainer {
+      max-width: 400px;
+      width: 100%;
+      background: $color-white;
+      border-radius: $radius-2xl;
+      box-shadow: $shadow-lg;
+      margin: $spacing-24 0;
+      overflow-y: auto;
+    }
+  }
+}
+
+.formContainer {
+  width: 100%;
+}

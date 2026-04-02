@@ -1,0 +1,82 @@
+@use '../../../styles/variables' as *;
+
+.skipLogicBadge {
+  margin-top: $spacing-16;
+  margin-left: $spacing-20;
+  background: $color-skip-logic-bg;
+  border: 1px solid $color-skip-logic-border;
+  border-radius: $radius-lg;
+  padding: $spacing-12 $spacing-16;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  margin-bottom: $spacing-8;
+}
+
+.title {
+  flex: 1;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+}
+
+.editLink {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.closeBtn {
+  font-size: $font-size-lg;
+  color: $color-gray-500;
+  line-height: 1;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.rule {
+  padding-left: $spacing-4;
+}
+
+.ruleText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-light;
+  color: $color-gray-700;
+  line-height: $line-height-relaxed;
+}
+
+.ruleValue {
+  font-weight: $font-weight-regular;
+  background: $color-white;
+  padding: $spacing-2 $spacing-6;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border;
+}
+
+.ruleTarget {
+  font-weight: $font-weight-regular;
+  color: $color-primary;
+}

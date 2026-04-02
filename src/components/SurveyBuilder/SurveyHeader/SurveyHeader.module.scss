@@ -1,0 +1,93 @@
+@use '../../../styles/variables' as *;
+
+.header {
+  height: $header-height;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $spacing-24;
+  background: $color-white;
+  border-bottom: 1px solid $color-border;
+  flex-shrink: 0;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.backBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-regular;
+  color: $color-gray-900;
+}
+
+.titleInput {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-regular;
+  color: $color-gray-900;
+  border: 1px solid $color-border-focus;
+  border-radius: $radius-sm;
+  padding: $spacing-4 $spacing-8;
+  outline: none;
+}
+
+.editBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+}
+
+.cloudBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+// Publish button uses Elemental Button component
+.publishBtn {
+  // Elemental handles theming via primary/secondary prop
+}
