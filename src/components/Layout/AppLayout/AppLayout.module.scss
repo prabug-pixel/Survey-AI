@@ -7,6 +7,14 @@
   overflow: hidden;
 }
 
+.rightSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
 .mainContent {
   flex: 1;
   display: flex;

@@ -1,11 +1,14 @@
 @use '../../../styles/variables' as *;
 
+// Figma: Content area — #f4f6f7 bg, 4px top radius
 .preview {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+  background: $color-bg-page;
+  border-radius: $radius-sm $radius-sm 0 0;
 }
 
 .previewArea {

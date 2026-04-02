@@ -20,14 +20,14 @@ const AiChatPanel: React.FC = () => {
   }, [messages, isTyping]);
 
   const handleQuickAction = (actionId: string) => {
-    // Simulate selecting CSAT Survey and generating
-    dispatch(chatActions.addUserMessage(
-      actionId === 'csat' ? 'CSAT Survey' :
-      actionId === 'nps' ? 'NPS Survey' :
-      actionId === 'post_purchase' ? 'Post purchase survey' : 'Others'
-    ));
-
-    // Simulate AI conversation flow
+    const labels: Record<string, string> = {
+      csat: 'CSAT Survey',
+      nps: 'NPS Survey',
+      post_visit: 'Post-visit dental feedback',
+      patient_experience: 'Patient experience survey',
+      others: 'Others',
+    };
+    dispatch(chatActions.addUserMessage(labels[actionId] || actionId));
     dispatch(chatActions.setTyping(true));
     setTimeout(() => {
       dispatch(chatActions.setTyping(false));
@@ -38,14 +38,10 @@ const AiChatPanel: React.FC = () => {
 
   const handleSend = (message: string) => {
     dispatch(chatActions.addUserMessage(message));
-
-    // Simulate AI response
     dispatch(chatActions.setTyping(true));
     setTimeout(() => {
       dispatch(chatActions.setTyping(false));
-
       if (!surveyGenerated) {
-        // First message triggers survey generation flow
         dispatch(chatActions.setChatHistory(SAMPLE_CHAT_CSAT));
         dispatch(surveyActions.loadSampleSurvey());
       } else {
@@ -58,8 +54,10 @@ const AiChatPanel: React.FC = () => {
 
   return (
     <div className={styles.chatPanel}>
+      {/* Figma: Tabs at top, 6px pt, 24px px */}
       <TabSwitcher />
 
+      {/* Figma: AI suggestion area — scrollable, flex-end alignment */}
       <div className={styles.messagesArea}>
         {messages.map((msg) => (
           <ChatMessage
@@ -70,22 +68,16 @@ const AiChatPanel: React.FC = () => {
         ))}
 
         {isTyping && (
-          <div className={styles.typingRow}>
-            <div className={styles.typingAvatar}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#1a73e8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div className={styles.typingIndicator}>
-              <span /><span /><span />
-            </div>
+          <div className={styles.typingIndicator}>
+            <span /><span /><span />
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      <ChatInput onSend={handleSend} showMention={surveyGenerated} />
+      {/* Figma: Prompt box at bottom */}
+      <ChatInput onSend={handleSend} />
     </div>
   );
 };

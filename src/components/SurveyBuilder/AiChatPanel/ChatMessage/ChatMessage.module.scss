@@ -1,93 +1,78 @@
 @use '../../../../styles/variables' as *;
 
+// Figma: Chat message row
 .messageRow {
   display: flex;
   gap: $spacing-8;
-  padding: $spacing-4 0;
-
-  &.user {
-    flex-direction: row-reverse;
-
-    .content {
-      align-items: flex-end;
-    }
-  }
+  align-items: flex-start;
+  width: 100%;
+  background: $color-white;
 }
 
 .avatar {
   flex-shrink: 0;
-  padding-top: $spacing-2;
-}
-
-.aiAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-full;
-  background: $color-primary-light;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-.userAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-full;
-  background: $color-gray-600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.avatarImg {
+  width: 20px;
+  height: 20px;
 }
 
 .content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: $spacing-8;
-  max-width: 85%;
+  min-width: 0;
 }
 
-.bubble {
-  padding: $spacing-10 $spacing-14;
-  font-size: $font-size-base;
+.messageText {
+  font-size: $font-size-md;
   font-weight: $font-weight-regular;
-  line-height: $line-height-relaxed;
-  border-radius: $radius-xl;
-  word-wrap: break-word;
-}
-
-.aiBubble {
-  background: $color-white;
-  color: $color-gray-800;
-  border: 1px solid $color-border;
-  border-top-left-radius: $radius-sm;
-}
-
-.userBubble {
-  background: $color-user-bubble;
-  color: $color-gray-800;
-  border-top-right-radius: $radius-sm;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-base;
 }
 
 .quickActions {
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-8;
-  padding-left: $spacing-4;
+  align-items: flex-start;
+  padding: $spacing-8 0;
+  width: 100%;
 }
 
-.quickActionBtn {
-  padding: $spacing-6 $spacing-14;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-regular;
-  color: $color-gray-800;
+.optionTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-4;
+  height: 36px;
+  padding: 0 $spacing-12;
   background: $color-white;
   border: 1px solid $color-border;
-  border-radius: $radius-full;
-  transition: all $transition-fast;
-  white-space: nowrap;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast;
 
   &:hover {
     background: $color-bg-hover;
-    border-color: $color-gray-400;
   }
+}
+
+.checkboxIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.optionLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-base;
+  white-space: nowrap;
 }

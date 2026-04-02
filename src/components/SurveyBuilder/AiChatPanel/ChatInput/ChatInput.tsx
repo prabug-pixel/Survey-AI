@@ -1,39 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useAppSelector, useAppDispatch } from '../../../../store';
-import { chatActions } from '../../../../store/chatSlice';
-import { IconSend, IconAttach, IconCode, IconMore, IconAtSign, IconClose } from '../../../../shared/Icons/Icons';
+import React, { useState } from 'react';
+import attachFileIcon from '../../../../assets/figma-icons/attach-file.svg';
+import editNoteIcon from '../../../../assets/figma-icons/edit-note.svg';
+import moreHorizIcon from '../../../../assets/figma-icons/more-horiz.svg';
+import templateIcon from '../../../../assets/figma-icons/template-icon.svg';
+import importContactsIcon from '../../../../assets/figma-icons/import-contacts.svg';
+import paperPlaneIcon from '../../../../assets/figma-icons/paper-plane.svg';
 import styles from './ChatInput.module.scss';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
-  showMention?: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSend, showMention = false }) => {
-  const dispatch = useAppDispatch();
-  const mentionedQuestionId = useAppSelector((s) => s.chat.mentionedQuestionId);
-  const survey = useAppSelector((s) => s.survey.survey);
+const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [value, setValue] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Find mentioned question text
-  const mentionedQuestion = mentionedQuestionId && survey
-    ? survey.pages.flatMap((p) => p.questions).find((q) => q.id === mentionedQuestionId)
-    : null;
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
-    }
-  }, [value]);
 
   const handleSend = () => {
     const trimmed = value.trim();
     if (!trimmed) return;
     onSend(trimmed);
     setValue('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -43,62 +28,46 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, showMention = false }) =>
     }
   };
 
-  const removeMention = () => {
-    dispatch(chatActions.setMentionedQuestion(null));
-  };
-
   return (
-    <div className={styles.chatInputWrapper}>
-      {mentionedQuestion && (
-        <div className={styles.mentionBadge}>
-          <span className={styles.mentionNumber}>{mentionedQuestion.order}</span>
-          <span className={styles.mentionIcon}>
-            {mentionedQuestion.type === 'rating' ? '\u2605' : '\u25C9'}
-          </span>
-          <span className={styles.mentionText}>{mentionedQuestion.text.substring(0, 30)}...</span>
-          <button className={styles.mentionClose} onClick={removeMention} aria-label="Remove mention">
-            <IconClose size={12} color="#757575" />
-          </button>
-        </div>
-      )}
-      <div className={styles.inputRow}>
+    <div className={styles.promptBox}>
+      {/* Placeholder text area */}
+      <div className={styles.inputArea}>
         <textarea
-          ref={textareaRef}
           className={styles.textarea}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={mentionedQuestion
-            ? 'Describe what you want to modify and\n@mention to apply logics'
-            : 'What type of survey would you like to build?\n@mention to apply logics'
-          }
-          rows={1}
+          placeholder={'What type of survey would you like to build?\n@mention to apply logics'}
+          rows={2}
         />
       </div>
-      <div className={styles.toolbar}>
-        <div className={styles.toolbarLeft}>
-          {showMention && (
-            <button className={styles.toolBtn} title="Mention question" aria-label="Mention question">
-              <IconAtSign size={16} color="#9e9e9e" />
-            </button>
-          )}
-          <button className={styles.toolBtn} title="Attach file" aria-label="Attach file">
-            <IconAttach size={16} color="#9e9e9e" />
+
+      {/* Figma: Actions row — icons + send button */}
+      <div className={styles.actionsRow}>
+        <div className={styles.leftActions}>
+          <button className={styles.actionIcon} aria-label="Attach file">
+            <img src={attachFileIcon} alt="" className={styles.icon24} />
           </button>
-          <button className={styles.toolBtn} title="Code" aria-label="Code">
-            <IconCode size={16} color="#9e9e9e" />
+          <button className={styles.actionIcon} aria-label="Edit note">
+            <img src={editNoteIcon} alt="" className={styles.icon20} />
           </button>
-          <button className={styles.toolBtn} title="More" aria-label="More options">
-            <IconMore size={16} color="#9e9e9e" />
+          <button className={styles.actionIcon} aria-label="More options">
+            <img src={moreHorizIcon} alt="" className={styles.icon24} />
+          </button>
+          <button className={styles.actionIcon} aria-label="Templates">
+            <img src={templateIcon} alt="" className={styles.icon20} />
+          </button>
+          <button className={styles.actionIcon} aria-label="Import contacts">
+            <img src={importContactsIcon} alt="" className={styles.icon20} />
           </button>
         </div>
         <button
-          className={`${styles.sendBtn} ${value.trim() ? styles.active : ''}`}
+          className={styles.sendBtn}
           onClick={handleSend}
           disabled={!value.trim()}
-          aria-label="Send message"
+          aria-label="Send"
         >
-          <IconSend size={16} color={value.trim() ? '#1a73e8' : '#bdbdbd'} />
+          <img src={paperPlaneIcon} alt="" className={styles.icon24} />
         </button>
       </div>
     </div>

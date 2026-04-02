@@ -5,136 +5,92 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: $spacing-40 $spacing-24;
+  gap: $spacing-48;
+  padding: 114px $spacing-24 0;
   overflow-y: auto;
-}
-
-.illustration {
-  margin-bottom: $spacing-32;
-  padding: $spacing-32;
-  background: $color-gray-100;
-  border-radius: $radius-2xl;
-}
-
-.illustrationCard {
-  display: flex;
-  gap: $spacing-12;
-  background: $color-white;
-  border-radius: $radius-lg;
-  padding: $spacing-20;
-  box-shadow: $shadow-sm;
-  width: 200px;
-}
-
-.cardLeft {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-8;
-  align-items: center;
-}
-
-.aiLabel {
-  font-size: $font-size-sm;
-  font-weight: $font-weight-regular;
-  color: $color-primary;
-  background: $color-primary-light;
-  padding: $spacing-4 $spacing-8;
-  border-radius: $radius-sm;
-}
-
-.barShort {
-  width: 32px;
-  height: 4px;
-  background: $color-primary;
-  border-radius: $radius-full;
-}
-
-.cardRight {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-6;
-}
-
-.lineLong {
-  height: 6px;
-  background: $color-gray-200;
-  border-radius: $radius-full;
   width: 100%;
 }
 
-.dotRow {
+.topSection {
   display: flex;
-  gap: $spacing-4;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-24;
+  width: 277px;
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  background: $color-gray-300;
-  border-radius: $radius-full;
+.illustration {
+  width: 218px;
+  height: 194px;
 }
 
-.lineMedium {
-  height: 6px;
-  background: $color-gray-200;
-  border-radius: $radius-full;
-  width: 80%;
+.illustrationImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.lineShort {
-  height: 6px;
-  background: $color-gray-200;
-  border-radius: $radius-full;
-  width: 50%;
+.ctaGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-10;
+  width: 100%;
 }
 
-.cta {
-  font-size: $font-size-md;
-  color: $color-gray-700;
-  font-weight: $font-weight-regular;
+.ctaRow {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: $spacing-4;
 }
 
-.sparkle {
-  font-size: $font-size-lg;
-  color: $color-primary;
+.sparkleIcon {
+  width: 16px;
+  height: 16.14px;
+}
+
+.ctaText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-base;
+  text-align: center;
 }
 
 .link {
-  color: $color-primary;
+  color: $color-text-action;
   font-size: $font-size-md;
   font-weight: $font-weight-regular;
-  text-decoration: none;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
 
   &:hover {
     text-decoration: underline;
   }
 }
 
-.divider {
-  font-size: $font-size-sm;
-  color: $color-gray-500;
-  font-weight: $font-weight-light;
-  margin: $spacing-12 0;
+.orText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-base;
+  text-align: center;
 }
 
-.libraryLabel {
-  font-size: $font-size-md;
-  color: $color-gray-700;
-  font-weight: $font-weight-regular;
-  margin-bottom: $spacing-20;
+.libraryRow {
   display: flex;
   align-items: center;
-  gap: $spacing-4;
+  justify-content: center;
+  gap: $spacing-2;
 }
 
 .chevron {
   font-size: $font-size-lg;
+  color: $color-text-action;
   line-height: 1;
 }

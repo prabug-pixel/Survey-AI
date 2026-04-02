@@ -1,5 +1,7 @@
 import React from 'react';
 import type { ChatMessage as ChatMessageType } from '../../../../types/survey.types';
+import aiAvatarIcon from '../../../../assets/figma-icons/ai-avatar.svg';
+import checkboxIcon from '../../../../assets/figma-icons/checkbox.svg';
 import styles from './ChatMessage.module.scss';
 
 interface ChatMessageProps {
@@ -11,29 +13,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onQuickAction }) => 
   const isAi = message.role === 'ai';
 
   return (
-    <div className={`${styles.messageRow} ${isAi ? styles.ai : styles.user}`}>
+    <div className={styles.messageRow}>
+      {/* Figma: Avatar — 20px AI avatar */}
       {isAi && (
         <div className={styles.avatar}>
-          <div className={styles.aiAvatar}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#1a73e8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
-      )}
-      {!isAi && (
-        <div className={styles.avatar}>
-          <div className={styles.userAvatar}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="12" cy="7" r="4" stroke="#fff" strokeWidth="1.5" />
-            </svg>
-          </div>
+          <img src={aiAvatarIcon} alt="" className={styles.avatarImg} />
         </div>
       )}
 
       <div className={styles.content}>
-        <div className={`${styles.bubble} ${isAi ? styles.aiBubble : styles.userBubble}`}>
+        {/* Message text */}
+        <div className={styles.messageText}>
           {message.content.split('\n').map((line, i) => (
             <React.Fragment key={i}>
               {line}
@@ -42,15 +32,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onQuickAction }) => 
           ))}
         </div>
 
+        {/* Figma: Option tabs — quick action buttons with checkbox icon */}
         {message.quickActions && message.quickActions.length > 0 && (
           <div className={styles.quickActions}>
             {message.quickActions.map((action) => (
               <button
                 key={action.id}
-                className={styles.quickActionBtn}
+                className={styles.optionTab}
                 onClick={() => onQuickAction?.(action.id)}
               >
-                {action.label}
+                <img src={checkboxIcon} alt="" className={styles.checkboxIcon} />
+                <span className={styles.optionLabel}>{action.label}</span>
               </button>
             ))}
           </div>

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store';
 import { surveyActions } from '../../../store/surveySlice';
-import Button from '@birdeye/elemental/core/atoms/Button';
-import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
-import { IconChevronLeft, IconEdit, IconCloud } from '../../../shared/Icons/Icons';
+import arrowLeftIcon from '../../../assets/figma-icons/arrow-left.svg';
+import editIcon from '../../../assets/figma-icons/edit.svg';
+import chevronDownIcon from '../../../assets/figma-icons/chevron-down.svg';
 import styles from './SurveyHeader.module.scss';
 
 const SurveyHeader: React.FC = () => {
@@ -31,13 +31,11 @@ const SurveyHeader: React.FC = () => {
   };
 
   return (
-    <header className={styles.header}>
+    <div className={styles.contentBar}>
       <div className={styles.left}>
-        <Tooltip text="Go back" position="bottom" hideOnScroll>
-          <button className={styles.backBtn} aria-label="Go back">
-            <IconChevronLeft size={20} color="#424242" />
-          </button>
-        </Tooltip>
+        <button className={styles.backBtn} aria-label="Go back">
+          <img src={arrowLeftIcon} alt="" className={styles.icon20} />
+        </button>
 
         <div className={styles.titleGroup}>
           {isEditing ? (
@@ -50,37 +48,28 @@ const SurveyHeader: React.FC = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
           ) : (
-            <h1 className={styles.title}>{titleValue}</h1>
+            <span className={styles.title}>{titleValue}</span>
           )}
-          <Tooltip text="Edit title" position="bottom" hideOnScroll>
-            <button
-              className={styles.editBtn}
-              onClick={() => setIsEditing(true)}
-              aria-label="Edit title"
-            >
-              <IconEdit size={14} color="#9e9e9e" />
-            </button>
-          </Tooltip>
+          <button
+            className={styles.editBtn}
+            onClick={() => setIsEditing(true)}
+            aria-label="Edit title"
+          >
+            <img src={editIcon} alt="" className={styles.icon20} />
+          </button>
         </div>
       </div>
 
       <div className={styles.right}>
-        {surveyGenerated && (
-          <Tooltip text="Save to cloud" position="bottom" hideOnScroll>
-            <button className={styles.cloudBtn} aria-label="Save to cloud">
-              <IconCloud size={20} color="#757575" />
-            </button>
-          </Tooltip>
-        )}
-        <Button
-          label="Publish"
-          theme={surveyGenerated ? 'primary' : 'secondary'}
-          onClick={() => {}}
+        <button
+          className={`${styles.publishBtn} ${surveyGenerated ? styles.active : ''}`}
           disabled={!surveyGenerated}
-          className={styles.publishBtn}
-        />
+        >
+          <span>Publish</span>
+          <img src={chevronDownIcon} alt="" className={styles.icon20} />
+        </button>
       </div>
-    </header>
+    </div>
   );
 };
 

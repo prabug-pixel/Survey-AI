@@ -1,34 +1,31 @@
 @use '../../../styles/variables' as *;
 
-.header {
-  height: $header-height;
+// Figma: Content bar — white bg, 54px height, between top nav and content
+.contentBar {
+  height: $content-bar-height;
+  background: $color-white;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 $spacing-24;
-  background: $color-white;
-  border-bottom: 1px solid $color-border;
+  padding: $spacing-4 $spacing-24;
   flex-shrink: 0;
 }
 
 .left {
   display: flex;
   align-items: center;
-  gap: $spacing-8;
+  gap: $spacing-4;
 }
 
 .backBtn {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: $radius-md;
-  transition: background $transition-fast;
+  height: 26px;
+}
 
-  &:hover {
-    background: $color-bg-hover;
-  }
+.icon20 {
+  width: 20px;
+  height: 20px;
 }
 
 .titleGroup {
@@ -38,15 +35,20 @@
 }
 
 .title {
-  font-size: $font-size-lg;
+  font-size: $font-size-xl;
   font-weight: $font-weight-regular;
-  color: $color-gray-900;
+  line-height: $line-height-xl;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-xl;
+  white-space: nowrap;
 }
 
 .titleInput {
-  font-size: $font-size-lg;
+  font-size: $font-size-xl;
   font-weight: $font-weight-regular;
-  color: $color-gray-900;
+  line-height: $line-height-xl;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-xl;
   border: 1px solid $color-border-focus;
   border-radius: $radius-sm;
   padding: $spacing-4 $spacing-8;
@@ -54,40 +56,46 @@
 }
 
 .editBtn {
-  width: 24px;
-  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-sm;
-  transition: background $transition-fast;
-
-  &:hover {
-    background: $color-bg-hover;
-  }
 }
 
 .right {
   display: flex;
   align-items: center;
-  gap: $spacing-12;
+  gap: $spacing-8;
 }
 
-.cloudBtn {
-  width: 36px;
-  height: 36px;
+// Figma: Button Primary Disabled — gray-40 bg, gray-80 text, 36px h, 4px radius
+.publishBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-md;
-  transition: background $transition-fast;
+  gap: $spacing-4;
+  height: 36px;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $radius-sm;
+  background: $color-gray-40;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+  color: $color-text-placeholder;
+  letter-spacing: $letter-spacing-base;
+  white-space: nowrap;
+  transition: all $transition-fast;
 
-  &:hover {
-    background: $color-bg-hover;
+  &:disabled {
+    cursor: not-allowed;
   }
-}
 
-// Publish button uses Elemental Button component
-.publishBtn {
-  // Elemental handles theming via primary/secondary prop
+  &.active {
+    background: $color-primary;
+    color: $color-white;
+    cursor: pointer;
+
+    &:hover {
+      background: $color-primary-hover;
+    }
+  }
 }

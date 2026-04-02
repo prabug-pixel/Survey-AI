@@ -1,42 +1,48 @@
 // ============================================================
-// Design Tokens — Survey AI 2.0
-// Typography: Only Regular (400) and Light (300) weights allowed
+// Design Tokens — Survey AI 2.0 (Exact Figma match)
+// Font: Roboto Regular (400) only
 // ============================================================
 
-// --- Colors ---
-$color-primary: #1a73e8;
-$color-primary-light: #e8f0fe;
+// --- Colors (exact Figma tokens) ---
+$color-primary: #1976d2;
+$color-primary-light: #ecf5fd;
 $color-primary-hover: #1565c0;
 $color-primary-dark: #1557b0;
+$color-active-nav-bg: #c7d6f6;
 
 $color-white: #ffffff;
-$color-black: #1a1a1a;
+$color-black: #212121;
 
-$color-gray-50: #fafafa;
-$color-gray-100: #f5f5f5;
-$color-gray-150: #f0f0f0;
-$color-gray-200: #eeeeee;
-$color-gray-300: #e0e0e0;
+$color-gray-40: #eaeaea;
+$color-gray-50: #f4f6f7;
+$color-gray-80: #a3a3a3;
+$color-gray-100: #f2f4f7;
+$color-gray-200: #e5e9f0;
+$color-gray-300: #d5d5d5;
 $color-gray-400: #bdbdbd;
 $color-gray-500: #9e9e9e;
 $color-gray-600: #757575;
 $color-gray-700: #616161;
-$color-gray-800: #424242;
+$color-gray-800: #555555;
 $color-gray-900: #212121;
 
-$color-border: #e4e7ec;
-$color-border-light: #f0f2f5;
-$color-border-focus: #1a73e8;
+$color-border: #e5e9f0;
+$color-border-sidebar: #eaeaea;
+$color-border-topnav: #e9e9eb;
+$color-border-focus: #1976d2;
 
-$color-bg-page: #f5f7fa;
+$color-bg-page: #f4f6f7;
 $color-bg-card: #ffffff;
-$color-bg-sidebar: #ffffff;
-$color-bg-chat: #f8f9fb;
-$color-bg-hover: #f5f7fa;
-$color-bg-selected: #e8f0fe;
-$color-bg-input: #f5f7fa;
+$color-bg-sidebar: #e5e9f0;
+$color-bg-hover: #f2f4f7;
+$color-bg-selected: #ecf5fd;
 
-// Rating scale colors (gradient from red to green)
+$color-text-primary: #212121;
+$color-text-secondary: #555555;
+$color-text-placeholder: #a3a3a3;
+$color-text-action: #1976d2;
+
+// Rating scale colors
 $color-rating-1: #fdecea;
 $color-rating-2: #fef3e0;
 $color-rating-3: #fff9e6;
@@ -55,57 +61,51 @@ $color-warning: #fbbc04;
 $color-error: #ea4335;
 $color-info: #4285f4;
 
-// AI / Chat
-$color-ai-bubble: #f0f4ff;
-$color-user-bubble: #f5f5f5;
-$color-ai-icon: #1a73e8;
-
 // Skip logic
 $color-skip-logic-bg: #eef6ff;
 $color-skip-logic-border: #b3d4fc;
-$color-skip-logic-text: #1a73e8;
 
-// --- Typography ---
-$font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-// Only Light (300) and Regular (400) allowed
-$font-weight-light: 300;
+// --- Typography (Roboto Regular only) ---
+$font-family: 'Roboto', sans-serif;
 $font-weight-regular: 400;
 
 $font-size-xs: 11px;
 $font-size-sm: 12px;
-$font-size-base: 13px;
+$font-size-base: 14px;
 $font-size-md: 14px;
 $font-size-lg: 16px;
 $font-size-xl: 18px;
 $font-size-2xl: 20px;
 $font-size-3xl: 24px;
 
-$line-height-tight: 1.2;
-$line-height-normal: 1.5;
-$line-height-relaxed: 1.6;
+$line-height-sm: 18px;
+$line-height-base: 20px;
+$line-height-lg: 24px;
+$line-height-xl: 26px;
 
-// --- Spacing ---
+$letter-spacing-base: -0.28px;
+$letter-spacing-lg: -0.32px;
+$letter-spacing-xl: -0.36px;
+
+// --- Spacing (Figma tokens) ---
 $spacing-2: 2px;
-$spacing-4: 4px;
+$spacing-4: 4px;   // --spacing/xs
 $spacing-6: 6px;
-$spacing-8: 8px;
+$spacing-8: 8px;   // --spacing/sm
 $spacing-10: 10px;
-$spacing-12: 12px;
+$spacing-12: 12px;  // --spacing/md (default)
 $spacing-14: 14px;
-$spacing-16: 16px;
-$spacing-20: 20px;
-$spacing-24: 24px;
+$spacing-16: 16px;  // --spacing/lg
+$spacing-20: 20px;  // --spacing/xl
+$spacing-24: 24px;  // --spacing/2xl
 $spacing-28: 28px;
 $spacing-32: 32px;
 $spacing-40: 40px;
 $spacing-48: 48px;
-$spacing-56: 56px;
-$spacing-64: 64px;
 
-// --- Border Radius ---
-$radius-sm: 4px;
-$radius-md: 6px;
+// --- Border Radius (Figma tokens) ---
+$radius-sm: 4px;   // --corner-radius/sm (default-web)
+$radius-md: 8px;   // --corner-radius/md (default-mobile)
 $radius-lg: 8px;
 $radius-xl: 12px;
 $radius-2xl: 16px;
@@ -116,15 +116,13 @@ $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 $shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
 $shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
 $shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
-$shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.12);
-$shadow-sidebar: 1px 0 0 0 #e4e7ec;
 
-// --- Layout ---
+// --- Layout (Figma exact) ---
 $sidebar-width: 56px;
-$chat-panel-width: 380px;
+$chat-panel-width: 344px;
 $editor-panel-width: 320px;
-$header-height: 56px;
-$preview-toolbar-height: 48px;
+$topnav-height: 52px;
+$content-bar-height: 54px;
 
 // --- Transitions ---
 $transition-fast: 150ms ease;
@@ -133,6 +131,7 @@ $transition-slow: 300ms ease-in-out;
 
 // --- Z-index ---
 $z-sidebar: 100;
+$z-topnav: 110;
 $z-header: 90;
 $z-editor: 80;
 $z-dropdown: 200;

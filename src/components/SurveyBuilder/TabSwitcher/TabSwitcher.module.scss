@@ -1,18 +1,59 @@
 @use '../../../styles/variables' as *;
 
-// Wrapper for Elemental TabHeader — constrains to chat panel context
-.tabSwitcher {
-  padding: $spacing-4 $spacing-16 0;
-  border-bottom: 1px solid $color-border;
+// Figma: Tabs component — 2 tabs, white bg, 8px gap
+.tabs {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: $spacing-8;
+  width: 100%;
+  background: $color-white;
+}
 
-  // Override Elemental TabHeader font weights to match design system
-  :global {
-    .tab-header-wrapper {
-      font-weight: $font-weight-regular;
-    }
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-4;
+  cursor: pointer;
+}
 
-    .tab-header-wrapper .tab-active {
-      font-weight: $font-weight-regular;
-    }
-  }
+.tabLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+  color: $color-text-secondary;
+  letter-spacing: $letter-spacing-base;
+  white-space: nowrap;
+  padding: $spacing-8;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  border-radius: $radius-sm;
+}
+
+.tab.active .tabLabel {
+  color: $color-text-primary;
+}
+
+.aiIcon {
+  width: 24px;
+  height: 24px;
+}
+
+// Figma: active indicator — 1px blue bar
+.activeBar {
+  width: 100%;
+  height: 1px;
+  background: $color-primary;
+}
+
+.inactiveBar {
+  width: 100%;
+  height: 1px;
+  background: $color-primary;
+  opacity: 0;
 }

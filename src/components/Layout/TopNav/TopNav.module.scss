@@ -1,0 +1,52 @@
+@use '../../../styles/variables' as *;
+
+// Figma: Top Nav — sticky, white bg, 52px height, border bottom #e9e9eb
+.topNav {
+  height: $topnav-height;
+  background: $color-white;
+  border-bottom: 1px solid $color-border-topnav;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-12 $spacing-24;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+  z-index: $z-topnav;
+}
+
+.logoTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 229px;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-xl;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-xl;
+  white-space: nowrap;
+}
+
+.rightActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.iconBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-8;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}

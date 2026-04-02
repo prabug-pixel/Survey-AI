@@ -48,18 +48,8 @@ export const SAMPLE_SURVEY: Survey = {
             { id: 'c3', label: 'Yes, major issues' },
           ],
           skipLogicRules: [
-            {
-              id: 'sl1',
-              condition: 'is',
-              answerValue: 'None',
-              targetQuestionId: 'q7',
-            },
-            {
-              id: 'sl2',
-              condition: 'is_not',
-              answerValue: 'Yes, major issues',
-              targetQuestionId: 'q8',
-            },
+            { id: 'sl1', condition: 'is', answerValue: 'None', targetQuestionId: 'q7' },
+            { id: 'sl2', condition: 'is_not', answerValue: 'Yes, major issues', targetQuestionId: 'q8' },
           ],
         },
         {
@@ -104,12 +94,13 @@ export const SAMPLE_CHAT_INITIAL: ChatMessage[] = [
   {
     id: 'msg-1',
     role: 'ai',
-    content: "Hey John! \u{1F44B}\nI'll help you create the perfect survey. What type of survey would you like to create?",
+    content: "Hey John! \u{1F44B}\u{1F3FB}\nI'll help you create the perfect survey in minutes.\nWhat type of survey would you like to create?",
     timestamp: '2026-04-02T10:00:00Z',
     quickActions: [
       { id: 'csat', label: 'CSAT Survey' },
       { id: 'nps', label: 'NPS Survey' },
-      { id: 'post_purchase', label: 'Post purchase survey' },
+      { id: 'post_visit', label: 'Post-visit dental feedback' },
+      { id: 'patient_experience', label: 'Patient experience survey' },
       { id: 'others', label: 'Others' },
     ],
   },
@@ -119,7 +110,7 @@ export const SAMPLE_CHAT_CSAT: ChatMessage[] = [
   {
     id: 'msg-1',
     role: 'ai',
-    content: "Hey John! \u{1F44B}\nI'll help you create the perfect survey. What type of survey would you like to create?",
+    content: "Hey John! \u{1F44B}\u{1F3FB}\nI'll help you create the perfect survey in minutes.\nWhat type of survey would you like to create?",
     timestamp: '2026-04-02T10:00:00Z',
   },
   {

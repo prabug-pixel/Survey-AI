@@ -46,7 +46,7 @@
   font-size: $font-size-md;
   font-weight: $font-weight-regular;
   color: $color-gray-800;
-  line-height: $line-height-normal;
+  line-height: $line-height-base;
 }
 
 .questionInput {
@@ -58,7 +58,7 @@
   background: transparent;
   outline: none;
   padding: $spacing-2 0;
-  line-height: $line-height-normal;
+  line-height: $line-height-base;
 }
 
 .required {
@@ -98,13 +98,13 @@
   border-radius: $radius-lg;
   padding: $spacing-12;
   font-size: $font-size-base;
-  font-weight: $font-weight-light;
+  font-weight: $font-weight-regular;
   color: $color-gray-800;
   resize: vertical;
 
   &::placeholder {
     color: $color-gray-400;
-    font-weight: $font-weight-light;
+    font-weight: $font-weight-regular;
   }
 
   &:disabled {

@@ -1,5 +1,7 @@
 import React from 'react';
 import TemplateCards from '../AiChatPanel/TemplateCards/TemplateCards';
+import emptyStateBg from '../../../assets/figma-icons/empty-state-bg.svg';
+import sparkleIcon from '../../../assets/figma-icons/sparkle.svg';
 import styles from './EmptyState.module.scss';
 
 interface EmptyStateProps {
@@ -8,37 +10,31 @@ interface EmptyStateProps {
 
 const EmptyState: React.FC<EmptyStateProps> = ({ onTemplateSelect }) => (
   <div className={styles.emptyState}>
-    <div className={styles.illustration}>
-      <div className={styles.illustrationCard}>
-        <div className={styles.cardLeft}>
-          <div className={styles.aiLabel}>AI</div>
-          <div className={styles.barShort} />
+    <div className={styles.topSection}>
+      {/* Figma: Empty state illustration */}
+      <div className={styles.illustration}>
+        <img src={emptyStateBg} alt="" className={styles.illustrationImg} />
+      </div>
+
+      {/* Figma: CTA text */}
+      <div className={styles.ctaGroup}>
+        <div className={styles.ctaRow}>
+          <img src={sparkleIcon} alt="" className={styles.sparkleIcon} />
+          <span className={styles.ctaText}>
+            Build your survey, <button className={styles.link}>Create from scratch</button>
+          </span>
         </div>
-        <div className={styles.cardRight}>
-          <div className={styles.lineLong} />
-          <div className={styles.dotRow}>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <span key={i} className={styles.dot} />
-            ))}
-          </div>
-          <div className={styles.lineMedium} />
-          <div className={styles.lineShort} />
+        <p className={styles.orText}>or</p>
+        <div className={styles.libraryRow}>
+          <span className={styles.ctaText}>
+            Select from <button className={styles.link}>library</button>
+          </span>
+          <span className={styles.chevron}>&#8964;</span>
         </div>
       </div>
     </div>
 
-    <p className={styles.cta}>
-      <span className={styles.sparkle}>&#10024;</span>{' '}
-      Build your survey, <button className={styles.link}>Create from scratch</button>
-    </p>
-
-    <p className={styles.divider}>or</p>
-
-    <p className={styles.libraryLabel}>
-      Select from <button className={styles.link}>library</button>{' '}
-      <span className={styles.chevron}>&#8964;</span>
-    </p>
-
+    {/* Figma: Library cards grid */}
     <TemplateCards onSelect={onTemplateSelect} />
   </div>
 );

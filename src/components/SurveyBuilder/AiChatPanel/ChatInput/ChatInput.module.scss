@@ -1,130 +1,83 @@
 @use '../../../../styles/variables' as *;
 
-.chatInputWrapper {
-  padding: $spacing-12 $spacing-16;
-  border-top: 1px solid $color-border;
+.promptBox {
   background: $color-white;
-}
-
-.mentionBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-6;
-  padding: $spacing-4 $spacing-10;
-  background: $color-primary-light;
-  border: 1px solid #8fbcf5;
-  border-radius: $radius-full;
-  margin-bottom: $spacing-8;
-  font-size: $font-size-xs;
-  color: $color-primary;
-}
-
-.mentionNumber {
-  width: 18px;
-  height: 18px;
-  border-radius: $radius-full;
-  background: $color-primary;
-  color: $color-white;
-  font-size: 10px;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: $spacing-16;
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mentionIcon {
-  font-size: $font-size-sm;
-}
-
-.mentionText {
-  font-weight: $font-weight-regular;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mentionClose {
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius-full;
-  transition: background $transition-fast;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.08);
-  }
-}
-
-.inputRow {
-  display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.inputArea {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+  width: 100%;
 }
 
 .textarea {
-  flex: 1;
+  width: 100%;
   border: none;
   resize: none;
-  font-size: $font-size-base;
-  font-weight: $font-weight-light;
-  color: $color-gray-800;
-  line-height: $line-height-normal;
-  min-height: 36px;
-  max-height: 100px;
+  font-family: $font-family;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+  letter-spacing: $letter-spacing-base;
   background: transparent;
 
   &::placeholder {
-    color: $color-gray-400;
-    font-weight: $font-weight-light;
+    color: $color-text-placeholder;
+  }
+
+  &:focus {
+    outline: none;
   }
 }
 
-.toolbar {
+.actionsRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: $spacing-8;
+  width: 100%;
 }
 
-.toolbarLeft {
+.leftActions {
   display: flex;
   align-items: center;
-  gap: $spacing-4;
+  gap: $spacing-12;
 }
 
-.toolBtn {
-  width: 32px;
-  height: 32px;
+.actionIcon {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: $radius-md;
-  transition: background $transition-fast;
+  overflow: hidden;
+}
 
-  &:hover {
-    background: $color-bg-hover;
-  }
+.icon24 {
+  width: 24px;
+  height: 24px;
+}
+
+.icon20 {
+  width: 20px;
+  height: 20px;
 }
 
 .sendBtn {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-full;
-  transition: all $transition-fast;
 
   &:disabled {
+    opacity: 0.4;
     cursor: default;
-  }
-
-  &.active {
-    background: $color-primary-light;
-
-    &:hover {
-      background: #d1e3fc;
-    }
   }
 }

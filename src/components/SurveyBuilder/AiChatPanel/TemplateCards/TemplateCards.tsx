@@ -7,15 +7,17 @@ interface TemplateCardsProps {
 }
 
 const TemplateCards: React.FC<TemplateCardsProps> = ({ onSelect }) => (
-  <div className={styles.grid}>
+  <div className={styles.cardsRow}>
     {SURVEY_TEMPLATES.map((template) => (
       <button
         key={template.id}
         className={styles.card}
         onClick={() => onSelect(template.id)}
       >
-        <h4 className={styles.cardTitle}>{template.title}</h4>
-        <p className={styles.cardDesc}>{template.description}</p>
+        <div className={styles.cardContent}>
+          <p className={styles.cardTitle}>{template.title}</p>
+          <p className={styles.cardDesc}>{template.description}</p>
+        </div>
       </button>
     ))}
   </div>

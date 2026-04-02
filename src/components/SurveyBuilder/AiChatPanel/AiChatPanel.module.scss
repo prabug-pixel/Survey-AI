@@ -6,45 +6,30 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: $spacing-20;
+  align-items: center;
   background: $color-white;
-  border-right: 1px solid $color-border;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: 6px $spacing-24 $spacing-24;
+  overflow: hidden;
 }
 
 .messagesArea {
   flex: 1;
-  overflow-y: auto;
-  padding: $spacing-16;
   display: flex;
   flex-direction: column;
-  gap: $spacing-12;
-}
-
-.typingRow {
-  display: flex;
-  align-items: center;
-  gap: $spacing-8;
-  padding: $spacing-4 0;
-}
-
-.typingAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-full;
-  background: $color-primary-light;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: flex-end;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
 }
 
 .typingIndicator {
   display: flex;
   gap: $spacing-4;
-  padding: $spacing-10 $spacing-14;
-  background: $color-white;
-  border: 1px solid $color-border;
-  border-radius: $radius-xl;
-  border-top-left-radius: $radius-sm;
+  padding: $spacing-8 0;
 
   span {
     width: 6px;

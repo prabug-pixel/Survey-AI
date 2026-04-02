@@ -1,7 +1,7 @@
 @use 'variables' as *;
 
 // ============================================================
-// Global Resets & Base Styles
+// Global Resets & Base Styles — Figma exact match
 // ============================================================
 
 *,
@@ -12,7 +12,7 @@
   padding: 0;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
 
 html {
   font-size: 16px;
@@ -24,8 +24,9 @@ body {
   font-family: $font-family;
   font-weight: $font-weight-regular;
   font-size: $font-size-md;
-  line-height: $line-height-normal;
-  color: $color-black;
+  line-height: $line-height-base;
+  letter-spacing: $letter-spacing-base;
+  color: $color-text-primary;
   background-color: $color-bg-page;
   overflow: hidden;
 }
@@ -36,18 +37,13 @@ body {
   overflow: hidden;
 }
 
-// --- Typography enforcement: only Light and Regular ---
-h1, h2, h3, h4, h5, h6 {
-  font-weight: $font-weight-regular;
-  line-height: $line-height-tight;
-}
-
+h1, h2, h3, h4, h5, h6,
 p, span, label, input, textarea, select, button, a {
   font-weight: $font-weight-regular;
 }
 
 a {
-  color: $color-primary;
+  color: $color-text-action;
   text-decoration: none;
 
   &:hover {
@@ -77,7 +73,6 @@ img {
   display: block;
 }
 
-// --- Scrollbar ---
 ::-webkit-scrollbar {
   width: 5px;
 }
@@ -93,43 +88,4 @@ img {
   &:hover {
     background: $color-gray-400;
   }
-}
-
-// --- Utility classes ---
-.text-light {
-  font-weight: $font-weight-light;
-}
-
-.text-regular {
-  font-weight: $font-weight-regular;
-}
-
-.text-primary {
-  color: $color-primary;
-}
-
-.text-muted {
-  color: $color-gray-600;
-}
-
-.text-sm {
-  font-size: $font-size-sm;
-}
-
-.text-base {
-  font-size: $font-size-base;
-}
-
-.text-md {
-  font-size: $font-size-md;
-}
-
-.text-lg {
-  font-size: $font-size-lg;
-}
-
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
