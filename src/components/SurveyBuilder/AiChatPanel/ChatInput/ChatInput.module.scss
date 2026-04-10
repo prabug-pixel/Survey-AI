@@ -1,9 +1,29 @@
 @use '../../../../styles/variables' as *;
 
 .chatInputWrapper {
-  padding: $spacing-12 $spacing-16;
-  border-top: 1px solid $color-border;
+  padding: 0 $spacing-24 $spacing-24;
   background: $color-white;
+}
+
+.promptBox {
+  background: #ffffff;
+  border: 1px solid #e5e9f0;
+  border-radius: 8px;
+  height: 144px;
+  padding: 0 $spacing-8;
+  margin-bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px 0;
+
+  &:focus,
+  &:focus-within,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
 }
 
 .mentionBadge {
@@ -15,16 +35,17 @@
   border: 1px solid #8fbcf5;
   border-radius: $radius-full;
   margin-bottom: $spacing-8;
-  font-size: $font-size-xs;
-  color: $color-primary;
+  font-size: 11px;
+  color: var(--primary);
+  width: 100%;
 }
 
 .mentionNumber {
   width: 18px;
   height: 18px;
-  border-radius: $radius-full;
-  background: $color-primary;
-  color: $color-white;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: #ffffff;
   font-size: 10px;
   display: flex;
   align-items: center;
@@ -32,7 +53,7 @@
 }
 
 .mentionIcon {
-  font-size: $font-size-sm;
+  font-size: 12px;
 }
 
 .mentionText {
@@ -49,7 +70,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-full;
+  border-radius: 9999px;
+  margin-left: auto;
   transition: background $transition-fast;
 
   &:hover {
@@ -57,26 +79,35 @@
   }
 }
 
-.inputRow {
-  display: flex;
-  align-items: flex-start;
+.textareaWrap {
+  width: 100%;
 }
 
 .textarea {
-  flex: 1;
+  width: 100%;
   border: none;
+  padding: 12px 8px;
   resize: none;
-  font-size: $font-size-base;
-  font-weight: $font-weight-light;
-  color: $color-gray-800;
-  line-height: $line-height-normal;
-  min-height: 36px;
+  font-size: 14px;
+  font-weight: $font-weight-regular;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #212121;
+  min-height: 40px;
   max-height: 100px;
   background: transparent;
+  outline: none;
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
 
   &::placeholder {
-    color: $color-gray-400;
-    font-weight: $font-weight-light;
+    color: #a3a3a3;
+    font-weight: $font-weight-regular;
   }
 }
 
@@ -84,47 +115,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: $spacing-8;
+  width: 100%;
+  gap: 0;
+  padding: 0 $spacing-4;
 }
 
 .toolbarLeft {
   display: flex;
   align-items: center;
-  gap: $spacing-4;
+  justify-content: flex-end;
+  gap: $spacing-12;
 }
 
 .toolBtn {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-md;
-  transition: background $transition-fast;
+  padding: 0;
+  color: #424242;
+  transition: color $transition-fast;
 
   &:hover {
-    background: $color-bg-hover;
+    color: #212121;
   }
 }
 
 .sendBtn {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-full;
   transition: all $transition-fast;
 
   &:disabled {
     cursor: default;
-  }
-
-  &.active {
-    background: $color-primary-light;
-
-    &:hover {
-      background: #d1e3fc;
-    }
+    opacity: 0.4;
   }
 }

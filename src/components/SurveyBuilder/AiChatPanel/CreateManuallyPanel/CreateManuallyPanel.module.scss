@@ -1,0 +1,168 @@
+@use '../../../../styles/variables' as *;
+
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-24;
+  padding: $spacing-16;
+  overflow-y: auto;
+  background: $color-white;
+}
+
+// --- Search field ---
+
+.searchField {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 36px;
+  padding: $spacing-8 $spacing-12;
+  background: $color-white;
+  border: 1px solid #ccc;
+  border-radius: $radius-sm;
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: $font-family;
+  font-size: $font-size-md;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #212121;
+
+  &::placeholder {
+    color: #8f8f8f;
+  }
+}
+
+// --- Categories ---
+
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-24;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-4 $spacing-12 $spacing-4 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+.categoryTitle {
+  font-family: $font-family;
+  font-size: $font-size-lg;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.32px;
+  color: #212121;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.categoryChevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+// --- Question cards ---
+
+.categoryItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.questionCard {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: $spacing-8;
+  height: 36px;
+  padding: $spacing-4 $spacing-12;
+  background: $color-white;
+  border: 1px solid #e5e9f0;
+  border-radius: $radius-sm;
+  cursor: grab;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-gray-50;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  & + & {
+    margin-top: 0;
+  }
+}
+
+.cardContent {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.cardLabel {
+  font-family: $font-family;
+  font-size: $font-size-md;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #212121;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
