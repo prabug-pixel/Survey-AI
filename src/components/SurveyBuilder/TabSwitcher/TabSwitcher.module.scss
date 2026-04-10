@@ -1,18 +1,70 @@
 @use '../../../styles/variables' as *;
 
-// Wrapper for Elemental TabHeader — constrains to chat panel context
 .tabSwitcher {
-  padding: $spacing-4 $spacing-16 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: $spacing-8 $spacing-16 0;
   border-bottom: 1px solid $color-border;
+}
 
-  // Override Elemental TabHeader font weights to match design system
-  :global {
-    .tab-header-wrapper {
-      font-weight: $font-weight-regular;
-    }
+.tabList {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 81px;
+  width: 100%;
+  max-width: 347px;
+  min-height: 38px;
+}
 
-    .tab-header-wrapper .tab-active {
-      font-weight: $font-weight-regular;
-    }
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(33, 33, 33, 1);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: $font-family;
+
+  &:focus-visible {
+    outline: 2px solid $color-border-focus;
+    outline-offset: 4px;
+    border-radius: $radius-sm;
+  }
+}
+
+.aiIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b46d6;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.active {
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: #2f80ed;
   }
 }
