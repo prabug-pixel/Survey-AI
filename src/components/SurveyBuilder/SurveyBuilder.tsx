@@ -13,14 +13,8 @@ const SurveyBuilder: React.FC = () => {
   const surveyGenerated = useAppSelector((s) => s.survey.surveyGenerated);
   const editorOpen = useAppSelector((s) => s.survey.editorPanel.isOpen);
 
-  const handleTemplateSelect = (templateId: string) => {
-    const templateNames: Record<string, string> = {
-      csat: 'Customer satisfaction survey for a healthcare clinic',
-      feedback: 'General feedback form for our business',
-      employee: 'Employee experience survey for our company',
-      event: 'Event feedback form for attendees',
-    };
-    dispatch(processMessage(templateNames[templateId] || `Create a ${templateId} survey`) as never);
+  const handleTemplateSelect = (prompt: string) => {
+    dispatch(processMessage(prompt) as never);
   };
 
   return (

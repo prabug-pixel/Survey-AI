@@ -7,6 +7,15 @@ interface ChatMessageProps {
   onQuickAction?: (actionId: string) => void;
 }
 
+const AiAvatar: React.FC = () => (
+  <div className={styles.aiAvatar}>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="10" cy="10" r="10" fill="#C4B5FD" />
+      <text x="10" y="14" textAnchor="middle" fontSize="11" fill="#6D28D9">✦</text>
+    </svg>
+  </div>
+);
+
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, onQuickAction }) => {
   const isAi = message.role === 'ai';
 
@@ -14,17 +23,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onQuickAction }) => 
     <div className={`${styles.messageRow} ${isAi ? styles.ai : styles.user}`}>
       {isAi && (
         <div className={styles.avatar}>
-          <div className={styles.aiAvatar}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#1a73e8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+          <AiAvatar />
         </div>
       )}
       {!isAi && (
         <div className={styles.avatar}>
           <div className={styles.userAvatar}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
               <circle cx="12" cy="7" r="4" stroke="#fff" strokeWidth="1.5" />
             </svg>
