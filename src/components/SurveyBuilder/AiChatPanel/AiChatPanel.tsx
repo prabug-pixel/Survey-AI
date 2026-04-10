@@ -1,11 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store';
-import { chatActions } from '../../../store/chatSlice';
-import { surveyActions } from '../../../store/surveySlice';
-import { SAMPLE_CHAT_CSAT } from '../../../constants/sampleSurvey';
+import { processMessage } from '../../../store/chatSlice';
 import TabSwitcher from '../TabSwitcher/TabSwitcher';
 import ChatMessage from './ChatMessage/ChatMessage';
 import ChatInput from './ChatInput/ChatInput';
+import aiAvatarGif from '../../../assets/download.gif';
 import styles from './AiChatPanel.module.scss';
 
 const AiChatPanel: React.FC = () => {
@@ -20,40 +19,17 @@ const AiChatPanel: React.FC = () => {
   }, [messages, isTyping]);
 
   const handleQuickAction = (actionId: string) => {
-    // Simulate selecting CSAT Survey and generating
-    dispatch(chatActions.addUserMessage(
-      actionId === 'csat' ? 'CSAT Survey' :
-      actionId === 'nps' ? 'NPS Survey' :
-      actionId === 'post_purchase' ? 'Post purchase survey' : 'Others'
-    ));
-
-    // Simulate AI conversation flow
-    dispatch(chatActions.setTyping(true));
-    setTimeout(() => {
-      dispatch(chatActions.setTyping(false));
-      dispatch(chatActions.setChatHistory(SAMPLE_CHAT_CSAT));
-      dispatch(surveyActions.loadSampleSurvey());
-    }, 800);
+    const labels: Record<string, string> = {
+      csat: 'CSAT Survey',
+      nps: 'NPS Survey',
+      post_purchase: 'Post purchase survey',
+      others: 'I want to create a custom survey',
+    };
+    dispatch(processMessage(labels[actionId] || actionId) as never);
   };
 
   const handleSend = (message: string) => {
-    dispatch(chatActions.addUserMessage(message));
-
-    // Simulate AI response
-    dispatch(chatActions.setTyping(true));
-    setTimeout(() => {
-      dispatch(chatActions.setTyping(false));
-
-      if (!surveyGenerated) {
-        // First message triggers survey generation flow
-        dispatch(chatActions.setChatHistory(SAMPLE_CHAT_CSAT));
-        dispatch(surveyActions.loadSampleSurvey());
-      } else {
-        dispatch(chatActions.addAiMessage({
-          content: "Great suggestion, I've added a few targeted questions to help identify issues and capture staff-specific feedback.",
-        }));
-      }
-    }, 800);
+    dispatch(processMessage(message) as never);
   };
 
   return (
@@ -71,14 +47,8 @@ const AiChatPanel: React.FC = () => {
 
         {isTyping && (
           <div className={styles.typingRow}>
-            <div className={styles.typingAvatar}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#1a73e8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div className={styles.typingIndicator}>
-              <span /><span /><span />
-            </div>
+            <img src={aiAvatarGif} alt="" className={styles.typingAvatar} />
+            <span className={styles.typingText}>Working on it...</span>
           </div>
         )}
 

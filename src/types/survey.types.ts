@@ -74,7 +74,7 @@ export interface SurveyTemplate {
   id: string;
   title: string;
   description: string;
-  icon: 'csat' | 'feedback' | 'employee' | 'event';
+  icon?: string;
 }
 
 export type PreviewMode = 'desktop' | 'mobile';

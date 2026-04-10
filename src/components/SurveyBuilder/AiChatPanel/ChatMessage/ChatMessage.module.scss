@@ -3,37 +3,36 @@
 .messageRow {
   display: flex;
   gap: $spacing-8;
-  padding: $spacing-4 0;
-
-  &.user {
-    flex-direction: row-reverse;
-
-    .content {
-      align-items: flex-end;
-    }
-  }
+  align-items: flex-start;
 }
 
 .avatar {
   flex-shrink: 0;
-  padding-top: $spacing-2;
 }
 
 .aiAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-full;
-  background: $color-primary-light;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .userAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-full;
-  background: $color-gray-600;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.userAvatarFallback {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #bdbdbd;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,51 +42,46 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-8;
-  max-width: 85%;
+  flex: 1;
+  min-width: 0;
 }
 
 .bubble {
-  padding: $spacing-10 $spacing-14;
-  font-size: $font-size-base;
+  font-size: 14px;
   font-weight: $font-weight-regular;
-  line-height: $line-height-relaxed;
-  border-radius: $radius-xl;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #212121;
   word-wrap: break-word;
-}
-
-.aiBubble {
-  background: $color-white;
-  color: $color-gray-800;
-  border: 1px solid $color-border;
-  border-top-left-radius: $radius-sm;
-}
-
-.userBubble {
-  background: $color-user-bubble;
-  color: $color-gray-800;
-  border-top-right-radius: $radius-sm;
 }
 
 .quickActions {
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-8;
-  padding-left: $spacing-4;
+  padding: $spacing-8 0;
 }
 
 .quickActionBtn {
-  padding: $spacing-6 $spacing-14;
-  font-size: $font-size-sm;
+  height: 36px;
+  padding: 0 $spacing-12;
+  font-size: 14px;
   font-weight: $font-weight-regular;
-  color: $color-gray-800;
-  background: $color-white;
-  border: 1px solid $color-border;
-  border-radius: $radius-full;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #212121;
+  background: #ffffff;
+  border: 1px solid #e5e9f0;
+  border-radius: 4px;
   transition: all $transition-fast;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-4;
 
   &:hover {
-    background: $color-bg-hover;
-    border-color: $color-gray-400;
+    background: var(--accent);
+    border-color: #bdbdbd;
   }
 }
