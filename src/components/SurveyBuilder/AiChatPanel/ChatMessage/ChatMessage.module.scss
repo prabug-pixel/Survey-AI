@@ -4,14 +4,6 @@
   display: flex;
   gap: $spacing-8;
   align-items: flex-start;
-
-  &.user {
-    flex-direction: row-reverse;
-
-    .content {
-      align-items: flex-end;
-    }
-  }
 }
 
 .avatar {
@@ -21,7 +13,12 @@
 .aiAvatar {
   width: 20px;
   height: 20px;
-  border-radius: $radius-full;
+}
+
+.userAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
   overflow: hidden;
 
   img {
@@ -31,11 +28,11 @@
   }
 }
 
-.userAvatar {
+.userAvatarFallback {
   width: 20px;
   height: 20px;
-  border-radius: $radius-full;
-  background: $color-gray-600;
+  border-radius: 9999px;
+  background: #bdbdbd;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,17 +53,6 @@
   letter-spacing: -0.28px;
   color: #212121;
   word-wrap: break-word;
-}
-
-.aiBubble {
-  // AI messages have no bubble styling — plain text per Figma
-}
-
-.userBubble {
-  background: $color-user-bubble;
-  padding: $spacing-10 $spacing-14;
-  border-radius: $radius-xl;
-  border-top-right-radius: $radius-sm;
 }
 
 .quickActions {

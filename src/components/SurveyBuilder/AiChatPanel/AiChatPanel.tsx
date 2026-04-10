@@ -4,6 +4,7 @@ import { processMessage } from '../../../store/chatSlice';
 import TabSwitcher from '../TabSwitcher/TabSwitcher';
 import ChatMessage from './ChatMessage/ChatMessage';
 import ChatInput from './ChatInput/ChatInput';
+import aiAvatarGif from '../../../assets/download.gif';
 import styles from './AiChatPanel.module.scss';
 
 const AiChatPanel: React.FC = () => {
@@ -46,14 +47,8 @@ const AiChatPanel: React.FC = () => {
 
         {isTyping && (
           <div className={styles.typingRow}>
-            <div className={styles.typingAvatar}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#1a73e8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div className={styles.typingIndicator}>
-              <span /><span /><span />
-            </div>
+            <img src={aiAvatarGif} alt="" className={styles.typingAvatar} />
+            <span className={styles.typingText}>Working on it...</span>
           </div>
         )}
 
