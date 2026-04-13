@@ -223,6 +223,61 @@ const surveySlice = createSlice({
         }
       }
     },
+
+    // Add dropped question
+    addDroppedQuestion(state, action: PayloadAction<{ type: QuestionType | string }>) {
+      if (!state.survey) {
+        state.survey = {
+          id: uuid(),
+          title: 'Standard survey',
+          status: 'draft',
+          header: { companyName: '', subtitle: '' },
+          pages: [{ id: uuid(), questions: [] }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        state.surveyGenerated = true;
+      }
+      const page = state.survey.pages[0];
+
+      const rawType = action.payload.type;
+      let qType: QuestionType = 'text';
+      if (['nps', 'rating', 'multiple_choice'].includes(rawType)) {
+        qType = rawType as QuestionType;
+      } else if (['short_text', 'paragraph'].includes(rawType)) {
+        qType = 'text';
+      }
+
+      const newQ: Question = {
+        id: uuid(),
+        type: qType,
+        text: 'Enter question text',
+        required: false,
+        order: page.questions.length + 1,
+      };
+
+      if (qType === 'rating') {
+        newQ.ratingConfig = { scale: 5, lowLabel: 'Not at all likely', highLabel: 'Extremely likely' };
+      }
+      if (qType === 'nps') {
+        newQ.ratingConfig = { scale: 10, lowLabel: 'Not at all likely', highLabel: 'Extremely likely' };
+      }
+      if (qType === 'multiple_choice') {
+        newQ.choices = [
+          { id: uuid(), label: 'Option 1' },
+          { id: uuid(), label: 'Option 2' },
+          { id: uuid(), label: 'Option 3' },
+        ];
+      }
+      if (qType === 'text') {
+        newQ.placeholder = 'Enter your response';
+      }
+
+      page.questions.push(newQ);
+
+      // Select it immediately
+      state.editorPanel = { isOpen: true, questionId: newQ.id };
+    },
   },
 });
 

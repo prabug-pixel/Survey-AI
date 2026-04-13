@@ -92,6 +92,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, allQuestions }) =
         </div>
       )}
 
+      {question.type === 'nps' && question.ratingConfig && (
+        <div className={styles.questionBody}>
+          <RatingScale
+            scale={question.ratingConfig.scale}
+            lowLabel={question.ratingConfig.highLabel}
+            highLabel={question.ratingConfig.lowLabel}
+            startFromZero
+            disabled
+          />
+        </div>
+      )}
+
       {question.type === 'multiple_choice' && question.choices && (
         <div className={styles.questionBody}>
           {question.choices.map((choice) => (

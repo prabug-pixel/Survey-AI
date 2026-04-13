@@ -16,7 +16,12 @@ const QUESTION_TYPE_OPTIONS = [
   { value: 'rating', label: 'Rating' },
   { value: 'multiple_choice', label: 'Multiple choice' },
   { value: 'text', label: 'Text' },
-  { value: 'nps', label: 'NPS' },
+  { value: 'nps', label: 'Net Promoter Score' },
+];
+
+const NPS_SORT_OPTIONS = [
+  { value: '0-10', label: '0 - 10' },
+  { value: '10-0', label: '10 - 0' },
 ];
 
 const QuestionEditor: React.FC = () => {
@@ -30,8 +35,9 @@ const QuestionEditor: React.FC = () => {
 
   if (!question) return null;
 
-  const typeLabel =
-    QUESTION_TYPE_OPTIONS.find((o) => o.value === question.type)?.label || 'Unknown';
+  const typeLabel = question.type === 'nps'
+    ? 'Net Promoter Score'
+    : `${QUESTION_TYPE_OPTIONS.find((o) => o.value === question.type)?.label || 'Unknown'} question`;
 
   const handleTypeChange = (option: { value: string | number }) => {
     dispatch(
@@ -79,8 +85,36 @@ const QuestionEditor: React.FC = () => {
 
         {/* Type-specific editor */}
         {question.type === 'rating' && <RatingEditor question={question} />}
+        {question.type === 'nps' && (
+          <>
+            <div className={styles.field}>
+              <label className={styles.label}>Sort</label>
+              <SingleSelect
+                options={NPS_SORT_OPTIONS}
+                selected="0-10"
+                onChange={() => {}}
+                name="npsSort"
+                className={styles.singleSelect}
+              />
+            </div>
+            <RatingEditor question={question} />
+          </>
+        )}
         {question.type === 'multiple_choice' && <MultipleChoiceEditor question={question} />}
         {question.type === 'text' && <TextEditor question={question} />}
+
+        {/* Embed in email toggle (NPS) */}
+        {question.type === 'nps' && (
+          <div className={styles.toggleRow}>
+            <span className={styles.toggleLabel}>Embed in email</span>
+            <Toggle
+              checked={false}
+              onChange={() => {}}
+              name="embedInEmail"
+              className={styles.toggleWrap}
+            />
+          </div>
+        )}
 
         {/* Required toggle — Elemental Toggle */}
         <div className={styles.toggleRow}>
