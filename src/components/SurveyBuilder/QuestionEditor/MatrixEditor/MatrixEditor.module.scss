@@ -1,0 +1,84 @@
+.matrixEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303030;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303030;
+}
+
+.rowsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rowItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowInput {
+  flex: 1;
+  
+  :global(.be-input) {
+    height: 40px;
+  }
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.addBtn {
+  color: #2552ED;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  width: fit-content;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.scaleSelect {
+  width: 100%;
+}

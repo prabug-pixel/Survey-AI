@@ -20,8 +20,18 @@ const SurveyBuilder: React.FC = () => {
     dispatch(processMessage(prompt) as never);
   };
 
+  const hasQuestionType = (types: DOMStringList | ReadonlyArray<string>) =>
+    Array.from(types).includes('application/question-type');
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (hasQuestionType(e.dataTransfer.types)) {
+      e.preventDefault();
+      setIsDragOver(true);
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('application/question-type')) {
+    if (hasQuestionType(e.dataTransfer.types)) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
       setIsDragOver(true);
@@ -29,7 +39,7 @@ const SurveyBuilder: React.FC = () => {
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    if (e.currentTarget === e.target || !e.currentTarget.contains(e.relatedTarget as Node)) {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
     }
   };
@@ -37,7 +47,9 @@ const SurveyBuilder: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    const questionType = e.dataTransfer.getData('application/question-type');
+    const questionType =
+      e.dataTransfer.getData('application/question-type') ||
+      e.dataTransfer.getData('text/plain');
     if (questionType) {
       dispatch(surveyActions.addDroppedQuestion({ type: questionType }));
     }
@@ -54,6 +66,7 @@ const SurveyBuilder: React.FC = () => {
 
         <div
           className={`${styles.contentArea} ${isDragOver ? styles.dragOver : ''}`}
+          onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}

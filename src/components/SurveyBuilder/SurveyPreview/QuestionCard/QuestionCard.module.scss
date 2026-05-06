@@ -91,6 +91,16 @@
   padding-left: $spacing-20;
 }
 
+.shortTextStub {
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: $spacing-8 $spacing-12;
+  font-size: $font-size-base;
+  color: $color-gray-500;
+  background: $color-white;
+  min-height: 36px;
+}
+
 .textArea {
   width: 100%;
   min-height: 80px;
@@ -112,3 +122,265 @@
     cursor: default;
   }
 }
+
+.addOptionBtn, .addMatrixRowBtn, .addBtnSmall {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2552ED;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-top: 8px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.matrixBody {
+  padding-left: $spacing-20;
+  overflow-x: auto;
+}
+
+.matrixHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rowLabelStub {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.matrixColumnHeader {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: #757575;
+  min-width: 60px;
+}
+
+.matrixRow {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.rowLabel {
+  width: 150px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: #303030;
+}
+
+.matrixCell {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.radioVisual {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #bdbdbd;
+  border-radius: 50%;
+}
+
+.matrixDropdownCell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.removeRowBtn, .removeFieldBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #bdbdbd;
+
+  &:hover {
+    color: #757575;
+  }
+}
+
+.contactBody {
+  padding-left: $spacing-20;
+}
+
+.contactFields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 400px;
+}
+
+.contactFieldRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contactInputStub {
+  flex: 1;
+  height: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #bdbdbd;
+  background: #fdfdfd;
+}
+
+.dateTimeBody {
+  padding-left: $spacing-20;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateTimeConfigRow {
+  display: flex;
+  gap: 20px;
+}
+
+.dateTimeInputs {
+  display: flex;
+  gap: 12px;
+}
+
+.timeSelectStub {
+  height: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #303030;
+  background: #fdfdfd;
+  min-width: 100px;
+}
+
+.locationBody {
+  padding-left: $spacing-20;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.locationDropdownStub {
+  height: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #303030;
+  background: #fdfdfd;
+  max-width: 300px;
+}
+
+.reviewBody {
+  padding-left: $spacing-20;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.starRow {
+  display: flex;
+  gap: 4px;
+}
+
+.feedbackStub {
+  height: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #bdbdbd;
+}
+
+.reviewFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sourceIcons {
+  display: flex;
+  gap: 8px;
+}
+
+.sourceCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #2552ED;
+}
+
+.welcomeBody, .thankYouBody {
+  padding: 30px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcomeDesc, .thankYouText {
+  font-size: 16px;
+  color: #303030;
+  max-width: 400px;
+}
+
+.welcomeBtn {
+  background-color: #2552ED;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.thankYouTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303030;
+  margin: 0;
+}
+
+.redirectLink {
+  font-size: 13px;
+  color: #757575;
+  font-style: italic;
+}
+
+

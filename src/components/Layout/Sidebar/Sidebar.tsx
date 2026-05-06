@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import OverviewIcon from '../../../assets/Icons/Overview.svg';
 import InboxIcon from '../../../assets/Icons/Inbox.svg';
 import ListingsIcon from '../../../assets/Icons/Listings.svg';
@@ -22,6 +23,7 @@ interface NavItem {
   id: string;
   icon: string;
   label: string;
+  path?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -33,8 +35,8 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'payments',     icon: PaymentsIcon,             label: 'Payments' },
   { id: 'appointments', icon: AppointmentsIcon,         label: 'Appointments' },
   { id: 'social',       icon: SocialIcon,               label: 'Social' },
-  { id: 'surveys',      icon: SurveysIcon,              label: 'Surveys' },
-  { id: 'ticketing',    icon: TicketingIcon,             label: 'Ticketing' },
+  { id: 'surveys',      icon: SurveysIcon,              label: 'Surveys',    path: '/surveys' },
+  { id: 'ticketing',    icon: TicketingIcon,            label: 'Ticketing' },
   { id: 'contacts',     icon: ContactsIcon,             label: 'Contacts' },
   { id: 'campaigns',    icon: CampaignsIcon,            label: 'Campaigns' },
   { id: 'automation',   icon: MarketingAutomationIcon,  label: 'Marketing Automation' },
@@ -51,7 +53,21 @@ const BirdeyeLogo: React.FC = () => (
 );
 
 const Sidebar: React.FC = () => {
-  const [activeItem, setActiveItem] = useState('surveys');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getActiveId = () => {
+    if (location.pathname.startsWith('/surveys')) return 'surveys';
+    return null;
+  };
+
+  const activeId = getActiveId();
+
+  const handleNavClick = (item: NavItem) => {
+    if (item.path) {
+      navigate(item.path);
+    }
+  };
 
   return (
     <nav className={styles.sidebar} aria-label="Main navigation">
@@ -61,13 +77,13 @@ const Sidebar: React.FC = () => {
 
       <div className={styles.navList}>
         {NAV_ITEMS.map((item) => {
-          const isActive = activeItem === item.id;
+          const isActive = activeId === item.id;
 
           return (
             <button
               key={item.id}
               className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-              onClick={() => setActiveItem(item.id)}
+              onClick={() => handleNavClick(item)}
               title={item.label}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}

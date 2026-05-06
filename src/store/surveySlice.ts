@@ -7,8 +7,15 @@ import type {
   SkipLogicRule,
   PreviewMode,
   EditorPanelState,
+  MatrixRow,
+  WelcomeConfig,
+  ThankYouConfig,
+  SavedSurvey,
+  ExpirationConfig,
+  AuditLogEntry,
 } from '../types/survey.types';
 import { SAMPLE_SURVEY } from '../constants/sampleSurvey';
+
 
 interface SurveyState {
   survey: Survey | null;
@@ -16,6 +23,7 @@ interface SurveyState {
   editorPanel: EditorPanelState;
   activeTab: 'ai' | 'manual';
   surveyGenerated: boolean;
+  savedSurveys: SavedSurvey[];
 }
 
 const initialState: SurveyState = {
@@ -24,6 +32,7 @@ const initialState: SurveyState = {
   editorPanel: { isOpen: false, questionId: null },
   activeTab: 'ai',
   surveyGenerated: false,
+  savedSurveys: [],
 };
 
 const surveySlice = createSlice({
@@ -88,20 +97,101 @@ const surveySlice = createSlice({
     updateQuestionType(state, action: PayloadAction<{ questionId: string; type: QuestionType }>) {
       const question = findQuestion(state.survey, action.payload.questionId);
       if (question) {
-        question.type = action.payload.type;
+        const newType = action.payload.type;
+        question.type = newType;
         // Initialize defaults for new type
-        if (action.payload.type === 'rating' && !question.ratingConfig) {
+        if (newType === 'rating' && !question.ratingConfig) {
           question.ratingConfig = { scale: 5, lowLabel: 'Not at all likely', highLabel: 'Extremely likely' };
         }
-        if (action.payload.type === 'multiple_choice' && !question.choices) {
+        if (newType === 'nps' && !question.ratingConfig) {
+          question.ratingConfig = { scale: 10, lowLabel: 'Not at all likely', highLabel: 'Extremely likely' };
+        }
+        if ((newType === 'multiple_choice' || newType === 'checkboxes' || newType === 'dropdown') && !question.choices) {
           question.choices = [
             { id: uuid(), label: 'Option 1' },
             { id: uuid(), label: 'Option 2' },
             { id: uuid(), label: 'Option 3' },
           ];
         }
-        if (action.payload.type === 'text' && !question.placeholder) {
+        if ((newType === 'text' || newType === 'short_text' || newType === 'paragraph') && !question.placeholder) {
           question.placeholder = 'Enter your response';
+        }
+        if ((newType === 'matrix_radio' || newType === 'matrix_ratings') && !question.matrixConfig) {
+          question.matrixConfig = {
+            rows: [
+              { id: uuid(), label: 'Row 1' },
+              { id: uuid(), label: 'Row 2' },
+              { id: uuid(), label: 'Row 3' },
+            ],
+            columnScale: 3,
+            columnLabels: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral'],
+          };
+        }
+        if (newType === 'matrix_dropdown' && !question.matrixConfig) {
+          question.matrixConfig = {
+            rows: [
+              { id: uuid(), label: 'Category 1' },
+              { id: uuid(), label: 'Category 2' },
+              { id: uuid(), label: 'Category 3' },
+            ],
+            columnScale: 0,
+            columnLabels: [],
+          };
+          if (!question.choices) {
+            question.choices = [
+              { id: uuid(), label: 'Good' },
+              { id: uuid(), label: 'Average' },
+              { id: uuid(), label: 'Excellent' },
+            ];
+          }
+        }
+        if (newType === 'contact_info' && !question.contactInfoConfig) {
+          question.contactInfoConfig = {
+            fields: [
+              { id: 'firstName', label: 'First name', enabled: true },
+              { id: 'lastName', label: 'Last name', enabled: true },
+              { id: 'email', label: 'Email', enabled: true },
+              { id: 'phone', label: 'Phone', enabled: true },
+            ],
+            saveToBirdeye: true,
+          };
+        }
+        if (newType === 'date_time' && !question.dateTimeConfig) {
+          question.dateTimeConfig = {
+            includeDate: true,
+            includeTime: true,
+            startTime: '10:00 AM',
+            endTime: '06:00 PM',
+            interval: '30 mins',
+          };
+        }
+        if (newType === 'location' && !question.locationConfig) {
+          question.locationConfig = {
+            locationChoices: 'All locations',
+            showAlias: true,
+          };
+        }
+        if (newType === 'review_collector' && !question.reviewCollectorConfig) {
+          question.reviewCollectorConfig = {
+            sources: ['google', 'birdeye'],
+            requestPublicReview: true,
+            showContactUs: true,
+            buttonColor: '#1976D2',
+            buttonTextColor: '#FFFFFF',
+          };
+        }
+        if (newType === 'welcome' && !question.welcomeConfig) {
+          question.welcomeConfig = {
+            description: 'Tell us about your experience',
+            buttonText: 'Start Survey',
+            showImage: true,
+          };
+        }
+        if (newType === 'thank_you' && !question.thankYouConfig) {
+          question.thankYouConfig = {
+            redirectUrl: '',
+            showRedirect: false,
+          };
         }
       }
     },
@@ -241,17 +331,23 @@ const surveySlice = createSlice({
       const page = state.survey.pages[0];
 
       const rawType = action.payload.type;
-      let qType: QuestionType = 'text';
-      if (['nps', 'rating', 'multiple_choice'].includes(rawType)) {
-        qType = rawType as QuestionType;
-      } else if (['short_text', 'paragraph'].includes(rawType)) {
-        qType = 'text';
-      }
+      const KNOWN_TYPES: QuestionType[] = [
+        'nps', 'rating', 'multiple_choice', 'text',
+        'short_text', 'paragraph', 'help_text',
+        'checkboxes', 'dropdown',
+        'matrix_radio', 'matrix_ratings', 'matrix_dropdown',
+        'welcome', 'contact_info', 'date_time', 'location',
+        'review_collector', 'review_request', 'thank_you',
+        'page_title', 'page_break',
+      ];
+      const qType: QuestionType = KNOWN_TYPES.includes(rawType as QuestionType)
+        ? (rawType as QuestionType)
+        : 'text';
 
       const newQ: Question = {
         id: uuid(),
         type: qType,
-        text: 'Enter question text',
+        text: qType === 'help_text' ? 'Help text' : 'Enter question',
         required: false,
         order: page.questions.length + 1,
       };
@@ -269,14 +365,316 @@ const surveySlice = createSlice({
           { id: uuid(), label: 'Option 3' },
         ];
       }
-      if (qType === 'text') {
+      if (qType === 'checkboxes') {
+        newQ.choices = [
+          { id: uuid(), label: 'Option 1' },
+          { id: uuid(), label: 'Option 2' },
+          { id: uuid(), label: 'Option 3' },
+        ];
+      }
+      if (qType === 'dropdown') {
+        newQ.choices = [
+          { id: uuid(), label: 'Option 1' },
+          { id: uuid(), label: 'Option 2' },
+          { id: uuid(), label: 'Option 3' },
+        ];
+      }
+      if (qType === 'text' || qType === 'short_text' || qType === 'paragraph') {
         newQ.placeholder = 'Enter your response';
+      }
+      if (qType === 'matrix_radio' || qType === 'matrix_ratings') {
+        newQ.matrixConfig = {
+          rows: [
+            { id: uuid(), label: 'Row 1' },
+            { id: uuid(), label: 'Row 2' },
+            { id: uuid(), label: 'Row 3' },
+          ],
+          columnScale: 3,
+          columnLabels: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral'],
+        };
+      }
+      if (qType === 'matrix_dropdown') {
+        newQ.matrixConfig = {
+          rows: [
+            { id: uuid(), label: 'Category 1' },
+            { id: uuid(), label: 'Category 2' },
+            { id: uuid(), label: 'Category 3' },
+          ],
+          columnScale: 0,
+          columnLabels: [],
+        };
+        newQ.choices = [
+          { id: uuid(), label: 'Good' },
+          { id: uuid(), label: 'Average' },
+          { id: uuid(), label: 'Excellent' },
+        ];
+      }
+      if (qType === 'contact_info') {
+        newQ.contactInfoConfig = {
+          fields: [
+            { id: 'firstName', label: 'First name', enabled: true },
+            { id: 'lastName', label: 'Last name', enabled: true },
+            { id: 'email', label: 'Email', enabled: true },
+            { id: 'phone', label: 'Phone', enabled: true },
+          ],
+          saveToBirdeye: true,
+        };
+      }
+      if (qType === 'date_time') {
+        newQ.dateTimeConfig = {
+          includeDate: true,
+          includeTime: true,
+          startTime: '10:00 AM',
+          endTime: '06:00 PM',
+          interval: '30 mins',
+        };
+      }
+      if (qType === 'location') {
+        newQ.locationConfig = {
+          locationChoices: 'All locations',
+          showAlias: true,
+        };
+      }
+      if (qType === 'review_collector') {
+        newQ.reviewCollectorConfig = {
+          sources: ['google', 'birdeye'],
+          requestPublicReview: true,
+          showContactUs: true,
+          buttonColor: '#1976D2',
+          buttonTextColor: '#FFFFFF',
+        };
+      }
+      if (qType === 'welcome') {
+        newQ.welcomeConfig = {
+          description: 'Tell us about your experience',
+          buttonText: 'Start Survey',
+          showImage: true,
+        };
+      }
+      if (qType === 'thank_you') {
+        newQ.thankYouConfig = {
+          redirectUrl: '',
+          showRedirect: false,
+        };
       }
 
       page.questions.push(newQ);
 
       // Select it immediately
       state.editorPanel = { isOpen: true, questionId: newQ.id };
+    },
+
+    // Matrix: add row
+    addMatrixRow(state, action: PayloadAction<string>) {
+      const question = findQuestion(state.survey, action.payload);
+      if (question?.matrixConfig) {
+        question.matrixConfig.rows.push({
+          id: uuid(),
+          label: `Row ${question.matrixConfig.rows.length + 1}`,
+        });
+      }
+    },
+
+    // Matrix: update row label
+    updateMatrixRow(state, action: PayloadAction<{ questionId: string; rowId: string; label: string }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      const row = question?.matrixConfig?.rows.find((r: MatrixRow) => r.id === action.payload.rowId);
+      if (row) {
+        row.label = action.payload.label;
+      }
+    },
+
+    // Matrix: remove row
+    removeMatrixRow(state, action: PayloadAction<{ questionId: string; rowId: string }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.matrixConfig) {
+        question.matrixConfig.rows = question.matrixConfig.rows.filter(
+          (r: MatrixRow) => r.id !== action.payload.rowId
+        );
+      }
+    },
+
+    // Matrix: update column scale
+    updateMatrixColumnScale(state, action: PayloadAction<{ questionId: string; scale: number }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.matrixConfig) {
+        const scale = action.payload.scale;
+        question.matrixConfig.columnScale = scale;
+        const LABELS_MAP: Record<number, string[]> = {
+          3: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral'],
+          5: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral', 'Satisfactory', 'Extremely satisfactory'],
+          7: ['Extremely unsatisfactory', 'Very unsatisfactory', 'Unsatisfactory', 'Neutral', 'Satisfactory', 'Very satisfactory', 'Extremely satisfactory'],
+        };
+        question.matrixConfig.columnLabels = LABELS_MAP[scale] || LABELS_MAP[3];
+      }
+    },
+
+    // Contact Info: update field enabled
+    updateContactInfoField(state, action: PayloadAction<{ questionId: string; fieldId: string; enabled: boolean }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.contactInfoConfig) {
+        const field = question.contactInfoConfig.fields.find(f => f.id === action.payload.fieldId);
+        if (field) {
+          field.enabled = action.payload.enabled;
+        }
+      }
+    },
+
+    // Contact Info: toggle save to Birdeye
+    toggleSaveToBirdeye(state, action: PayloadAction<string>) {
+      const question = findQuestion(state.survey, action.payload);
+      if (question?.contactInfoConfig) {
+        question.contactInfoConfig.saveToBirdeye = !question.contactInfoConfig.saveToBirdeye;
+      }
+    },
+
+    // Date/Time: update config
+    updateDateTimeConfig(state, action: PayloadAction<{ questionId: string; updates: Partial<any> }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.dateTimeConfig) {
+        question.dateTimeConfig = { ...question.dateTimeConfig, ...action.payload.updates };
+      }
+    },
+
+    // Review Collector: update config
+    updateReviewCollectorConfig(state, action: PayloadAction<{ questionId: string; updates: Partial<any> }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.reviewCollectorConfig) {
+        question.reviewCollectorConfig = { ...question.reviewCollectorConfig, ...action.payload.updates };
+      }
+    },
+
+    // Welcome: update config
+    updateWelcomeConfig(state, action: PayloadAction<{ questionId: string; updates: Partial<WelcomeConfig> }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.welcomeConfig) {
+        question.welcomeConfig = { ...question.welcomeConfig, ...action.payload.updates };
+      }
+    },
+
+    // Thank You: update config
+    updateThankYouConfig(state, action: PayloadAction<{ questionId: string; updates: Partial<ThankYouConfig> }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.thankYouConfig) {
+        question.thankYouConfig = { ...question.thankYouConfig, ...action.payload.updates };
+      }
+    },
+
+    publishSurvey(state) {
+      if (state.survey) {
+        const now = new Date();
+        const formatted = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+        const surveySnapshot = { ...state.survey, status: 'published' as const };
+        const saved: SavedSurvey = {
+          id: state.survey.id,
+          title: state.survey.title,
+          status: 'running',
+          sent: 0,
+          responses: 0,
+          lastUpdated: formatted,
+          owner: 'Prabu',
+          surveyData: surveySnapshot,
+        };
+        const existing = state.savedSurveys.findIndex(s => s.id === saved.id);
+        if (existing >= 0) {
+          state.savedSurveys[existing] = saved;
+        } else {
+          state.savedSurveys.unshift(saved);
+        }
+      }
+      state.survey = null;
+      state.surveyGenerated = false;
+      state.editorPanel = { isOpen: false, questionId: null };
+    },
+
+    deleteSavedSurvey(state, action: PayloadAction<string>) {
+      state.savedSurveys = state.savedSurveys.filter(s => s.id !== action.payload);
+    },
+
+    updateExpiration(
+      state,
+      action: PayloadAction<{ surveyId: string; config: ExpirationConfig; actor: string }>
+    ) {
+      const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
+      if (!s) return;
+      const prev = s.expiration;
+      s.expiration = action.payload.config;
+      if (action.payload.config.enabled && action.payload.config.endDate) {
+        const now = Date.now();
+        const end = new Date(action.payload.config.endDate).getTime();
+        const hoursLeft = (end - now) / 3600000;
+        if (s.status === 'running' && hoursLeft <= 72 && hoursLeft > 0) {
+          s.status = 'expiring_soon';
+        }
+      } else if (!action.payload.config.enabled && s.status === 'expiring_soon') {
+        s.status = 'running';
+      }
+      if (!s.auditLog) s.auditLog = [];
+      const isNew = !prev?.enabled && action.payload.config.enabled;
+      const detail = isNew
+        ? `Expiration enabled · end date: ${action.payload.config.endDate
+            ? new Date(action.payload.config.endDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+            : 'not set'}`
+        : action.payload.config.enabled
+        ? `Expiration settings updated`
+        : `Expiration disabled`;
+      s.auditLog.unshift({
+        id: uuid(),
+        action: isNew ? 'Enabled expiration' : 'Modified expiration settings',
+        actor: action.payload.actor,
+        timestamp: new Date().toISOString(),
+        details: detail,
+      });
+    },
+
+    closeSurveyNow(state, action: PayloadAction<{ surveyId: string; actor: string }>) {
+      const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
+      if (!s) return;
+      s.status = 'expired';
+      if (!s.auditLog) s.auditLog = [];
+      s.auditLog.unshift({
+        id: uuid(),
+        action: 'Manually closed survey',
+        actor: action.payload.actor,
+        timestamp: new Date().toISOString(),
+        details: 'Survey closed via "Close now" action. All in-progress sessions terminated.',
+      });
+    },
+
+    reopenSurvey(
+      state,
+      action: PayloadAction<{ surveyId: string; newEndDate?: string; actor: string }>
+    ) {
+      const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
+      if (!s) return;
+      s.status = 'running';
+      if (s.expiration) {
+        s.expiration.enabled = false;
+        if (action.payload.newEndDate) {
+          s.expiration.endDate = action.payload.newEndDate;
+          s.expiration.enabled = true;
+        }
+      }
+      if (!s.auditLog) s.auditLog = [];
+      s.auditLog.unshift({
+        id: uuid(),
+        action: 'Reopened survey',
+        actor: action.payload.actor,
+        timestamp: new Date().toISOString(),
+        details: action.payload.newEndDate
+          ? `Survey reopened · new end date: ${new Date(action.payload.newEndDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`
+          : 'Survey reopened with no expiration set. Previously-issued links restored.',
+      });
+    },
+
+    addAuditEntry(
+      state,
+      action: PayloadAction<{ surveyId: string; entry: Omit<AuditLogEntry, 'id'> }>
+    ) {
+      const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
+      if (!s) return;
+      if (!s.auditLog) s.auditLog = [];
+      s.auditLog.unshift({ ...action.payload.entry, id: uuid() });
     },
   },
 });

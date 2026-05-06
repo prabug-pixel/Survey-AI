@@ -1,0 +1,313 @@
+@use '../../styles/variables' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  overflow: hidden;
+}
+
+// ── Page header ─────────────────────────────────────────────
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-8 $spacing-24;
+  height: 64px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: 400;
+  color: #212121;
+  letter-spacing: -0.36px;
+  line-height: 26px;
+}
+
+.count {
+  font-size: $font-size-sm;
+  font-weight: 400;
+  color: #757575;
+  background: #f0f0f0;
+  border-radius: $radius-full;
+  padding: 1px 7px;
+  line-height: 18px;
+}
+
+.searchBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  border: 1px solid #e5e9f0;
+  background: #fff;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+// ── Table wrapper ────────────────────────────────────────────
+.tableWrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  min-width: 800px;
+}
+
+// Column layout shared by header and data rows
+$col-name: minmax(240px, 2fr);
+$col-status: 100px;
+$col-number: minmax(80px, 1fr);
+$col-date: minmax(120px, 1fr);
+$col-owner: minmax(80px, 1fr);
+$col-actions: 92px;
+
+// ── Header row ───────────────────────────────────────────────
+.headerRow {
+  display: grid;
+  grid-template-columns:
+    $col-name
+    $col-status
+    $col-number
+    $col-number
+    $col-date
+    $col-owner
+    $col-actions;
+  border-bottom: 1px solid #eaeaea;
+  height: 56px;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.headerCell {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  padding: $spacing-16 $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: 400;
+  color: #555;
+  letter-spacing: -0.24px;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: #212121;
+  }
+
+  &.sortedHeader {
+    font-weight: 500;
+    color: #212121;
+  }
+}
+
+// ── Data rows ────────────────────────────────────────────────
+.row {
+  display: grid;
+  grid-template-columns:
+    $col-name
+    $col-status
+    $col-number
+    $col-number
+    $col-date
+    $col-owner
+    $col-actions;
+  border-bottom: 1px solid #eaeaea;
+  min-height: 56px;
+  background: #fff;
+  transition: background $transition-fast;
+}
+
+.rowHover {
+  background: #f2f4f7;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: $spacing-8 $spacing-4;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: #212121;
+  letter-spacing: -0.28px;
+  line-height: 20px;
+}
+
+// Column-specific overrides
+.nameCol {
+  padding-left: $spacing-24;
+}
+
+.statusCol {
+  justify-content: flex-start;
+}
+
+// ── Name cell ────────────────────────────────────────────────
+.surveyName {
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: #1976d2;
+  letter-spacing: -0.28px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.accessLabel {
+  font-size: $font-size-sm;
+  color: #757575;
+  letter-spacing: -0.24px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+// ── Status badge ─────────────────────────────────────────────
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-4 $spacing-8;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.24px;
+  white-space: nowrap;
+}
+
+.running {
+  background: #f1faf0;
+  color: #377e2c;
+}
+
+.draft {
+  background: #eaeaea;
+  color: #555;
+}
+
+.expiring_soon {
+  background: #fff8e1;
+  color: #e65100;
+}
+
+.expired {
+  background: #fdecea;
+  color: #c62828;
+}
+
+// ── Actions column ───────────────────────────────────────────
+.actionsCol {
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 0 $spacing-8;
+}
+
+.moreContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  border: 1px solid #e5e9f0;
+  background: #fff;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+}
+
+// ── Dropdown menu ────────────────────────────────────────────
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: #fff;
+  border-radius: $radius-sm;
+  box-shadow: 0 4px 8px rgba(33, 33, 33, 0.18);
+  z-index: $z-dropdown;
+  padding: $spacing-12 $spacing-16;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  min-width: 200px;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $radius-sm;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: #555;
+  letter-spacing: -0.28px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+
+  &:first-child {
+    background: #f5f5f5;
+  }
+}
+
+.deleteItem {
+  color: #555;
+}
+
+// ── Empty state ──────────────────────────────────────────────
+.emptyState {
+  padding: $spacing-48 $spacing-24;
+  text-align: center;
+  font-size: $font-size-md;
+  color: #757575;
+}

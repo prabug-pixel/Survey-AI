@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../../store';
 import { surveyActions } from '../../../store/surveySlice';
 import Button from '@birdeye/elemental/core/atoms/Button';
@@ -8,6 +9,7 @@ import styles from './SurveyHeader.module.scss';
 
 const SurveyHeader: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const survey = useAppSelector((s) => s.survey.survey);
   const surveyGenerated = useAppSelector((s) => s.survey.surveyGenerated);
 
@@ -30,11 +32,21 @@ const SurveyHeader: React.FC = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate('/surveys');
+  };
+
+  const handlePublish = () => {
+    const surveyId = survey?.id;
+    dispatch(surveyActions.publishSurvey());
+    navigate(surveyId ? `/surveys/${surveyId}` : '/surveys');
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
         <Tooltip text="Go back" position="bottom" hideOnScroll>
-          <button className={styles.backBtn} aria-label="Go back">
+          <button className={styles.backBtn} aria-label="Go back" onClick={handleBack}>
             <IconChevronLeft size={20} color="#424242" />
           </button>
         </Tooltip>
@@ -75,7 +87,7 @@ const SurveyHeader: React.FC = () => {
         <Button
           label="Publish"
           theme={surveyGenerated ? 'primary' : 'secondary'}
-          onClick={() => {}}
+          onClick={handlePublish}
           disabled={!surveyGenerated}
           className={styles.publishBtn}
         />

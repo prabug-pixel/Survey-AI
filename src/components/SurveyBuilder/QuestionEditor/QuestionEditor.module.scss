@@ -127,3 +127,36 @@
 .doneBtn {
   width: 100%;
 }
+
+.textInput {
+  width: 100%;
+  padding: $spacing-8 $spacing-12;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  font-family: $font-family;
+  color: $color-gray-800;
+  background: $color-white;
+
+  &:focus {
+    outline: none;
+    border-color: $color-border-focus;
+  }
+}
+
+.textareaInput {
+  width: 100%;
+  padding: $spacing-8 $spacing-12;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  font-family: $font-family;
+  color: $color-gray-800;
+  background: $color-white;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: $color-border-focus;
+  }
+}

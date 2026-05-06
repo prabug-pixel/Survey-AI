@@ -1,0 +1,55 @@
+.reviewEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303030;
+}
+
+.required {
+  color: #d32f2f;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toggleText {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #303030;
+}
+
+.colorInputWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.colorInput {
+  flex: 1;
+  
+  :global(.be-input) {
+    height: 40px;
+  }
+}
+
+.colorPreview {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

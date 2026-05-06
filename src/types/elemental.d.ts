@@ -200,12 +200,30 @@ declare module '@birdeye/elemental/core/atoms/Modal' {
       shouldCloseOnEsc?: boolean;
       shouldCloseOnOverlayClick?: boolean;
       onCloseModal?: () => void;
+      customIcon?: React.ReactNode;
+      insideDrawer?: boolean;
     };
     size?: 'extraSmall' | 'small' | 'medium' | 'large' | 'mediumLarge' | 'extraLarge' | 'megaLarge';
     children?: React.ReactNode;
+    smallCloseIcon?: boolean;
   }
-  const Modal: React.FC<ModalProps>;
-  export default Modal;
+  export default class Modal extends React.Component<ModalProps> {}
+}
+
+declare module '@birdeye/elemental/core/atoms/CommonSideDrawer' {
+  import React from 'react';
+  interface CommonDrawerProps {
+    isOpen: boolean;
+    title: string;
+    children: React.ReactNode;
+    onClose: (value: boolean) => void;
+    width?: string;
+    shouldScroll?: boolean;
+    headerRightContent?: React.ReactNode;
+    buttonPosition?: 'left' | 'right';
+  }
+  const CommonDrawer: React.FC<CommonDrawerProps>;
+  export default CommonDrawer;
 }
 
 declare module '@birdeye/elemental/core/atoms/LoadingShimmer' {

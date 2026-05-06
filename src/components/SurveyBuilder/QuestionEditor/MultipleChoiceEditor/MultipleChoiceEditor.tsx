@@ -15,13 +15,17 @@ interface MultipleChoiceEditorProps {
 const MultipleChoiceEditor: React.FC<MultipleChoiceEditorProps> = ({ question }) => {
   const dispatch = useAppDispatch();
   const choices = question.choices || [];
+  const indicatorClass =
+    question.type === 'checkboxes' ? styles.checkbox :
+    question.type === 'dropdown' ? styles.dropdownIndicator :
+    styles.radio;
 
   return (
     <div className={styles.choiceEditor}>
       <div className={styles.optionList}>
         {choices.map((choice) => (
           <div key={choice.id} className={styles.optionRow}>
-            <span className={styles.radio} />
+            <span className={indicatorClass} />
             <FormInput
               name={`option-${choice.id}`}
               type="text"

@@ -16,8 +16,11 @@ const SurveyForm: React.FC = () => {
   const page = survey.pages[0];
   if (!page) return null;
 
+  const hasQuestionType = (types: DOMStringList | ReadonlyArray<string>) =>
+    Array.from(types).includes('application/question-type');
+
   const handleDragOver = (e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('application/question-type')) {
+    if (hasQuestionType(e.dataTransfer.types)) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
       setIsDragOver(true);
@@ -25,7 +28,7 @@ const SurveyForm: React.FC = () => {
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    if (e.currentTarget === e.target || !e.currentTarget.contains(e.relatedTarget as Node)) {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
     }
   };
@@ -34,7 +37,9 @@ const SurveyForm: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-    const questionType = e.dataTransfer.getData('application/question-type');
+    const questionType =
+      e.dataTransfer.getData('application/question-type') ||
+      e.dataTransfer.getData('text/plain');
     if (questionType) {
       dispatch(surveyActions.addDroppedQuestion({ type: questionType }));
     }

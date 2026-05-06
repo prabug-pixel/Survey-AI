@@ -26,6 +26,23 @@
   flex-shrink: 0;
 }
 
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid $color-gray-400;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.dropdownIndicator {
+  width: 16px;
+  height: 16px;
+  border: 1px solid $color-gray-400;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+  background: $color-gray-100;
+}
+
 .optionInput {
   flex: 1;
   padding: $spacing-8 $spacing-12;

@@ -1,0 +1,28 @@
+.dateTimeEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.checkboxGroup {
+  display: flex;
+  gap: 24px;
+}
+
+.timeSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303030;
+}
