@@ -1,8 +1,5 @@
 import React from 'react';
-import { useAppDispatch } from '../../../../store';
-import { surveyActions } from '../../../../store/surveySlice';
 import type { Question } from '../../../../types/survey.types';
-import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Checkbox from '../../../../shared/Checkbox/Checkbox';
 import styles from './LocationEditor.module.scss';
 
@@ -16,7 +13,6 @@ const LOCATION_OPTIONS = [
 ];
 
 const LocationEditor: React.FC<LocationEditorProps> = ({ question }) => {
-  const dispatch = useAppDispatch();
   const config = question.locationConfig;
 
   if (!config) return null;
@@ -25,12 +21,15 @@ const LocationEditor: React.FC<LocationEditorProps> = ({ question }) => {
     <div className={styles.locationEditor}>
       <div className={styles.field}>
         <label className={styles.label}>Select location choices</label>
-        <SingleSelect
-          options={LOCATION_OPTIONS}
-          selected={config.locationChoices}
-          onChange={() => {}}
+        <select
           name="locationSelect"
-        />
+          className={styles.nativeSelect}
+          defaultValue={config.locationChoices}
+        >
+          {LOCATION_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </div>
       <div className={styles.checkboxRow}>
         <Checkbox

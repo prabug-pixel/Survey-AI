@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Question } from '../../../../types/survey.types';
-import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import styles from './TextEditor.module.scss';
 
 interface TextEditorProps {
@@ -9,12 +8,13 @@ interface TextEditorProps {
 
 const TextEditor: React.FC<TextEditorProps> = ({ question }) => (
   <div className={styles.textEditor}>
-    <FormInput
+    <label className={styles.label}>Placeholder text</label>
+    <input
       name="placeholder"
       type="text"
       value={question.placeholder || ''}
-      label="Placeholder text"
       disabled
+      className={styles.nativeInput}
     />
     <p className={styles.hint}>
       Respondents will see a text area to type their answer.

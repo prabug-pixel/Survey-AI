@@ -3,7 +3,6 @@ import { useAppDispatch } from '../../../../store';
 import { surveyActions } from '../../../../store/surveySlice';
 import type { Question } from '../../../../types/survey.types';
 import Button from '@birdeye/elemental/core/atoms/Button';
-import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import { IconClose } from '../../../../shared/Icons/Icons';
 import styles from './MultipleChoiceEditor.module.scss';
@@ -26,11 +25,11 @@ const MultipleChoiceEditor: React.FC<MultipleChoiceEditorProps> = ({ question })
         {choices.map((choice) => (
           <div key={choice.id} className={styles.optionRow}>
             <span className={indicatorClass} />
-            <FormInput
+            <input
               name={`option-${choice.id}`}
               type="text"
               value={choice.label}
-              onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e) =>
                 dispatch(surveyActions.updateChoiceOption({
                   questionId: question.id,
                   optionId: choice.id,

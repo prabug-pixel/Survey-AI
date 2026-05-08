@@ -2,9 +2,6 @@ import React from 'react';
 import { useAppDispatch } from '../../../../store';
 import { surveyActions } from '../../../../store/surveySlice';
 import type { Question, MatrixRow } from '../../../../types/survey.types';
-import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
-import FormInput from '@birdeye/elemental/core/atoms/FormInput';
-import Button from '@birdeye/elemental/core/atoms/Button';
 import { IconClose } from '../../../../shared/Icons/Icons';
 import styles from './MatrixEditor.module.scss';
 
@@ -36,8 +33,8 @@ const MatrixEditor: React.FC<MatrixEditorProps> = ({ question }) => {
     dispatch(surveyActions.removeMatrixRow({ questionId: question.id, rowId }));
   };
 
-  const handleScaleChange = (option: { value: string | number }) => {
-    dispatch(surveyActions.updateMatrixColumnScale({ questionId: question.id, scale: Number(option.value) }));
+  const handleScaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    dispatch(surveyActions.updateMatrixColumnScale({ questionId: question.id, scale: Number(e.target.value) }));
   };
 
   return (
@@ -45,13 +42,16 @@ const MatrixEditor: React.FC<MatrixEditorProps> = ({ question }) => {
       {question.type !== 'matrix_dropdown' && (
         <div className={styles.field}>
           <label className={styles.label}>Column scale</label>
-          <SingleSelect
-            options={SCALE_OPTIONS}
-            selected={config.columnScale}
-            onChange={handleScaleChange}
+          <select
             name="matrixScale"
-            className={styles.scaleSelect}
-          />
+            className={styles.nativeSelect}
+            value={config.columnScale}
+            onChange={handleScaleChange}
+          >
+            {SCALE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -62,11 +62,11 @@ const MatrixEditor: React.FC<MatrixEditorProps> = ({ question }) => {
         <div className={styles.rowsList}>
           {config.rows.map((row: MatrixRow) => (
             <div key={row.id} className={styles.rowItem}>
-              <FormInput
+              <input
                 name={`row-${row.id}`}
+                type="text"
                 value={row.label}
-                onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => handleRowChange(row.id, e.target.value)}
-                noFloatingLabel
+                onChange={(e) => handleRowChange(row.id, e.target.value)}
                 className={styles.rowInput}
               />
               <button 
@@ -90,17 +90,17 @@ const MatrixEditor: React.FC<MatrixEditorProps> = ({ question }) => {
           <div className={styles.rowsList}>
             {question.choices.map((choice) => (
               <div key={choice.id} className={styles.rowItem}>
-                <FormInput
+                <input
                   name={`choice-${choice.id}`}
+                  type="text"
                   value={choice.label}
-                  onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => 
-                    dispatch(surveyActions.updateChoiceOption({ 
-                      questionId: question.id, 
-                      optionId: choice.id, 
-                      label: e.target.value 
+                  onChange={(e) =>
+                    dispatch(surveyActions.updateChoiceOption({
+                      questionId: question.id,
+                      optionId: choice.id,
+                      label: e.target.value,
                     }))
                   }
-                  noFloatingLabel
                   className={styles.rowInput}
                 />
                 <button 

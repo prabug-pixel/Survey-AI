@@ -206,6 +206,7 @@ export interface ExpirationConfig {
   enabled: boolean;
   endDate?: string;
   timezone: string;
+  gracePeriodEnabled: boolean;
   gracePeriodHours: number;
   closedMessage: {
     title: string;

@@ -50,7 +50,10 @@
   border-radius: $radius-md;
   font-size: $font-size-md;
   font-weight: $font-weight-regular;
+  font-family: $font-family;
   color: $color-gray-800;
+  background: $color-white;
+  outline: none;
 
   &:focus {
     border-color: $color-border-focus;

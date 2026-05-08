@@ -5,7 +5,7 @@
   flex: 1;
   overflow-y: auto;
   padding: $spacing-24;
-  background: $color-bg-page;
+  background-color: rgba(255, 255, 255, 1);
   display: flex;
   flex-direction: column;
   gap: $spacing-16;
@@ -34,30 +34,29 @@
   color: #bf360c;
 }
 
-.bannerTitle {
-  display: block;
+.bannerContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  min-width: 0;
+}
+
+.bannerHead {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.bannerEffective {
+  font-size: $font-size-sm;
   font-weight: 500;
-  font-size: $font-size-md;
-  margin-bottom: $spacing-2;
+  letter-spacing: -0.24px;
 }
 
 .bannerBody {
   display: block;
   font-size: $font-size-sm;
   line-height: $line-height-normal;
-}
-
-.successFlash {
-  display: flex;
-  align-items: center;
-  gap: $spacing-8;
-  padding: $spacing-12 $spacing-16;
-  background: #f1faf0;
-  border: 1px solid #a5d6a7;
-  border-radius: $radius-lg;
-  font-size: $font-size-md;
-  color: #377e2c;
-  flex-shrink: 0;
 }
 
 // ── Main card ─────────────────────────────────────────────────
@@ -123,6 +122,13 @@
   color: #757575;
   letter-spacing: -0.24px;
   margin-top: -$spacing-8;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-16;
 }
 
 .separator {
@@ -197,6 +203,22 @@
     border-color: #1976d2;
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
   }
+}
+
+.nativeInputError {
+  border-color: #d32f2f;
+
+  &:focus {
+    border-color: #d32f2f;
+    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
+  }
+}
+
+.errorText {
+  font-size: $font-size-sm;
+  color: #d32f2f;
+  letter-spacing: -0.24px;
+  line-height: $line-height-normal;
 }
 
 .nativeSelect {
@@ -299,35 +321,20 @@
   }
 }
 
-// ── Audit log row ─────────────────────────────────────────────
-.auditRow {
-  display: flex;
-  justify-content: flex-start;
-}
-
-// ── Sticky save bar ───────────────────────────────────────────
-.saveBar {
-  position: sticky;
-  bottom: 0;
+// ── Card footer ───────────────────────────────────────────────
+.cardFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-12 $spacing-24;
-  background: $color-white;
+  gap: $spacing-12;
+  padding: $spacing-16 $spacing-24;
   border-top: 1px solid #eaeaea;
-  margin: 0 (-$spacing-24) (-$spacing-24);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
-  z-index: 10;
+  background: #fafafa;
 }
 
-.saveBarNote {
-  font-size: $font-size-sm;
-  color: #757575;
-  letter-spacing: -0.24px;
-}
-
-.saveBarBtns {
+.footerRight {
   display: flex;
   align-items: center;
   gap: $spacing-8;
 }
+

@@ -4,7 +4,6 @@ import { surveyActions } from '../../../store/surveySlice';
 import type { QuestionType } from '../../../types/survey.types';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
-import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import { IconClose, IconSkipLogic, IconDisplayLogic, IconReorder } from '../../../shared/Icons/Icons';
 import RatingEditor from './RatingEditor/RatingEditor';
@@ -59,11 +58,11 @@ const QuestionEditor: React.FC = () => {
 
   const typeLabel = QUESTION_TYPE_OPTIONS.find((o) => o.value === question.type)?.label ?? question.type;
 
-  const handleTypeChange = (option: { value: string | number }) => {
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(
       surveyActions.updateQuestionType({
         questionId: question.id,
-        type: option.value as QuestionType,
+        type: e.target.value as QuestionType,
       })
     );
   };
@@ -88,19 +87,21 @@ const QuestionEditor: React.FC = () => {
       </div>
 
       <div className={styles.body}>
-        {/* Question type — Elemental SingleSelect */}
+        {/* Question type — native select */}
         <div className={styles.field}>
           <label className={styles.label}>
             Question type <span className={styles.required}>*</span>
           </label>
-          <SingleSelect
-            options={QUESTION_TYPE_OPTIONS}
-            selected={question.type}
-            onChange={handleTypeChange}
-            placeholder="Select type"
+          <select
             name="questionType"
-            className={styles.singleSelect}
-          />
+            className={styles.nativeSelect}
+            value={question.type}
+            onChange={handleTypeChange}
+          >
+            {QUESTION_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
         </div>
 
         {/* Type-specific editor */}
@@ -109,13 +110,15 @@ const QuestionEditor: React.FC = () => {
           <>
             <div className={styles.field}>
               <label className={styles.label}>Sort</label>
-              <SingleSelect
-                options={NPS_SORT_OPTIONS}
-                selected="0-10"
-                onChange={() => {}}
+              <select
                 name="npsSort"
-                className={styles.singleSelect}
-              />
+                className={styles.nativeSelect}
+                defaultValue="0-10"
+              >
+                {NPS_SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
             <RatingEditor question={question} />
           </>

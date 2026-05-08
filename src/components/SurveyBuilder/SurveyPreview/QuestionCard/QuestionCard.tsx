@@ -8,7 +8,6 @@ import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import RatingScale from '../../../../shared/RatingScale/RatingScale';
 import RadioOption from '../../../../shared/RadioOption/RadioOption';
 import { IconDragHandle, IconCodeConnect, IconTrash, IconClose, IconPlus, IconLocation, IconStar, IconCheck } from '../../../../shared/Icons/Icons';
-import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Checkbox from '../../../../shared/Checkbox/Checkbox';
 import SkipLogicBadge from '../../SkipLogicBadge/SkipLogicBadge';
 import styles from './QuestionCard.module.scss';
@@ -137,13 +136,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, allQuestions }) =
               <Checkbox key={choice.id} label={choice.label} checked={false} onChange={() => {}} name={`q-${question.id}`} />
             ))
           ) : (
-            <SingleSelect 
-              options={question.choices.map(c => ({ value: c.id, label: c.label }))}
-              selected=""
-              onChange={() => {}}
-              placeholder="Select option"
+            <select
               name={`q-${question.id}`}
-            />
+              className={styles.previewSelect}
+              defaultValue=""
+              disabled
+            >
+              <option value="" disabled>Select option</option>
+              {question.choices.map(c => (
+                <option key={c.id} value={c.id}>{c.label}</option>
+              ))}
+            </select>
           )}
         </div>
       )}
@@ -162,13 +165,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, allQuestions }) =
               <div className={styles.rowLabel}>{row.label}</div>
               {question.type === 'matrix_dropdown' ? (
                 <div className={styles.matrixDropdownCell}>
-                  <SingleSelect 
-                    options={question.choices?.map(c => ({ value: c.id, label: c.label })) || []}
-                    selected=""
-                    onChange={() => {}}
-                    placeholder="Select"
+                  <select
                     name={`row-${row.id}`}
-                  />
+                    className={styles.previewSelect}
+                    defaultValue=""
+                    disabled
+                  >
+                    <option value="" disabled>Select</option>
+                    {(question.choices || []).map(c => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
                   {isActive && (
                     <button className={styles.removeRowBtn} onClick={(e) => {
                       e.stopPropagation();

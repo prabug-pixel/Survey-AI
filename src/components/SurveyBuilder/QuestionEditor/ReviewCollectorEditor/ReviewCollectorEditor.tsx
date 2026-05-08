@@ -2,9 +2,7 @@ import React from 'react';
 import { useAppDispatch } from '../../../../store';
 import { surveyActions } from '../../../../store/surveySlice';
 import type { Question } from '../../../../types/survey.types';
-import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
-import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import styles from './ReviewCollectorEditor.module.scss';
 
 interface ReviewCollectorEditorProps {
@@ -30,12 +28,15 @@ const ReviewCollectorEditor: React.FC<ReviewCollectorEditorProps> = ({ question 
     <div className={styles.reviewEditor}>
       <div className={styles.field}>
         <label className={styles.label}>Select source <span className={styles.required}>*</span></label>
-        <SingleSelect
-          options={SOURCE_OPTIONS}
-          selected="2 selected"
-          onChange={() => {}}
+        <select
           name="sourceSelect"
-        />
+          className={styles.nativeSelect}
+          defaultValue="2 selected"
+        >
+          {SOURCE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
       <div className={styles.toggleRow}>
@@ -59,11 +60,11 @@ const ReviewCollectorEditor: React.FC<ReviewCollectorEditorProps> = ({ question 
       <div className={styles.field}>
         <label className={styles.label}>Button color</label>
         <div className={styles.colorInputWrap}>
-          <FormInput
+          <input
+            type="text"
             name="buttonColor"
             value={config.buttonColor}
-            onChange={(_: any, e: any) => updateConfig({ buttonColor: e.target.value })}
-            noFloatingLabel
+            onChange={(e) => updateConfig({ buttonColor: e.target.value })}
             className={styles.colorInput}
           />
           <div className={styles.colorPreview} style={{ backgroundColor: config.buttonColor }} />
@@ -73,11 +74,11 @@ const ReviewCollectorEditor: React.FC<ReviewCollectorEditorProps> = ({ question 
       <div className={styles.field}>
         <label className={styles.label}>Button text color</label>
         <div className={styles.colorInputWrap}>
-          <FormInput
+          <input
+            type="text"
             name="buttonTextColor"
             value={config.buttonTextColor}
-            onChange={(_: any, e: any) => updateConfig({ buttonTextColor: e.target.value })}
-            noFloatingLabel
+            onChange={(e) => updateConfig({ buttonTextColor: e.target.value })}
             className={styles.colorInput}
           />
           <div className={styles.colorPreview} style={{ backgroundColor: config.buttonTextColor, border: '1px solid #e0e0e0' }} />
