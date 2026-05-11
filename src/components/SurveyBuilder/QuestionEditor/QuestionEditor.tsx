@@ -5,6 +5,8 @@ import type { QuestionType } from '../../../types/survey.types';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
+import FormInput from '@birdeye/elemental/core/atoms/FormInput';
+import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import { IconClose, IconSkipLogic, IconDisplayLogic, IconReorder } from '../../../shared/Icons/Icons';
 import RatingEditor from './RatingEditor/RatingEditor';
 import MultipleChoiceEditor from './MultipleChoiceEditor/MultipleChoiceEditor';
@@ -140,23 +142,25 @@ const QuestionEditor: React.FC = () => {
         {/* Welcome editor */}
         {question.type === 'welcome' && (
           <div className={styles.field}>
-            <label className={styles.label}>Description</label>
-            <textarea
-              className={styles.textareaInput}
+            <TextArea
+              name="welcomeDescription"
+              label="Description"
               value={question.welcomeConfig?.description ?? ''}
-              onChange={(e) =>
+              onChange={(_: unknown, e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 dispatch(surveyActions.updateWelcomeConfig({
                   questionId: question.id,
                   updates: { description: e.target.value },
                 }))
               }
               rows={3}
+              autoSize={false}
             />
-            <label className={styles.label} style={{ marginTop: 8 }}>Button text</label>
-            <input
-              className={styles.textInput}
+            <FormInput
+              name="welcomeButtonText"
+              type="text"
+              label="Button text"
               value={question.welcomeConfig?.buttonText ?? ''}
-              onChange={(e) =>
+              onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
                 dispatch(surveyActions.updateWelcomeConfig({
                   questionId: question.id,
                   updates: { buttonText: e.target.value },
@@ -184,20 +188,19 @@ const QuestionEditor: React.FC = () => {
               />
             </div>
             {question.thankYouConfig?.showRedirect && (
-              <>
-                <label className={styles.label} style={{ marginTop: 8 }}>Redirect URL</label>
-                <input
-                  className={styles.textInput}
-                  value={question.thankYouConfig?.redirectUrl ?? ''}
-                  placeholder="https://example.com"
-                  onChange={(e) =>
-                    dispatch(surveyActions.updateThankYouConfig({
-                      questionId: question.id,
-                      updates: { redirectUrl: e.target.value },
-                    }))
-                  }
-                />
-              </>
+              <FormInput
+                name="thankYouRedirectUrl"
+                type="text"
+                label="Redirect URL"
+                value={question.thankYouConfig?.redirectUrl ?? ''}
+                placeholder="https://example.com"
+                onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch(surveyActions.updateThankYouConfig({
+                    questionId: question.id,
+                    updates: { redirectUrl: e.target.value },
+                  }))
+                }
+              />
             )}
           </div>
         )}
@@ -230,20 +233,22 @@ const QuestionEditor: React.FC = () => {
         <div className={styles.logicSection}>
           <h4 className={styles.logicTitle}>Logic</h4>
 
-          <button className={styles.logicBtn}>
-            <IconSkipLogic size={14} />
-            <span>Skip logic</span>
-          </button>
+          <div className={styles.logicList}>
+            <button type="button" className={styles.logicBtn} aria-label="Add skip logic">
+              <IconSkipLogic size={20} />
+              <span>Skip logic</span>
+            </button>
 
-          <button className={styles.logicBtn}>
-            <IconDisplayLogic size={14} />
-            <span>Display logic</span>
-          </button>
+            <button type="button" className={styles.logicBtn} aria-label="Add display logic">
+              <IconDisplayLogic size={20} />
+              <span>Display logic</span>
+            </button>
 
-          <button className={styles.logicBtn}>
-            <IconReorder size={14} />
-            <span>Reorder question</span>
-          </button>
+            <button type="button" className={styles.logicBtn} aria-label="Reorder question">
+              <IconReorder size={20} />
+              <span>Reorder question</span>
+            </button>
+          </div>
         </div>
       </div>
 

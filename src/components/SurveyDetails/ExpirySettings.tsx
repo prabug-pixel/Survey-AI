@@ -1,8 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import Button from '@birdeye/elemental/core/atoms/Button';
+import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Tag from '@birdeye/elemental/core/atoms/Tag';
+import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
+import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import type { SavedSurvey, ExpirationConfig } from '../../types/survey.types';
 import { GRACE_PERIOD_OPTIONS } from '../../types/survey.types';
 import { IconClock } from '../../shared/Icons/Icons';
@@ -35,12 +38,6 @@ const DEFAULT_CONFIG: ExpirationConfig = {
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-
-const toDatetimeLocal = (iso: string) => {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
 
 const isValidUrl = (url: string) => {
   try {
@@ -96,6 +93,19 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
   );
   const [config, setConfig] = useState<ExpirationConfig>(initialConfig);
   const [showErrors, setShowErrors] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerFieldRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showDatePicker) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (datePickerFieldRef.current && !datePickerFieldRef.current.contains(e.target as Node)) {
+        setShowDatePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [showDatePicker]);
 
   const errors = validate(config);
   const hasErrors = Object.keys(errors).length > 0;
@@ -124,8 +134,16 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
     setShowErrors(false);
   };
 
-  const endDateLocal = config.endDate ? toDatetimeLocal(config.endDate) : '';
-  const minDateTime = toDatetimeLocal(new Date(Date.now() + 60_000).toISOString());
+  const handleDatePicked = (startDt?: string) => {
+    if (!startDt) {
+      patch('endDate', undefined);
+      return;
+    }
+    const parsed = new Date(startDt);
+    if (!Number.isNaN(parsed.getTime())) {
+      patch('endDate', parsed.toISOString());
+    }
+  };
 
   const hoursLeft = config.endDate
     ? (new Date(config.endDate).getTime() - Date.now()) / 3600000
@@ -136,10 +154,11 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
   const isWarn = hoursLeft !== null && hoursLeft <= 72 && hoursLeft > 0;
   const isPast = hoursLeft !== null && hoursLeft <= 0;
-  const showFieldError = (k: keyof ValidationErrors) => showErrors && errors[k];
+  const showFieldError = (k: keyof ValidationErrors) => showErrors && Boolean(errors[k]);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.expiryTab}>
+      <div className={styles.expiryLeft}>
 
       {/* ── Status banner ─────────────────────────────────── */}
       {config.enabled && config.endDate && (
@@ -167,7 +186,7 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
       {/* ── Main settings card ────────────────────────────── */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <div>
+          <div className={styles.cardHeaderText}>
             <h2 className={styles.cardTitle}>Survey Expiration</h2>
             <p className={styles.cardDesc}>Control when your survey is available to respondents</p>
           </div>
@@ -175,36 +194,66 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
             name="expiration-enabled"
             checked={config.enabled}
             onChange={(_: unknown, e: { target: { checked: boolean } }) => patch('enabled', e.target.checked)}
-            className=""
+            roundedToggle
           />
         </div>
 
-        {config.enabled && (
-          <div className={styles.cardBody}>
+        <div className={styles.cardBody}>
 
             {/* ── Schedule ───────────────────────────────── */}
             <section className={styles.section}>
               <h3 className={styles.sectionTitle}>Schedule</h3>
               <div className={styles.fieldGrid}>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>End Date &amp; Time *</label>
-                  <input
-                    name="endDate"
-                    type="datetime-local"
-                    className={`${styles.nativeInput} ${showFieldError('endDate') ? styles.nativeInputError : ''}`}
-                    value={endDateLocal}
-                    min={minDateTime}
-                    onChange={(e) =>
-                      patch('endDate', e.target.value ? new Date(e.target.value).toISOString() : undefined)
-                    }
-                  />
+                  <div className={styles.datePickerField} ref={datePickerFieldRef}>
+                    <FormInput
+                      name="endDate"
+                      type="text"
+                      label="End Date & Time *"
+                      value={config.endDate ? fmt(config.endDate) : ''}
+                      placeholder="Select date and time"
+                      onClick={() => setShowDatePicker(true)}
+                      onFocus={() => setShowDatePicker(true)}
+                      showLeftIcon
+                      customIconClass="icon_phoenix-calendar"
+                      readOnly
+                    />
+                    {showDatePicker && (
+                      <div className={styles.datePickerPopup}>
+                        <DatePicker
+                          name="endDatePopup"
+                          startDt={config.endDate || undefined}
+                          range={false}
+                          showTimePicker
+                          disablePastDates
+                          enableFutureDates
+                          showApplyButtons
+                          applyButtonLabel="Apply"
+                          sendDateTime={(start) => {
+                            handleDatePicked(start);
+                            setShowDatePicker(false);
+                          }}
+                          cancelCalendarPopup={() => setShowDatePicker(false)}
+                          closeOnClickOutside={() => setShowDatePicker(false)}
+                          dynamicClass="profile-datepicker"
+                          insidePopup
+                          isRequired
+                        />
+                      </div>
+                    )}
+                  </div>
                   {showFieldError('endDate')
                     ? <span className={styles.errorText}>{errors.endDate}</span>
                     : <span className={styles.hint}>Survey will automatically close at this date and time</span>}
                 </div>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>Timezone</label>
-                  <div className={styles.readonlyField}>{config.timezone}</div>
+                  <FormInput
+                    name="timezone"
+                    type="text"
+                    label="Timezone"
+                    value={config.timezone}
+                    disabled
+                  />
                   <span className={styles.hint}>Account timezone · contact admin to change</span>
                 </div>
               </div>
@@ -215,7 +264,7 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
             {/* ── Grace period ───────────────────────────── */}
             <section className={styles.section}>
               <div className={styles.sectionTitleRow}>
-                <div>
+                <div className={styles.sectionTitleText}>
                   <h3 className={styles.sectionTitle}>Grace Period for In-Progress Sessions</h3>
                   <p className={styles.sectionDesc}>
                     Respondents who answered at least one question before expiry can continue for this duration.
@@ -226,22 +275,19 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                   name="grace-period-enabled"
                   checked={config.gracePeriodEnabled}
                   onChange={(_: unknown, e: { target: { checked: boolean } }) => patch('gracePeriodEnabled', e.target.checked)}
-                  className=""
+                  roundedToggle
                 />
               </div>
               {config.gracePeriodEnabled && (
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>Duration</label>
-                  <select
+                  <SingleSelect
                     name="gracePeriod"
-                    className={styles.nativeSelect}
-                    value={config.gracePeriodHours}
-                    onChange={(e) => patch('gracePeriodHours', Number(e.target.value))}
-                  >
-                    {GRACE_PERIOD_OPTIONS.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                    displayLabel="Duration"
+                    options={GRACE_PERIOD_OPTIONS}
+                    selected={config.gracePeriodHours}
+                    onChange={(option) => patch('gracePeriodHours', Number(option.value))}
+                    isAeroDesign
+                  />
                 </div>
               )}
             </section>
@@ -256,13 +302,13 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
               </p>
 
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>Title *</label>
-                <input
+                <FormInput
                   name="closedTitle"
                   type="text"
-                  className={`${styles.nativeInput} ${showFieldError('title') ? styles.nativeInputError : ''}`}
+                  label="Title *"
                   value={config.closedMessage.title}
-                  onChange={(e) => patchMsg('title', e.target.value)}
+                  onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => patchMsg('title', e.target.value)}
+                  required
                 />
                 {showFieldError('title') && <span className={styles.errorText}>{errors.title}</span>}
               </div>
@@ -281,52 +327,26 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
               <div className={styles.fieldGrid}>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>CTA Button Text (optional)</label>
-                  <input
+                  <FormInput
                     name="ctaText"
                     type="text"
-                    className={styles.nativeInput}
+                    label="CTA Button Text (optional)"
                     value={config.closedMessage.ctaText ?? ''}
-                    onChange={(e) => patchMsg('ctaText', e.target.value)}
+                    onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => patchMsg('ctaText', e.target.value)}
                   />
                 </div>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.label}>CTA URL (optional)</label>
-                  <input
+                  <FormInput
                     name="ctaUrl"
                     type="text"
+                    label="CTA URL (optional)"
                     placeholder="https://example.com"
-                    className={styles.nativeInput}
                     value={config.closedMessage.ctaUrl ?? ''}
-                    onChange={(e) => patchMsg('ctaUrl', e.target.value)}
+                    onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => patchMsg('ctaUrl', e.target.value)}
                   />
                 </div>
               </div>
               {showFieldError('cta') && <span className={styles.errorText}>{errors.cta}</span>}
-
-              {/* Closed survey preview */}
-              <div className={styles.fieldGroup}>
-                <label className={styles.label}>Preview</label>
-                <div className={styles.closedPreview}>
-                  <div className={styles.previewLogo}>apt</div>
-                  <h2 className={styles.previewTitle}>
-                    {config.closedMessage.title || 'This survey has closed'}
-                  </h2>
-                  <p className={styles.previewBody}>
-                    {config.closedMessage.body || 'Thank you for your interest.'}
-                  </p>
-                  {config.closedMessage.ctaText && config.closedMessage.ctaUrl && (
-                    <a
-                      className={styles.previewCta}
-                      href={config.closedMessage.ctaUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {config.closedMessage.ctaText}
-                    </a>
-                  )}
-                </div>
-              </div>
             </section>
 
             <div className={styles.separator} />
@@ -338,15 +358,14 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                 Sent to the survey owner ({survey.owner})
               </p>
 
-              <label className={styles.checkLabel}>
-                <input
-                  type="checkbox"
+              <label className={styles.checkboxRow}>
+                <FormInput
                   name="notifEnabled"
-                  className={styles.nativeCheckbox}
+                  type="checkbox"
                   checked={config.notifications.enabled}
-                  onChange={(e) => patchNotif('enabled', e.target.checked)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => patchNotif('enabled', e.target.checked)}
                 />
-                Enable expiration notifications
+                <span>Enable expiration notifications</span>
               </label>
 
               {config.notifications.enabled && (
@@ -356,23 +375,21 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                     { name: 'notif24h', field: 'hours24' as const, label: '24 hours before expiration' },
                     { name: 'notifAuto', field: 'onAutoClose' as const, label: 'When survey auto-closes' },
                   ] as const).map(({ name, field, label }) => (
-                    <label key={name} className={styles.checkLabel}>
-                      <input
-                        type="checkbox"
+                    <label key={name} className={styles.checkboxRow}>
+                      <FormInput
                         name={name}
-                        className={styles.nativeCheckbox}
+                        type="checkbox"
                         checked={config.notifications[field]}
-                        onChange={(e) => patchNotif(field, e.target.checked)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => patchNotif(field, e.target.checked)}
                       />
-                      {label}
+                      <span>{label}</span>
                     </label>
                   ))}
                 </div>
               )}
             </section>
 
-          </div>
-        )}
+        </div>
 
         {/* ── Card footer (save / discard) ───────────────── */}
         <div className={styles.cardFooter}>
@@ -392,6 +409,36 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
               onClick={handleSave}
               disabled={!isDirty || (showErrors && hasErrors)}
             />
+          </div>
+        </div>
+      </div>
+
+      </div>
+
+      {/* ── Right-side closed-survey preview ────────────── */}
+      <div className={styles.expiryRight}>
+        <div className={styles.previewPanel}>
+          <span className={styles.previewLabel}>Preview</span>
+          <div className={styles.previewContent}>
+            <div className={styles.closedPreview}>
+              <div className={styles.previewLogo}>apt</div>
+              <h2 className={styles.previewTitle}>
+                {config.closedMessage.title || 'This survey has closed'}
+              </h2>
+              <p className={styles.previewBody}>
+                {config.closedMessage.body || 'Thank you for your interest.'}
+              </p>
+              {config.closedMessage.ctaText && config.closedMessage.ctaUrl && (
+                <a
+                  className={styles.previewCta}
+                  href={config.closedMessage.ctaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {config.closedMessage.ctaText}
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

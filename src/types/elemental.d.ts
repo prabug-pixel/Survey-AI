@@ -73,20 +73,37 @@ declare module '@birdeye/elemental/core/atoms/SingleSelect' {
 
 declare module '@birdeye/elemental/core/atoms/FormInput' {
   import React from 'react';
+  // FormInput's onChange surface differs by `type`:
+  // - text / number / email / url / etc. → `(component, event)`
+  // - checkbox / radio                     → `(event)` (the native input change handler is passed through directly)
+  // We type both forms via overload-friendly intersection so consumers can pick.
+  type FormInputChange =
+    | ((component: unknown, event: React.ChangeEvent<HTMLInputElement>) => void)
+    | ((event: React.ChangeEvent<HTMLInputElement>) => void);
   interface FormInputProps {
     name: string;
     type?: string;
     value?: string | number | boolean;
-    onChange?: (component: unknown, event: React.ChangeEvent<HTMLInputElement>) => void;
+    checked?: boolean;
+    onChange?: FormInputChange;
     onBlur?: (component: unknown, event: React.FocusEvent<HTMLInputElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLInputElement>) => void;
+    onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
     label?: string;
+    labelInside?: boolean;
+    labelClass?: string;
     disabled?: boolean;
     required?: boolean;
+    readOnly?: boolean;
     placeholder?: string;
     className?: string;
     maxLength?: string;
     autoComplete?: boolean;
     allowClear?: boolean;
+    showLeftIcon?: boolean;
+    showRightIcon?: boolean;
+    customIconClass?: string;
+    id?: string;
   }
   const FormInput: React.FC<FormInputProps>;
   export default FormInput;
@@ -252,6 +269,96 @@ declare module '@birdeye/elemental/core/components/NoData' {
   }
   const NoData: React.FC<NoDataProps>;
   export default NoData;
+}
+
+declare module '@birdeye/elemental/core/components/DatePicker' {
+  import React from 'react';
+  interface DatePickerProps {
+    name?: string;
+    startDt?: string | Date | null;
+    endDt?: string | Date | null;
+    range?: boolean;
+    showTimePicker?: boolean;
+    showTimezone?: boolean;
+    timezoneLabel?: string;
+    enableFutureDates?: boolean;
+    disablePastDates?: boolean;
+    dateRangeFormat?: string;
+    showApplyButtons?: boolean;
+    inlineApplyButtonTrigger?: boolean;
+    sendDateTime?: (startDt?: string, endDt?: string, sameDay?: boolean) => void;
+    startDateChange?: (date: unknown) => void;
+    endDateChange?: (date: unknown) => void;
+    onClickApplyChanges?: (start: string, end: string) => void;
+    applyButtonLabel?: string;
+    cancelCalendarPopup?: () => void;
+    insidePopup?: boolean;
+    closeOnClickOutside?: () => void;
+    isRequired?: boolean;
+    title?: string;
+    datePickerLabel?: string;
+    showInfo?: boolean;
+    infoText?: string;
+    showTimePickerAbove?: boolean;
+    showInboxDateFormat?: boolean;
+    explicitMinDt?: string;
+    explicitMaxDt?: string;
+    enableBusinessTimeZone?: boolean;
+    validateEndDateInRangePicker?: boolean;
+    firstTimeFlag?: boolean;
+    dynamicClass?: string;
+    style?: React.CSSProperties;
+  }
+  const DatePicker: React.FC<DatePickerProps>;
+  export default DatePicker;
+}
+
+declare module '@birdeye/elemental/core/atoms/Select' {
+  import React from 'react';
+  interface SelectItemProps {
+    value: string | number;
+    children: React.ReactNode;
+    disabled?: boolean;
+    className?: string;
+  }
+  interface SelectClasses {
+    root?: string;
+    selectDisplay?: string;
+    menu?: string;
+  }
+  interface SelectProps {
+    value?: string | number | Array<string | number>;
+    defaultValue?: string | number | Array<string | number>;
+    onChange?: (
+      event: React.SyntheticEvent,
+      value: string | number | Array<string | number>,
+      isOpen?: boolean,
+      item?: string | number,
+      isAdded?: boolean
+    ) => void;
+    onOpen?: () => void;
+    onClose?: () => void;
+    open?: boolean;
+    defaultOpen?: boolean;
+    multiple?: boolean;
+    autoWidth?: boolean;
+    placeHolder?: string;
+    labelKey?: string;
+    idKey?: string;
+    renderValue?: (value: unknown) => React.ReactNode;
+    children?: React.ReactNode;
+    className?: string;
+    classes?: SelectClasses;
+    selectDisplayProps?: Record<string, unknown>;
+    disabled?: boolean;
+    id?: string;
+    variant?: string;
+  }
+  export const Select: React.FC<SelectProps>;
+  export const SelectItem: React.FC<SelectItemProps>;
+  export const SelectContext: React.Context<unknown>;
+  const _default: React.FC<SelectProps>;
+  export default _default;
 }
 
 declare module '@birdeye/elemental/core/sass/js/colors' {

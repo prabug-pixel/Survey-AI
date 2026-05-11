@@ -114,7 +114,14 @@ export const IconClose: React.FC<IconProps> = ({ size = 16, color = 'currentColo
 );
 
 export const IconDragHandle: React.FC<IconProps> = ({ size = 16, color = 'currentColor', className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    style={{ transform: 'rotate(90deg)' }}
+  >
     <circle cx="9" cy="6" r="1.5" fill={color} />
     <circle cx="15" cy="6" r="1.5" fill={color} />
     <circle cx="9" cy="12" r="1.5" fill={color} />
@@ -193,22 +200,24 @@ export const IconAtSign: React.FC<IconProps> = ({ size = 18, color = 'currentCol
   </svg>
 );
 
-export const IconSkipLogic: React.FC<IconProps> = ({ size = 16, color = '#1a73e8', className }) => (
+export const IconSkipLogic: React.FC<IconProps> = ({ size = 20, color = '#1976d2', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M13 17l5-5-5-5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M6 17l5-5-5-5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="5" cy="17" r="1.6" fill={color} />
+    <path d="M5 16C5 12 8 9 12 9h5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 6l3 3-3 3" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-export const IconDisplayLogic: React.FC<IconProps> = ({ size = 16, color = '#1a73e8', className }) => (
+export const IconDisplayLogic: React.FC<IconProps> = ({ size = 20, color = '#1976d2', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M4 4h16v4H4zM4 12h10v4H4zM4 20h6v4H4z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M5 19V10c0-1.66 1.34-3 3-3h9" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 4l3 3-3 3" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-export const IconReorder: React.FC<IconProps> = ({ size = 16, color = '#1a73e8', className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M7 16l5 5 5-5M7 8l5-5 5 5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+export const IconReorder: React.FC<IconProps> = ({ size = 20, color = '#1976d2', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className={className}>
+    <path d="M14 5h8v2h-8zM14 10.5h8v2h-8zM14 16h8v2h-8zM2 11.5C2 15.08 4.92 18 8.5 18H9v2l3-3-3-3v2h-.5C6.02 16 4 13.98 4 11.5S6.02 7 8.5 7H12V5H8.5C4.92 5 2 7.92 2 11.5z" />
   </svg>
 );
 

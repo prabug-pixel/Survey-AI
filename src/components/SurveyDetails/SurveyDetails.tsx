@@ -6,6 +6,7 @@ import type { SurveyResponse } from '../../types/survey.types';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Modal from '@birdeye/elemental/core/atoms/Modal';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
+import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import {
   IconChevronLeft,
   IconChevronDown,
@@ -152,7 +153,7 @@ const SurveyDetails: React.FC = () => {
   const handleReopen = () => {
     dispatch(surveyActions.reopenSurvey({
       surveyId: survey.id,
-      newEndDate: reopenEndDate ? new Date(reopenEndDate).toISOString() : undefined,
+      newEndDate: reopenEndDate || undefined,
       actor: survey.owner,
     }));
     setReopenDialogOpen(false);
@@ -434,6 +435,16 @@ const SurveyDetails: React.FC = () => {
         onClose={() => setAuditDrawerOpen(false)}
         width="400px"
         shouldScroll={true}
+        headerRightContent={
+          <button
+            type="button"
+            className={styles.drawerCloseBtn}
+            onClick={() => setAuditDrawerOpen(false)}
+            aria-label="Close audit log"
+          >
+            <IconChevronLeft size={20} color="#212121" />
+          </button>
+        }
       >
         <p className={styles.drawerDesc}>Track all changes to survey expiration settings</p>
         <div className={styles.auditContent}>
@@ -503,13 +514,24 @@ const SurveyDetails: React.FC = () => {
             <p className={styles.modalMeta}>Previously expired: <strong>{fmtDate(survey.expiration.endDate)}</strong></p>
           )}
           <div className={styles.modalField}>
-            <label className={styles.modalLabel}>New End Date (optional)</label>
-            <input
+            <DatePicker
               name="reopenEndDate"
-              type="datetime-local"
-              className={styles.modalInput}
-              value={reopenEndDate}
-              onChange={(e) => setReopenEndDate(e.target.value)}
+              datePickerLabel="New End Date (optional)"
+              startDt={reopenEndDate || undefined}
+              range={false}
+              showTimePicker
+              disablePastDates
+              enableFutureDates
+              showApplyButtons={false}
+              inlineApplyButtonTrigger
+              sendDateTime={(startDt) => {
+                if (!startDt) {
+                  setReopenEndDate('');
+                  return;
+                }
+                const parsed = new Date(startDt);
+                setReopenEndDate(Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString());
+              }}
             />
             <span className={styles.modalHint}>Leave empty to reopen without setting a new expiration</span>
           </div>

@@ -16,6 +16,7 @@
   &.active {
     border-color: $color-primary;
     box-shadow: 0 0 0 1px $color-primary;
+    padding-top: $spacing-8;
   }
 }
 

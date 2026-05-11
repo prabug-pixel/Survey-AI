@@ -1,14 +1,58 @@
 @use '../../styles/variables' as *;
 
-// ── Page wrapper ──────────────────────────────────────────────
-.page {
+// ── Two-column layout matching the Distribute tab ────────────
+// Left: editable settings (492px fixed). Right: live closed-page preview.
+.expiryTab {
   flex: 1;
+  overflow: hidden;
+  display: flex;
+  gap: 0;
+}
+
+.expiryLeft {
+  width: 492px;
+  flex-shrink: 0;
   overflow-y: auto;
   padding: $spacing-24;
-  background-color: rgba(255, 255, 255, 1);
+  border-right: 1px solid $color-border;
   display: flex;
   flex-direction: column;
   gap: $spacing-16;
+  background: $color-white;
+}
+
+.expiryRight {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-24;
+  background: $color-bg-page;
+}
+
+.previewPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $color-white;
+  border-radius: $radius-xl;
+  border: 1px solid $color-border;
+  overflow: hidden;
+}
+
+.previewLabel {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: $color-gray-600;
+  letter-spacing: -0.28px;
+  padding: $spacing-16 $spacing-20;
+  border-bottom: 1px solid $color-border;
+  flex-shrink: 0;
+}
+
+.previewContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-24;
 }
 
 // ── Banners ───────────────────────────────────────────────────
@@ -62,7 +106,7 @@
 // ── Main card ─────────────────────────────────────────────────
 .card {
   background: $color-white;
-  border: 1px solid #eaeaea;
+  border: 1px solid $color-border;
   border-radius: $radius-xl;
   overflow: hidden;
   flex-shrink: 0;
@@ -72,75 +116,89 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: $spacing-16;
   padding: $spacing-20 $spacing-24;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid $color-border;
+}
+
+.cardHeaderText {
+  flex: 1;
+  min-width: 0;
 }
 
 .cardTitle {
   font-size: $font-size-lg;
   font-weight: 500;
-  color: #212121;
+  color: $color-gray-900;
   letter-spacing: -0.32px;
-  margin-bottom: $spacing-4;
+  margin: 0 0 $spacing-4 0;
 }
 
 .cardDesc {
   font-size: $font-size-sm;
-  color: #757575;
+  color: $color-gray-600;
   letter-spacing: -0.24px;
+  margin: 0;
 }
 
 .cardBody {
-  padding: $spacing-24;
+  padding: $spacing-8 $spacing-24 $spacing-24;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 // ── Sections ──────────────────────────────────────────────────
 .section {
-  padding: $spacing-24 0;
+  padding: $spacing-20 0;
   display: flex;
   flex-direction: column;
   gap: $spacing-16;
 
   &:first-child {
-    padding-top: 0;
+    padding-top: $spacing-16;
   }
 }
 
 .sectionTitle {
   font-size: $font-size-md;
   font-weight: 500;
-  color: #212121;
+  color: $color-gray-900;
   letter-spacing: -0.28px;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .sectionDesc {
   font-size: $font-size-sm;
-  color: #757575;
+  color: $color-gray-600;
   letter-spacing: -0.24px;
-  margin-top: -$spacing-8;
+  line-height: $line-height-normal;
+  margin: $spacing-4 0 0 0;
 }
 
 .sectionTitleRow {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: $spacing-16;
+  gap: $spacing-24;
+}
+
+.sectionTitleText {
+  flex: 1;
+  min-width: 0;
 }
 
 .separator {
   border: none;
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid $color-border;
   margin: 0 (-$spacing-24);
 }
 
 // ── Field layout ──────────────────────────────────────────────
+// Single column inside the 492px left panel (matches the Distribute tab's
+// stacked-field cadence — no cramped 1fr 1fr pairs in a narrow column).
 .fieldGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: $spacing-16;
 }
 
@@ -148,122 +206,94 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-6;
+  min-width: 0;
+  max-width: 400px;
+  width: 100%;
+
+  :global(section.el-forminput),
+  :global(section.el-textarea),
+  :global([class*='FormInput__form-input-wrapper__']),
+  :global([class*='TextArea__form-input-wrapper__']) {
+    max-width: 400px;
+    width: 100%;
+  }
+
+  :global([class*='TextArea__pos-rel__']) {
+    width: 100%;
+    max-width: none;
+  }
 }
 
-// Label used for non-elemental labels (readonly field, preview label)
-.label {
+// Date picker = FormInput trigger + DatePicker popup (Aero design system's
+// intended popup pattern). The trigger sits in normal flow; the popup is
+// position: absolute over it. The `profile-datepicker` dynamicClass anchors
+// the elemental DatePicker at top-left of its positioned ancestor.
+.datePickerField {
+  position: relative;
+  width: 100%;
+}
+
+.datePickerPopup {
+  position: absolute;
+  top: calc(100% + $spacing-4);
+  left: 0;
+  z-index: $z-dropdown;
+  background: $color-white;
+  border-radius: $radius-md;
+  box-shadow: $shadow-dropdown;
+  padding: $spacing-12;
+  min-width: 320px;
+}
+
+// Structural label for fields whose elemental component doesn't render its
+// own label (elemental Select, preview block).
+.fieldLabel {
   font-size: $font-size-sm;
   font-weight: 400;
-  color: #424242;
+  color: $color-gray-800;
   letter-spacing: -0.24px;
 }
 
 .hint {
   font-size: $font-size-sm;
-  color: #9e9e9e;
+  color: $color-gray-500;
   letter-spacing: -0.24px;
   line-height: $line-height-normal;
-}
-
-// Timezone read-only display
-.readonlyField {
-  height: 40px;
-  border: 1px solid #eaeaea;
-  border-radius: $radius-sm;
-  padding: 0 $spacing-12;
-  font-size: $font-size-md;
-  color: #757575;
-  background: #fafafa;
-  display: flex;
-  align-items: center;
-}
-
-// ── Notification sub-checkbox indent ─────────────────────────
-.checkIndent {
-  margin-left: $spacing-24;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-4;
-}
-
-// ── Native inputs (React 19 safe — avoids elemental's findDOMNode) ───────────
-.nativeInput {
-  height: 40px;
-  width: 100%;
-  border: 1px solid #d0d5dd;
-  border-radius: $radius-sm;
-  padding: 0 $spacing-12;
-  font-size: $font-size-md;
-  color: #212121;
-  background: $color-white;
-  outline: none;
-  transition: border-color $transition-fast;
-
-  &:focus {
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
-  }
-}
-
-.nativeInputError {
-  border-color: #d32f2f;
-
-  &:focus {
-    border-color: #d32f2f;
-    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
-  }
 }
 
 .errorText {
   font-size: $font-size-sm;
-  color: #d32f2f;
+  color: $color-error;
   letter-spacing: -0.24px;
   line-height: $line-height-normal;
 }
 
-.nativeSelect {
-  height: 40px;
-  width: 100%;
-  border: 1px solid #d0d5dd;
-  border-radius: $radius-sm;
-  padding: 0 $spacing-12;
-  font-size: $font-size-md;
-  color: #212121;
-  background: $color-white;
-  outline: none;
-  cursor: pointer;
-  appearance: auto;
-  transition: border-color $transition-fast;
-
-  &:focus {
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
-  }
-}
-
-.nativeCheckbox {
-  width: 16px;
-  height: 16px;
-  accent-color: #1976d2;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.checkLabel {
+// ── Notification checkbox rows ───────────────────────────────
+// Structural layout only: elemental's FormInput renders the checkbox box;
+// the label sits next to it as a sibling span inside the same <label>.
+.checkboxRow {
   display: flex;
   align-items: center;
-  gap: $spacing-8;
-  font-size: $font-size-md;
-  color: #424242;
-  letter-spacing: -0.28px;
+  gap: $spacing-4;
   cursor: pointer;
   user-select: none;
+  font-size: $font-size-md;
+  color: $color-gray-800;
+  letter-spacing: -0.28px;
+  line-height: $line-height-normal;
+}
+
+.checkIndent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  margin-left: $spacing-24;
 }
 
 // ── Closed survey preview ─────────────────────────────────────
 .closedPreview {
-  background: #f5f5f5;
-  border: 1px solid #eaeaea;
+  background: $color-gray-100;
+  border: 1px solid $color-border;
   border-radius: $radius-lg;
   padding: $spacing-40 $spacing-24;
   text-align: center;
@@ -276,7 +306,7 @@
 .previewLogo {
   width: 56px;
   height: 56px;
-  background: #1976d2;
+  background: $color-primary;
   border-radius: $radius-lg;
   display: flex;
   align-items: center;
@@ -291,23 +321,25 @@
 .previewTitle {
   font-size: $font-size-3xl;
   font-weight: 600;
-  color: #212121;
+  color: $color-gray-900;
   letter-spacing: -0.48px;
   max-width: 480px;
+  margin: 0;
 }
 
 .previewBody {
   font-size: $font-size-lg;
-  color: #757575;
+  color: $color-gray-600;
   max-width: 480px;
   line-height: $line-height-relaxed;
+  margin: 0;
 }
 
 .previewCta {
   display: inline-flex;
   align-items: center;
   padding: $spacing-10 $spacing-24;
-  background: #1976d2;
+  background: $color-primary;
   color: $color-white;
   border-radius: $radius-sm;
   font-size: $font-size-md;
@@ -317,7 +349,7 @@
   transition: background $transition-fast;
 
   &:hover {
-    background: #1565c0;
+    background: $color-primary-hover;
   }
 }
 
@@ -328,8 +360,15 @@
   justify-content: space-between;
   gap: $spacing-12;
   padding: $spacing-16 $spacing-24;
-  border-top: 1px solid #eaeaea;
-  background: #fafafa;
+  border-top: 1px solid $color-border;
+  background: $color-gray-50;
+
+  :global(button[class*='Button__secondary__']) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-4;
+  }
 }
 
 .footerRight {
@@ -337,4 +376,3 @@
   align-items: center;
   gap: $spacing-8;
 }
-

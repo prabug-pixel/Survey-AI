@@ -16,7 +16,8 @@
   padding: 0 $spacing-24;
   height: 64px;
   flex-shrink: 0;
-  border-bottom: 1px solid #eaeaea;
+  border: 0;
+  border-image: none;
   gap: $spacing-16;
 }
 
@@ -189,7 +190,8 @@
   gap: 0;
   height: 48px;
   padding: 0 $spacing-24;
-  border-bottom: 1px solid #eaeaea;
+  border: 0;
+  border-image: none;
   flex-shrink: 0;
   background: #fff;
 }
@@ -835,6 +837,28 @@ $col-actions: 60px;
 // ── Audit Log Drawer content ──────────────────────────────────
 // CommonDrawer (elemental) provides the overlay, panel, header, and close button.
 // These classes style content rendered inside the drawer's children slot.
+
+.drawerCloseBtn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-border-focus;
+    outline-offset: 2px;
+  }
+}
 
 .drawerDesc {
   font-size: $font-size-sm;
