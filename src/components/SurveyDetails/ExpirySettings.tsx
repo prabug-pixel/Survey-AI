@@ -6,6 +6,7 @@ import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Tag from '@birdeye/elemental/core/atoms/Tag';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import DatePicker from '@birdeye/elemental/core/components/DatePicker';
+import TimePicker from '@birdeye/elemental/core/components/TimePicker';
 import type { SavedSurvey, ExpirationConfig } from '../../types/survey.types';
 import { GRACE_PERIOD_OPTIONS } from '../../types/survey.types';
 import { IconClock } from '../../shared/Icons/Icons';
@@ -38,6 +39,40 @@ const DEFAULT_CONFIG: ExpirationConfig = {
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+const fmtDateOnly = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+const fmtTimeOnly = (iso: string) =>
+  new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+interface TimeParts {
+  hours: number;          // 1..12
+  minutes: number;        // 0..59
+  meridiem: 'am' | 'pm';
+}
+
+const DEFAULT_TIME: TimeParts = { hours: 9, minutes: 0, meridiem: 'am' };
+
+const isoToTimeParts = (iso?: string): TimeParts => {
+  if (!iso) return DEFAULT_TIME;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return DEFAULT_TIME;
+  const h24 = d.getHours();
+  const meridiem: 'am' | 'pm' = h24 >= 12 ? 'pm' : 'am';
+  const hours = h24 % 12 === 0 ? 12 : h24 % 12;
+  return { hours, minutes: d.getMinutes(), meridiem };
+};
+
+const mergeDateAndTime = (dateIso: string, time: TimeParts): string => {
+  const d = new Date(dateIso);
+  const h24 =
+    time.meridiem === 'am'
+      ? (time.hours === 12 ? 0 : time.hours)
+      : (time.hours === 12 ? 12 : time.hours + 12);
+  d.setHours(h24, time.minutes, 0, 0);
+  return d.toISOString();
+};
 
 const isValidUrl = (url: string) => {
   try {
@@ -94,18 +129,24 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
   const [config, setConfig] = useState<ExpirationConfig>(initialConfig);
   const [showErrors, setShowErrors] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const datePickerFieldRef = useRef<HTMLDivElement>(null);
+  const timePickerFieldRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!showDatePicker) return;
+    if (!showDatePicker && !showTimePicker) return;
     const handleOutside = (e: MouseEvent) => {
-      if (datePickerFieldRef.current && !datePickerFieldRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (showDatePicker && datePickerFieldRef.current && !datePickerFieldRef.current.contains(target)) {
         setShowDatePicker(false);
+      }
+      if (showTimePicker && timePickerFieldRef.current && !timePickerFieldRef.current.contains(target)) {
+        setShowTimePicker(false);
       }
     };
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
-  }, [showDatePicker]);
+  }, [showDatePicker, showTimePicker]);
 
   const errors = validate(config);
   const hasErrors = Object.keys(errors).length > 0;
@@ -134,15 +175,30 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
     setShowErrors(false);
   };
 
+  const timeParts = isoToTimeParts(config.endDate);
+
   const handleDatePicked = (startDt?: string) => {
     if (!startDt) {
       patch('endDate', undefined);
       return;
     }
     const parsed = new Date(startDt);
-    if (!Number.isNaN(parsed.getTime())) {
-      patch('endDate', parsed.toISOString());
-    }
+    if (Number.isNaN(parsed.getTime())) return;
+    // Preserve the currently-set time portion (or the default) when only the
+    // date is picked from the calendar.
+    patch('endDate', mergeDateAndTime(parsed.toISOString(), timeParts));
+  };
+
+  const handleTimeChange = (
+    option: { value: number | string; label: string },
+    field: 'hours' | 'minutes' | 'meridiem'
+  ) => {
+    const baseIso = config.endDate ?? new Date().toISOString();
+    const next: TimeParts = { ...timeParts };
+    if (field === 'hours') next.hours = Number(option.value);
+    else if (field === 'minutes') next.minutes = Number(option.value);
+    else next.meridiem = String(option.value).toLowerCase() === 'pm' ? 'pm' : 'am';
+    patch('endDate', mergeDateAndTime(baseIso, next));
   };
 
   const hoursLeft = config.endDate
@@ -209,9 +265,9 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                     <FormInput
                       name="endDate"
                       type="text"
-                      label="End Date & Time *"
-                      value={config.endDate ? fmt(config.endDate) : ''}
-                      placeholder="Select date and time"
+                      label="End Date *"
+                      value={config.endDate ? fmtDateOnly(config.endDate) : ''}
+                      placeholder="Select date"
                       onClick={() => setShowDatePicker(true)}
                       onFocus={() => setShowDatePicker(true)}
                       showLeftIcon
@@ -224,7 +280,6 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                           name="endDatePopup"
                           startDt={config.endDate || undefined}
                           range={false}
-                          showTimePicker
                           disablePastDates
                           enableFutureDates
                           showApplyButtons
@@ -242,9 +297,34 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                       </div>
                     )}
                   </div>
-                  {showFieldError('endDate')
-                    ? <span className={styles.errorText}>{errors.endDate}</span>
-                    : <span className={styles.hint}>Survey will automatically close at this date and time</span>}
+                  <span className={styles.hint}>Survey will automatically close on this date</span>
+                  {showFieldError('endDate') && <span className={styles.errorText}>{errors.endDate}</span>}
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <div className={styles.datePickerField} ref={timePickerFieldRef}>
+                    <FormInput
+                      name="endTime"
+                      type="text"
+                      label="Time *"
+                      value={config.endDate ? fmtTimeOnly(config.endDate) : ''}
+                      placeholder="Select time"
+                      onClick={() => setShowTimePicker(true)}
+                      onFocus={() => setShowTimePicker(true)}
+                      showLeftIcon
+                      customIconClass="icon_phoenix-clock"
+                      readOnly
+                    />
+                    {showTimePicker && (
+                      <div className={styles.datePickerPopup}>
+                        <TimePicker
+                          timeObject={timeParts}
+                          changeTime={handleTimeChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <span className={styles.hint}>Time at which the survey closes</span>
                 </div>
                 <div className={styles.fieldGroup}>
                   <FormInput
@@ -258,8 +338,6 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                 </div>
               </div>
             </section>
-
-            <div className={styles.separator} />
 
             {/* ── Grace period ───────────────────────────── */}
             <section className={styles.section}>
@@ -291,8 +369,6 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                 </div>
               )}
             </section>
-
-            <div className={styles.separator} />
 
             {/* ── Closed survey message ──────────────────── */}
             <section className={styles.section}>
@@ -348,8 +424,6 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
               </div>
               {showFieldError('cta') && <span className={styles.errorText}>{errors.cta}</span>}
             </section>
-
-            <div className={styles.separator} />
 
             {/* ── Email notifications ────────────────────── */}
             <section className={styles.section}>

@@ -184,14 +184,19 @@ export const TIMEZONES = [
   'UTC',
 ] as const;
 
+// 1–24 are shown as hours; 48+ are shown as days (the 24h slot already
+// represents "1 day", so we skip a separate "1 day" entry to avoid two
+// options with the same hour value).
 export const GRACE_PERIOD_OPTIONS: { value: number; label: string }[] = [
-  { value: 1, label: '1 hour' },
-  { value: 6, label: '6 hours' },
-  { value: 12, label: '12 hours' },
-  { value: 24, label: '24 hours' },
-  { value: 48, label: '48 hours' },
-  { value: 72, label: '72 hours' },
-  { value: 168, label: '7 days' },
+  ...Array.from({ length: 24 }, (_, i) => {
+    const hours = i + 1;
+    return { value: hours, label: hours === 1 ? '1 hour' : `${hours} hours` };
+  }),
+  { value: 48, label: '2 days' },
+  { value: 72, label: '3 days' },
+  { value: 96, label: '4 days' },
+  { value: 120, label: '5 days' },
+  { value: 144, label: '6 days' },
 ];
 
 export interface AuditLogEntry {

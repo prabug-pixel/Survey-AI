@@ -313,6 +313,26 @@ declare module '@birdeye/elemental/core/components/DatePicker' {
   export default DatePicker;
 }
 
+declare module '@birdeye/elemental/core/components/TimePicker' {
+  import React from 'react';
+  interface TimeObject {
+    hours: number | string;
+    minutes: number | string;
+    meridiem: 'am' | 'pm' | string;
+  }
+  interface TimePickerOption {
+    value: number | string;
+    label: string;
+  }
+  interface TimePickerProps {
+    changeTime?: (option: TimePickerOption, field: 'hours' | 'minutes' | 'meridiem') => void;
+    timeObject?: TimeObject;
+    timezoneLabel?: string;
+  }
+  const TimePicker: React.FC<TimePickerProps>;
+  export default TimePicker;
+}
+
 declare module '@birdeye/elemental/core/atoms/Select' {
   import React from 'react';
   interface SelectItemProps {

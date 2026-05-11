@@ -45,7 +45,8 @@
   color: $color-gray-600;
   letter-spacing: -0.28px;
   padding: $spacing-16 $spacing-20;
-  border-bottom: 1px solid $color-border;
+  border: 0;
+  border-image: none;
   flex-shrink: 0;
 }
 
@@ -118,7 +119,7 @@
   justify-content: space-between;
   gap: $spacing-16;
   padding: $spacing-20 $spacing-24;
-  border-bottom: 1px solid $color-border;
+  border-bottom: 0;
 }
 
 .cardHeaderText {
@@ -142,21 +143,17 @@
 }
 
 .cardBody {
-  padding: $spacing-8 $spacing-24 $spacing-24;
+  padding: $spacing-24;
   display: flex;
   flex-direction: column;
+  gap: $spacing-32;
 }
 
 // ── Sections ──────────────────────────────────────────────────
 .section {
-  padding: $spacing-20 0;
   display: flex;
   flex-direction: column;
   gap: $spacing-16;
-
-  &:first-child {
-    padding-top: $spacing-16;
-  }
 }
 
 .sectionTitle {
@@ -185,12 +182,6 @@
 .sectionTitleText {
   flex: 1;
   min-width: 0;
-}
-
-.separator {
-  border: none;
-  border-top: 1px solid $color-border;
-  margin: 0 (-$spacing-24);
 }
 
 // ── Field layout ──────────────────────────────────────────────
