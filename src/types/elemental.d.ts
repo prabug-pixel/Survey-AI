@@ -73,20 +73,46 @@ declare module '@birdeye/elemental/core/atoms/SingleSelect' {
 
 declare module '@birdeye/elemental/core/atoms/FormInput' {
   import React from 'react';
+  // FormInput's onChange surface differs by `type`:
+  // - text / number / email / url / etc. → `(event, valueString)` — elemental
+  //   passes the parsed/formatted value as the second argument, NOT a second
+  //   component reference (that would let consumers do `e.target.value`).
+  //   Handlers should read the second arg directly.
+  // - checkbox / radio → `(event)` — the native input change handler is
+  //   passed through directly.
+  type FormInputChange =
+    | ((event: React.ChangeEvent<HTMLInputElement>, value: string) => void)
+    | ((event: React.ChangeEvent<HTMLInputElement>) => void);
   interface FormInputProps {
     name: string;
     type?: string;
     value?: string | number | boolean;
-    onChange?: (component: unknown, event: React.ChangeEvent<HTMLInputElement>) => void;
+    checked?: boolean;
+    onChange?: FormInputChange;
     onBlur?: (component: unknown, event: React.FocusEvent<HTMLInputElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLInputElement>) => void;
+    onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
     label?: string;
+    labelInside?: boolean;
+    labelClass?: string;
     disabled?: boolean;
     required?: boolean;
+    readOnly?: boolean;
     placeholder?: string;
     className?: string;
     maxLength?: string;
     autoComplete?: boolean;
     allowClear?: boolean;
+    showLeftIcon?: boolean;
+    showRightIcon?: boolean;
+    customIconClass?: string;
+    id?: string;
+    // Validation surface
+    validations?: Record<string, unknown>;
+    errorMessages?: Record<string, string>;
+    validationTrigger?: 'onChange' | 'onBlur';
+    showGreenTick?: boolean;
+    showErrorOnWrapper?: boolean;
   }
   const FormInput: React.FC<FormInputProps>;
   export default FormInput;
@@ -97,10 +123,13 @@ declare module '@birdeye/elemental/core/atoms/TextArea' {
   interface TextAreaProps {
     name: string;
     value?: string;
-    onChange?: (component: unknown, event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    // TextArea, like FormInput, calls onChange(event, valueString).
+    onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>, value: string) => void;
     onBlur?: (component: unknown, event: React.FocusEvent<HTMLTextAreaElement>) => void;
     label?: React.ReactNode;
     disabled?: boolean;
+    readOnly?: boolean;
+    required?: boolean;
     rows?: number;
     maxLength?: number;
     showCharCount?: boolean;
@@ -110,6 +139,9 @@ declare module '@birdeye/elemental/core/atoms/TextArea' {
     noFloatingLabel?: boolean;
     noLabel?: boolean;
     noBorder?: boolean;
+    validations?: Record<string, unknown>;
+    errorMessages?: Record<string, string>;
+    validationTrigger?: 'onChange' | 'onBlur';
   }
   export default class TextArea extends React.Component<TextAreaProps> {}
 }
@@ -200,12 +232,30 @@ declare module '@birdeye/elemental/core/atoms/Modal' {
       shouldCloseOnEsc?: boolean;
       shouldCloseOnOverlayClick?: boolean;
       onCloseModal?: () => void;
+      customIcon?: React.ReactNode;
+      insideDrawer?: boolean;
     };
     size?: 'extraSmall' | 'small' | 'medium' | 'large' | 'mediumLarge' | 'extraLarge' | 'megaLarge';
     children?: React.ReactNode;
+    smallCloseIcon?: boolean;
   }
-  const Modal: React.FC<ModalProps>;
-  export default Modal;
+  export default class Modal extends React.Component<ModalProps> {}
+}
+
+declare module '@birdeye/elemental/core/atoms/CommonSideDrawer' {
+  import React from 'react';
+  interface CommonDrawerProps {
+    isOpen: boolean;
+    title: string;
+    children: React.ReactNode;
+    onClose: (value: boolean) => void;
+    width?: string;
+    shouldScroll?: boolean;
+    headerRightContent?: React.ReactNode;
+    buttonPosition?: 'left' | 'right';
+  }
+  const CommonDrawer: React.FC<CommonDrawerProps>;
+  export default CommonDrawer;
 }
 
 declare module '@birdeye/elemental/core/atoms/LoadingShimmer' {
@@ -234,6 +284,156 @@ declare module '@birdeye/elemental/core/components/NoData' {
   }
   const NoData: React.FC<NoDataProps>;
   export default NoData;
+}
+
+declare module '@birdeye/elemental/core/components/DatePicker' {
+  import React from 'react';
+  interface DatePickerProps {
+    name?: string;
+    startDt?: string | Date | null;
+    endDt?: string | Date | null;
+    range?: boolean;
+    showTimePicker?: boolean;
+    showTimezone?: boolean;
+    timezoneLabel?: string;
+    enableFutureDates?: boolean;
+    disablePastDates?: boolean;
+    dateRangeFormat?: string;
+    showApplyButtons?: boolean;
+    inlineApplyButtonTrigger?: boolean;
+    sendDateTime?: (startDt?: string, endDt?: string, sameDay?: boolean) => void;
+    startDateChange?: (date: unknown) => void;
+    endDateChange?: (date: unknown) => void;
+    onClickApplyChanges?: (start: string, end: string) => void;
+    applyButtonLabel?: string;
+    cancelCalendarPopup?: () => void;
+    insidePopup?: boolean;
+    closeOnClickOutside?: () => void;
+    isRequired?: boolean;
+    title?: string;
+    datePickerLabel?: string;
+    showInfo?: boolean;
+    infoText?: string;
+    showTimePickerAbove?: boolean;
+    showInboxDateFormat?: boolean;
+    explicitMinDt?: string;
+    explicitMaxDt?: string;
+    enableBusinessTimeZone?: boolean;
+    validateEndDateInRangePicker?: boolean;
+    firstTimeFlag?: boolean;
+    dynamicClass?: string;
+    style?: React.CSSProperties;
+  }
+  const DatePicker: React.FC<DatePickerProps>;
+  export default DatePicker;
+}
+
+declare module '@birdeye/elemental/core/components/TimePicker' {
+  import React from 'react';
+  interface TimeObject {
+    hours: number | string;
+    minutes: number | string;
+    meridiem: 'am' | 'pm' | string;
+  }
+  interface TimePickerOption {
+    value: number | string;
+    label: string;
+  }
+  interface TimePickerProps {
+    changeTime?: (option: TimePickerOption, field: 'hours' | 'minutes' | 'meridiem') => void;
+    timeObject?: TimeObject;
+    timezoneLabel?: string;
+  }
+  const TimePicker: React.FC<TimePickerProps>;
+  export default TimePicker;
+}
+
+declare module '@birdeye/elemental/core/atoms/Select' {
+  import React from 'react';
+  interface SelectItemProps {
+    value: string | number;
+    children: React.ReactNode;
+    disabled?: boolean;
+    className?: string;
+  }
+  interface SelectClasses {
+    root?: string;
+    selectDisplay?: string;
+    menu?: string;
+  }
+  interface SelectProps {
+    value?: string | number | Array<string | number>;
+    defaultValue?: string | number | Array<string | number>;
+    onChange?: (
+      event: React.SyntheticEvent,
+      value: string | number | Array<string | number>,
+      isOpen?: boolean,
+      item?: string | number,
+      isAdded?: boolean
+    ) => void;
+    onOpen?: () => void;
+    onClose?: () => void;
+    open?: boolean;
+    defaultOpen?: boolean;
+    multiple?: boolean;
+    autoWidth?: boolean;
+    placeHolder?: string;
+    labelKey?: string;
+    idKey?: string;
+    renderValue?: (value: unknown) => React.ReactNode;
+    children?: React.ReactNode;
+    className?: string;
+    classes?: SelectClasses;
+    selectDisplayProps?: Record<string, unknown>;
+    disabled?: boolean;
+    id?: string;
+    variant?: string;
+  }
+  export const Select: React.FC<SelectProps>;
+  export const SelectItem: React.FC<SelectItemProps>;
+  export const SelectContext: React.Context<unknown>;
+  const _default: React.FC<SelectProps>;
+  export default _default;
+}
+
+declare module '@birdeye/elemental/core/atoms/TimePeriod' {
+  import React from 'react';
+  // Selected range — matches the shape elemental passes to
+  // onChangeSelectedDateRange. `key` is the preset identifier (e.g.
+  // 'LAST_60_DAYS', 'TODAY', 'CUSTOM') from elemental's static-ranges list.
+  interface TimePeriodDateRange {
+    startDate: Date | string;
+    endDate: Date | string;
+    key?: string;
+  }
+  interface TimePeriodProps {
+    selectedDateRange?: TimePeriodDateRange;
+    onChangeSelectedDateRange: (range: TimePeriodDateRange) => void;
+    comparison?: boolean;
+    hideRangeForComparison?: boolean;
+    doNotShowLabels?: boolean;
+    isBlueLabel?: boolean;
+    disable?: boolean;
+    hideCalendarIcon?: boolean;
+    enableFutureDates?: boolean;
+    initLabel?: string;
+    initSelected?: TimePeriodDateRange;
+    isScheduler?: boolean;
+    pastDates?: boolean;
+    isInsightsModule?: boolean;
+    hideAllTime?: boolean;
+    isLocalFilter?: boolean;
+    minDate?: string;
+    hideStaticRangeKeys?: string[];
+    alignPopUpLeft?: boolean;
+    isReseller?: boolean;
+    alignPopUpRight?: boolean;
+    hideClearIcon?: boolean;
+    inheritParentDimensions?: boolean;
+    dateDisplayFormat?: string;
+    'data-testid'?: string;
+  }
+  export default class TimePeriod extends React.Component<TimePeriodProps> {}
 }
 
 declare module '@birdeye/elemental/core/sass/js/colors' {

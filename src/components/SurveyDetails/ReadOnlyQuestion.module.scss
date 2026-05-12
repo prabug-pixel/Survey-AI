@@ -1,0 +1,220 @@
+@use '../../styles/variables' as *;
+
+.card {
+  background: $color-white;
+  border: 1px solid $color-gray-200;
+  border-radius: $radius-xl;
+  padding: $spacing-20 $spacing-24;
+  margin-bottom: $spacing-12;
+}
+
+.questionCard {
+  border: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-8;
+  margin-bottom: $spacing-16;
+}
+
+.number {
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: $color-gray-800;
+  flex-shrink: 0;
+  padding-top: $spacing-2;
+}
+
+.text {
+  font-size: $font-size-md;
+  color: $color-gray-800;
+  line-height: $line-height-normal;
+}
+
+.required {
+  color: #DE1B0C;
+  margin-left: $spacing-4;
+}
+
+.body {
+  padding-left: $spacing-20;
+}
+
+// ── Structural types ──────────────────────────────────────────
+.pageBreak {
+  border: none;
+  border-top: 2px dashed $color-gray-300;
+  margin: $spacing-16 0;
+}
+
+.pageTitleCard {
+  padding: $spacing-12 0;
+  margin-bottom: $spacing-12;
+}
+
+.pageTitleText {
+  font-size: $font-size-xl;
+  font-weight: 500;
+  color: $color-gray-900;
+}
+
+.helpText {
+  font-size: $font-size-md;
+  color: $color-gray-700;
+  line-height: $line-height-relaxed;
+}
+
+// ── Welcome / Thank you ───────────────────────────────────────
+.welcomeCard,
+.thankYouCard {
+  text-align: center;
+  padding: $spacing-40 $spacing-24;
+}
+
+.welcomeDesc,
+.thankYouText {
+  font-size: $font-size-lg;
+  color: $color-gray-800;
+  margin-bottom: $spacing-16;
+}
+
+.welcomeBtn {
+  background: $color-primary;
+  color: $color-white;
+  border: none;
+  border-radius: $radius-sm;
+  padding: $spacing-10 $spacing-24;
+  font-size: $font-size-md;
+  font-weight: 500;
+  cursor: default;
+  opacity: 0.9;
+}
+
+.thankYouTitle {
+  font-size: $font-size-3xl;
+  font-weight: 600;
+  color: $color-gray-900;
+  margin-bottom: $spacing-8;
+}
+
+.redirectNote {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+  font-style: italic;
+}
+
+// ── Input stubs ───────────────────────────────────────────────
+.inputStub {
+  border: 1px solid $color-gray-300;
+  border-radius: $radius-sm;
+  padding: $spacing-8 $spacing-12;
+  font-size: $font-size-md;
+  color: $color-gray-500;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+}
+
+.paragraphStub {
+  min-height: 80px;
+  align-items: flex-start;
+  padding-top: $spacing-10;
+}
+
+.selectStub {
+  height: 40px;
+  border: 1px solid $color-gray-300;
+  border-radius: $radius-sm;
+  padding: 0 $spacing-12;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-md;
+  color: $color-gray-500;
+  max-width: 300px;
+}
+
+// ── Matrix ────────────────────────────────────────────────────
+.matrixBody {
+  padding-left: $spacing-20;
+  overflow-x: auto;
+}
+
+.matrixHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-8;
+}
+
+.matrixRowLabel {
+  width: 160px;
+  flex-shrink: 0;
+  font-size: $font-size-sm;
+  color: $color-gray-800;
+}
+
+.matrixColHeader {
+  flex: 1;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+  min-width: 60px;
+}
+
+.matrixRow {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px solid $color-gray-150;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.matrixCell {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.radioVisual {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid $color-gray-400;
+  border-radius: 50%;
+}
+
+// ── Contact info ──────────────────────────────────────────────
+.contactGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+  max-width: 400px;
+}
+
+.contactField {
+  height: 40px;
+  border: 1px solid $color-gray-300;
+  border-radius: $radius-sm;
+  padding: 0 $spacing-12;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-md;
+  color: $color-gray-500;
+}
+
+// ── Review collector ──────────────────────────────────────────
+.starRow {
+  display: flex;
+  gap: $spacing-4;
+  padding-left: $spacing-20;
+}
+
+.star {
+  font-size: $font-size-2xl;
+  color: $color-gray-300;
+}

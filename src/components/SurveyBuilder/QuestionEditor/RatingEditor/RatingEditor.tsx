@@ -2,8 +2,6 @@ import React from 'react';
 import { useAppDispatch } from '../../../../store';
 import { surveyActions } from '../../../../store/surveySlice';
 import type { Question } from '../../../../types/survey.types';
-import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
-import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import styles from './RatingEditor.module.scss';
 
 interface RatingEditorProps {
@@ -25,32 +23,34 @@ const RatingEditor: React.FC<RatingEditorProps> = ({ question }) => {
 
   return (
     <div className={styles.ratingEditor}>
-      {/* Scale selector — Elemental SingleSelect */}
       <div className={styles.field}>
         <label className={styles.label}>Scale</label>
-        <SingleSelect
-          options={SCALE_OPTIONS}
-          selected={config.scale}
-          onChange={(option: { value: string | number }) =>
+        <select
+          name="ratingScale"
+          className={styles.nativeSelect}
+          value={config.scale}
+          onChange={(e) =>
             dispatch(surveyActions.updateRatingScale({
               questionId: question.id,
-              scale: Number(option.value),
+              scale: Number(e.target.value),
             }))
           }
-          name="ratingScale"
-          className={styles.scaleSelect}
-        />
+        >
+          {SCALE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Rating labels — Elemental FormInput */}
       <div className={styles.labelFields}>
         <div className={styles.field}>
-          <FormInput
-            name="lowLabel"
+          <label className={styles.label}>Low rating label</label>
+          <input
             type="text"
+            name="lowLabel"
+            className={styles.nativeInput}
             value={config.lowLabel}
-            label="Low rating label"
-            onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(e) =>
               dispatch(surveyActions.updateRatingLabel({
                 questionId: question.id,
                 field: 'lowLabel',
@@ -61,12 +61,13 @@ const RatingEditor: React.FC<RatingEditorProps> = ({ question }) => {
         </div>
 
         <div className={styles.field}>
-          <FormInput
-            name="highLabel"
+          <label className={styles.label}>High rating label</label>
+          <input
             type="text"
+            name="highLabel"
+            className={styles.nativeInput}
             value={config.highLabel}
-            label="High rating label"
-            onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(e) =>
               dispatch(surveyActions.updateRatingLabel({
                 questionId: question.id,
                 field: 'highLabel',

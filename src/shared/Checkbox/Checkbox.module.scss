@@ -1,0 +1,49 @@
+@use '../../styles/variables' as *;
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  cursor: pointer;
+  user-select: none;
+  width: fit-content;
+
+  &.disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+}
+
+.box {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid $color-border;
+  border-radius: 4px;
+  background-color: $color-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+
+  &:hover:not(.disabled) {
+    border-color: $color-primary;
+  }
+
+  &.checked {
+    background-color: $color-primary;
+    border-color: $color-primary;
+  }
+}
+
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.label {
+  font-size: $font-size-md;
+  color: #555555;
+  font-weight: $font-weight-regular;
+}

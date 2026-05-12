@@ -7,7 +7,9 @@
   display: flex;
   flex-direction: column;
   background: $color-white;
-  border-left: 1px solid $color-border;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  overflow: hidden;
   z-index: $z-editor;
 }
 
@@ -57,16 +59,55 @@
 .label {
   font-size: $font-size-sm;
   font-weight: $font-weight-regular;
-  color: $color-gray-700;
+  color: #555555;
 }
 
 .required {
-  color: $color-error;
+  color: #DE1B0C;
 }
 
 // SingleSelect from Elemental — wrapper alignment
 .singleSelect {
   width: 100%;
+}
+
+// Native select & input (React 19 safe — replaces elemental's findDOMNode-based atoms)
+.nativeSelect {
+  width: 100%;
+  height: 40px;
+  padding: 0 $spacing-12;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  font-family: $font-family;
+  color: $color-gray-800;
+  background: $color-white;
+  cursor: pointer;
+  appearance: auto;
+  outline: none;
+  transition: border-color $transition-fast;
+
+  &:focus {
+    border-color: $color-border-focus;
+  }
+}
+
+.nativeInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 $spacing-12;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  font-family: $font-family;
+  color: $color-gray-800;
+  background: $color-white;
+  outline: none;
+  transition: border-color $transition-fast;
+
+  &:focus {
+    border-color: $color-border-focus;
+  }
 }
 
 .toggleRow {
@@ -85,6 +126,69 @@
 .toggleWrap {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 24px;
+  flex-shrink: 0;
+  align-self: center;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+
+  &[class*='Toggle__toggle-wrapper__'] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    box-sizing: border-box;
+  }
+
+  :global([class*='Toggle__switch__']) {
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 24px;
+  }
+
+  :global([class*='Toggle__switch__'] input) {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
+  :global([class*='Toggle__slider__']) {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #d5d8de;
+    transition: background-color $transition-fast;
+  }
+
+  :global([class*='Toggle__slider__']::before) {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform $transition-fast;
+  }
+
+  :global([class*='Toggle__switch__'] input:checked + [class*='Toggle__slider__']) {
+    background: $color-primary;
+  }
+
+  :global([class*='Toggle__switch__'] input:checked + [class*='Toggle__slider__']::before) {
+    transform: translateX(21px);
+  }
 }
 
 .logicSection {
@@ -97,24 +201,47 @@
 
 .logicTitle {
   font-size: $font-size-md;
+  line-height: 20px;
+  letter-spacing: -0.28px;
   font-weight: $font-weight-regular;
-  color: $color-gray-800;
-  margin-bottom: $spacing-4;
+  color: $color-gray-900;
+  margin: 0;
+}
+
+.logicList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
 }
 
 .logicBtn {
   display: flex;
   align-items: center;
   gap: $spacing-8;
-  padding: $spacing-8 $spacing-4;
+  padding: $spacing-4 0;
+  background: transparent;
+  border: 0;
   font-size: $font-size-md;
+  line-height: 20px;
+  letter-spacing: -0.28px;
   font-weight: $font-weight-regular;
   color: $color-primary;
-  border-radius: $radius-md;
-  transition: background $transition-fast;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity $transition-fast;
 
   &:hover {
-    background: $color-primary-light;
+    opacity: 0.85;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-border-focus;
+    outline-offset: 2px;
+    border-radius: $radius-sm;
+  }
+
+  svg {
+    flex-shrink: 0;
   }
 }
 
@@ -127,3 +254,4 @@
 .doneBtn {
   width: 100%;
 }
+

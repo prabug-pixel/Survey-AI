@@ -54,6 +54,58 @@
   gap: $spacing-16;
 }
 
+.pageTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-16;
+  margin-bottom: $spacing-8;
+}
+
+.pageTitleText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  color: $color-gray-900;
+}
+
+.pageTitleAction {
+  font-size: $font-size-md;
+  font-weight: $font-weight-light;
+  color: #8f8f8f;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-gray-700;
+  }
+}
+
+.questionDropZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  margin: $spacing-16 0;
+  border: 2px dashed #e0e0e0;
+  border-radius: $radius-lg;
+  background: $color-white;
+  transition: all $transition-fast;
+
+  &.dropActive {
+    border-color: #1976d2;
+    background: rgba(25, 118, 210, 0.04);
+  }
+}
+
+.dropText {
+  font-size: $font-size-md;
+  color: #bdbdbd;
+  font-weight: $font-weight-light;
+
+  .dropActive & {
+    color: #1976d2;
+  }
+}
+
 .addPageBtn {
   display: flex;
   align-items: center;

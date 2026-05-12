@@ -1,0 +1,76 @@
+@use '../../../styles/variables' as *;
+
+.topBar {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $spacing-20;
+  background: $color-white;
+  border-bottom: 1px solid #e5e9f0;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.productLabel {
+  font-size: 18px;
+  font-weight: 400;
+  color: $color-gray-900;
+  letter-spacing: -0.32px;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-16;
+}
+
+.addBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #2552ed;
+  border: none;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: #1d44d1;
+  }
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: #f0f2f5;
+  }
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

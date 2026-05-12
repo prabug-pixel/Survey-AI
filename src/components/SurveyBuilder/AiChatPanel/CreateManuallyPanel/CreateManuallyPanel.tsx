@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useAppDispatch } from '../../../../store';
+import { surveyActions } from '../../../../store/surveySlice';
 import styles from './CreateManuallyPanel.module.scss';
 
 // --- Icon Components (Material Design 20x20, matching Figma) ---
@@ -247,8 +249,19 @@ const QUESTION_CATEGORIES: QuestionCategory[] = [
 ];
 
 const CreateManuallyPanel: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  const handleQuestionClick = (typeId: string) => {
+    dispatch(surveyActions.addDroppedQuestion({ type: typeId }));
+  };
+
+  const handleDragStart = (e: React.DragEvent, typeId: string, label: string) => {
+    e.dataTransfer.setData('application/question-type', typeId);
+    e.dataTransfer.setData('text/plain', label);
+    e.dataTransfer.effectAllowed = 'copy';
+  };
 
   const toggleSection = (title: string) => {
     setCollapsedSections((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -299,7 +312,13 @@ const CreateManuallyPanel: React.FC = () => {
               {!isCollapsed && (
                 <div className={styles.categoryItems}>
                   {category.items.map((item) => (
-                    <div key={item.id} className={styles.questionCard} draggable>
+                    <div
+                      key={item.id}
+                      className={styles.questionCard}
+                      draggable
+                      onClick={() => handleQuestionClick(item.id)}
+                      onDragStart={(e) => handleDragStart(e, item.id, item.label)}
+                    >
                       <div className={styles.cardContent}>
                         <span className={styles.cardIcon}>{item.icon}</span>
                         <span className={styles.cardLabel}>{item.label}</span>

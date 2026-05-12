@@ -4,6 +4,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: rgba(244, 246, 247, 1);
   overflow: hidden;
   min-width: 0;
 }
@@ -11,7 +12,6 @@
 .previewArea {
   flex: 1;
   overflow-y: auto;
-  background: $color-bg-page;
   padding: 0 $spacing-16;
 
   &.mobile {

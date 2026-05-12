@@ -4,40 +4,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-4;
-  padding: $spacing-10 0;
-}
-
-.group {
-  display: flex;
-  align-items: center;
+  margin-top: 8px;
+  align-self: center;
+  width: fit-content;
+  gap: $spacing-8;
+  padding: $spacing-8;
   background: $color-white;
-  border: 1px solid $color-border;
+  border: 1px solid #e5e9f0;
   border-radius: $radius-lg;
-  overflow: hidden;
 }
 
-.modeBtn {
+.btn {
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all $transition-fast;
-  border-radius: $radius-md;
+  background: $color-white;
+  border: 1px solid #e5e9f0;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast;
 
   &:hover {
-    background: $color-bg-hover;
+    background: #f0f2f5;
   }
 
   &.active {
-    background: $color-primary-light;
+    background: #e5e9f0;
   }
-}
-
-.divider {
-  width: 1px;
-  height: 20px;
-  background: $color-border;
-  margin: 0 $spacing-4;
 }

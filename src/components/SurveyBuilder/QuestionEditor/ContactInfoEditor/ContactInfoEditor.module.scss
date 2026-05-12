@@ -1,0 +1,98 @@
+.contactEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555555;
+}
+
+.fieldsList {
+  display: flex;
+  flex-direction: column;
+  background-color: #fcfcfc;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fieldItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  height: 40px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.fieldName {
+  font-size: 14px;
+  color: #303030;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+
+  &:hover:not(:disabled) {
+    background-color: #f0f0f0;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+}
+
+.addBtn {
+  color: #2552ED;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  width: fit-content;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.toggleSection {
+  padding-top: 12px;
+  border-top: 1px solid #eeeeee;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toggleLabel {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #303030;
+}

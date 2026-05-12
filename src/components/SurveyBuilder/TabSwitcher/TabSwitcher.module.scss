@@ -4,17 +4,19 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: $spacing-8 $spacing-16 0;
-  border-bottom: 1px solid $color-border;
+  padding: 8px $spacing-16 0;
+  height: fit-content;
+  border-bottom: 0 solid $color-border;
 }
 
 .tabList {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 81px;
+  gap: 80px;
   width: 100%;
   max-width: 347px;
+  height: fit-content;
   min-height: 38px;
 }
 
@@ -24,7 +26,8 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  min-height: 44px;
+  min-height: 37px;
+  height: 37px;
   padding: 0;
   border: 0;
   background: transparent;
