@@ -261,7 +261,7 @@ export const EmptyStates: Story = {
 
       <Section title="By pattern type">
         <DataTable
-          headers={["Type", "Headline", "Body (optional)", "CTA"]}
+          headers={["Type", "Headline", "Body", "CTA"]}
           rows={[
             ["Generic",          "No data yet",            "Start by creating your first item.",                       "Create item"],
             ["All clear",        "All caught up",           "You don't have any pending items right now.",              "—"],

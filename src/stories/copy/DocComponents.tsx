@@ -87,7 +87,7 @@ export function Anatomy({ parts }: { parts: { label: string; text: string; optio
           <span className="mt-0.5 w-2 h-2 rounded-full bg-primary shrink-0" />
           <div className="flex flex-col gap-0.5">
             <span className="text-xs text-muted-foreground">
-              {p.label}{p.optional && <span className="ml-1 opacity-60">(optional)</span>}
+              {p.label}
             </span>
             <span className="text-sm text-foreground italic">"{p.text}"</span>
           </div>

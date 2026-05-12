@@ -146,24 +146,25 @@ const QuestionEditor: React.FC = () => {
               name="welcomeDescription"
               label="Description"
               value={question.welcomeConfig?.description ?? ''}
-              onChange={(_: unknown, e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              onChange={(_event: unknown, value: string) =>
                 dispatch(surveyActions.updateWelcomeConfig({
                   questionId: question.id,
-                  updates: { description: e.target.value },
+                  updates: { description: String(value ?? '') },
                 }))
               }
               rows={3}
               autoSize={false}
+              noFloatingLabel
             />
             <FormInput
               name="welcomeButtonText"
               type="text"
               label="Button text"
               value={question.welcomeConfig?.buttonText ?? ''}
-              onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(_event: unknown, value: string) =>
                 dispatch(surveyActions.updateWelcomeConfig({
                   questionId: question.id,
-                  updates: { buttonText: e.target.value },
+                  updates: { buttonText: String(value ?? '') },
                 }))
               }
             />
@@ -194,10 +195,10 @@ const QuestionEditor: React.FC = () => {
                 label="Redirect URL"
                 value={question.thankYouConfig?.redirectUrl ?? ''}
                 placeholder="https://example.com"
-                onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(_event: unknown, value: string) =>
                   dispatch(surveyActions.updateThankYouConfig({
                     questionId: question.id,
-                    updates: { redirectUrl: e.target.value },
+                    updates: { redirectUrl: String(value ?? '') },
                   }))
                 }
               />

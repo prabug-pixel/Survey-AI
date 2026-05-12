@@ -207,6 +207,60 @@ export interface AuditLogEntry {
   details: string;
 }
 
+// ============================================================
+// Survey campaign / distribution configuration
+// ============================================================
+
+export type CampaignChannel = 'email' | 'text' | 'email_text';
+export type CampaignSchedule = 'immediately' | 'scheduled';
+export type LinkExpiryMode = 'days' | 'hours' | 'custom';
+
+export interface LinkExpiryConfig {
+  mode: LinkExpiryMode;
+  // Used when mode === 'days' or 'hours'. Default 60 days from sent.
+  value: number;
+  // Single-date legacy field (kept for back-compat with earlier UI).
+  customDate?: string;
+  // Aero "Date picker with preset" stores a range — start + end ISO dates
+  // plus the preset key (e.g. 'LAST_60_DAYS', 'CUSTOM') that produced it.
+  startDate?: string;
+  endDate?: string;
+  presetKey?: string;
+}
+
+export const DEFAULT_LINK_EXPIRY: LinkExpiryConfig = {
+  mode: 'days',
+  value: 60,
+};
+
+export interface CampaignConfig {
+  channel: CampaignChannel;
+  recipientSource: 'contacts' | 'segments' | 'csv';
+  emailTemplateId?: string;
+  textTemplateId?: string;
+  surveyId?: string;
+  schedule: CampaignSchedule;
+  overrideRestrictions: boolean;
+  sendReminders: boolean;
+  // Once the campaign is launched, fields like linkExpiry become read-only.
+  status: 'draft' | 'live';
+  options: {
+    linkExpiry: LinkExpiryConfig;
+  };
+}
+
+export const DEFAULT_CAMPAIGN_CONFIG: CampaignConfig = {
+  channel: 'email_text',
+  recipientSource: 'contacts',
+  schedule: 'immediately',
+  overrideRestrictions: false,
+  sendReminders: false,
+  status: 'draft',
+  options: {
+    linkExpiry: DEFAULT_LINK_EXPIRY,
+  },
+};
+
 export interface ExpirationConfig {
   enabled: boolean;
   endDate?: string;
@@ -238,6 +292,7 @@ export interface SavedSurvey {
   surveyData?: Survey;
   expiration?: ExpirationConfig;
   auditLog?: AuditLogEntry[];
+  campaign?: CampaignConfig;
 }
 
 export interface SurveyResponse {

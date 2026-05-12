@@ -14,8 +14,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isSurveyCreateFlow =
     location.pathname === '/surveys/create' ||
     location.pathname.startsWith('/surveys/create/');
+  // Marketing Automation drill-down (Survey campaigns) is a product surface
+  // outside the Surveys L2 nav scope — hide the Surveys L2 there.
+  const isMarketingAutomationFlow = /^\/surveys\/[^/]+\/campaigns(\/|$)/.test(location.pathname);
   const showL2 =
-    location.pathname.startsWith('/surveys') && !isSurveyCreateFlow;
+    location.pathname.startsWith('/surveys') &&
+    !isSurveyCreateFlow &&
+    !isMarketingAutomationFlow;
 
   return (
     <div className={styles.appLayout}>

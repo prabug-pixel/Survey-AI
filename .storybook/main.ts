@@ -9,7 +9,9 @@ const config: StorybookConfig = {
     "../src/stories/SurveyBuilder.stories.tsx",
     "../src/stories/SurveyL2Nav.stories.tsx",
     "../src/stories/AllSurveys.stories.tsx",
-    "../src/stories/SurveyDetails.stories.tsx"
+    "../src/stories/SurveyDetails.stories.tsx",
+    "../src/stories/FormInput.stories.tsx",
+    "../src/stories/Textarea.stories.tsx"
   ],
   "addons": [
     "@chromatic-com/storybook",

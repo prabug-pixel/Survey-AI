@@ -13,6 +13,7 @@ import type {
   SavedSurvey,
   ExpirationConfig,
   AuditLogEntry,
+  CampaignConfig,
 } from '../types/survey.types';
 import { SAMPLE_SURVEY } from '../constants/sampleSurvey';
 
@@ -627,6 +628,48 @@ const surveySlice = createSlice({
       });
     },
 
+    // Live autosave path used by the Expiry Settings form.
+    // Mirrors updateExpiration's data + status logic, but only writes an
+    // audit-log entry when the user flips the expiration on/off — typing in
+    // text fields persists silently so the log isn't spammed.
+    patchExpiration(
+      state,
+      action: PayloadAction<{ surveyId: string; config: ExpirationConfig; actor: string }>
+    ) {
+      const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
+      if (!s) return;
+      const prev = s.expiration;
+      s.expiration = action.payload.config;
+
+      if (action.payload.config.enabled && action.payload.config.endDate) {
+        const hoursLeft = (new Date(action.payload.config.endDate).getTime() - Date.now()) / 3600000;
+        if (s.status === 'running' && hoursLeft <= 72 && hoursLeft > 0) {
+          s.status = 'expiring_soon';
+        } else if (s.status === 'expiring_soon' && hoursLeft > 72) {
+          s.status = 'running';
+        }
+      } else if (!action.payload.config.enabled && s.status === 'expiring_soon') {
+        s.status = 'running';
+      }
+
+      const prevEnabled = !!prev?.enabled;
+      const nextEnabled = action.payload.config.enabled;
+      if (prevEnabled !== nextEnabled) {
+        if (!s.auditLog) s.auditLog = [];
+        s.auditLog.unshift({
+          id: uuid(),
+          action: nextEnabled ? 'Enabled expiration' : 'Disabled expiration',
+          actor: action.payload.actor,
+          timestamp: new Date().toISOString(),
+          details: nextEnabled
+            ? `Expiration enabled · end date: ${action.payload.config.endDate
+                ? new Date(action.payload.config.endDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+                : 'not set'}`
+            : 'Expiration disabled',
+        });
+      }
+    },
+
     closeSurveyNow(state, action: PayloadAction<{ surveyId: string; actor: string }>) {
       const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
       if (!s) return;
@@ -675,6 +718,24 @@ const surveySlice = createSlice({
       if (!s) return;
       if (!s.auditLog) s.auditLog = [];
       s.auditLog.unshift({ ...action.payload.entry, id: uuid() });
+    },
+
+    // Live autosave for the Survey Campaigns builder. Refuses writes to
+    // link-expiry fields once status === 'live' (the form already disables
+    // the control, this is the persistence-side guard).
+    patchCampaign(
+      state,
+      action: PayloadAction<{ surveyId: string; config: CampaignConfig }>
+    ) {
+      const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
+      if (!s) return;
+      const prev = s.campaign;
+      const next = action.payload.config;
+      // Lock expiry edits after launch.
+      if (prev?.status === 'live' && prev.options?.linkExpiry) {
+        next.options = { ...next.options, linkExpiry: prev.options.linkExpiry };
+      }
+      s.campaign = next;
     },
   },
 });

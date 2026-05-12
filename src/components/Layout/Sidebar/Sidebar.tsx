@@ -57,6 +57,9 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
 
   const getActiveId = () => {
+    // Survey-campaigns drill-down is a Marketing Automation product surface,
+    // so highlight the automation icon while the user is in that flow.
+    if (/^\/surveys\/[^/]+\/campaigns(\/|$)/.test(location.pathname)) return 'automation';
     if (location.pathname.startsWith('/surveys')) return 'surveys';
     return null;
   };

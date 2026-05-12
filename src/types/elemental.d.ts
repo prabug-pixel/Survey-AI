@@ -74,11 +74,14 @@ declare module '@birdeye/elemental/core/atoms/SingleSelect' {
 declare module '@birdeye/elemental/core/atoms/FormInput' {
   import React from 'react';
   // FormInput's onChange surface differs by `type`:
-  // - text / number / email / url / etc. → `(component, event)`
-  // - checkbox / radio                     → `(event)` (the native input change handler is passed through directly)
-  // We type both forms via overload-friendly intersection so consumers can pick.
+  // - text / number / email / url / etc. → `(event, valueString)` — elemental
+  //   passes the parsed/formatted value as the second argument, NOT a second
+  //   component reference (that would let consumers do `e.target.value`).
+  //   Handlers should read the second arg directly.
+  // - checkbox / radio → `(event)` — the native input change handler is
+  //   passed through directly.
   type FormInputChange =
-    | ((component: unknown, event: React.ChangeEvent<HTMLInputElement>) => void)
+    | ((event: React.ChangeEvent<HTMLInputElement>, value: string) => void)
     | ((event: React.ChangeEvent<HTMLInputElement>) => void);
   interface FormInputProps {
     name: string;
@@ -104,6 +107,12 @@ declare module '@birdeye/elemental/core/atoms/FormInput' {
     showRightIcon?: boolean;
     customIconClass?: string;
     id?: string;
+    // Validation surface
+    validations?: Record<string, unknown>;
+    errorMessages?: Record<string, string>;
+    validationTrigger?: 'onChange' | 'onBlur';
+    showGreenTick?: boolean;
+    showErrorOnWrapper?: boolean;
   }
   const FormInput: React.FC<FormInputProps>;
   export default FormInput;
@@ -114,10 +123,13 @@ declare module '@birdeye/elemental/core/atoms/TextArea' {
   interface TextAreaProps {
     name: string;
     value?: string;
-    onChange?: (component: unknown, event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    // TextArea, like FormInput, calls onChange(event, valueString).
+    onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>, value: string) => void;
     onBlur?: (component: unknown, event: React.FocusEvent<HTMLTextAreaElement>) => void;
     label?: React.ReactNode;
     disabled?: boolean;
+    readOnly?: boolean;
+    required?: boolean;
     rows?: number;
     maxLength?: number;
     showCharCount?: boolean;
@@ -127,6 +139,9 @@ declare module '@birdeye/elemental/core/atoms/TextArea' {
     noFloatingLabel?: boolean;
     noLabel?: boolean;
     noBorder?: boolean;
+    validations?: Record<string, unknown>;
+    errorMessages?: Record<string, string>;
+    validationTrigger?: 'onChange' | 'onBlur';
   }
   export default class TextArea extends React.Component<TextAreaProps> {}
 }
@@ -379,6 +394,46 @@ declare module '@birdeye/elemental/core/atoms/Select' {
   export const SelectContext: React.Context<unknown>;
   const _default: React.FC<SelectProps>;
   export default _default;
+}
+
+declare module '@birdeye/elemental/core/atoms/TimePeriod' {
+  import React from 'react';
+  // Selected range — matches the shape elemental passes to
+  // onChangeSelectedDateRange. `key` is the preset identifier (e.g.
+  // 'LAST_60_DAYS', 'TODAY', 'CUSTOM') from elemental's static-ranges list.
+  interface TimePeriodDateRange {
+    startDate: Date | string;
+    endDate: Date | string;
+    key?: string;
+  }
+  interface TimePeriodProps {
+    selectedDateRange?: TimePeriodDateRange;
+    onChangeSelectedDateRange: (range: TimePeriodDateRange) => void;
+    comparison?: boolean;
+    hideRangeForComparison?: boolean;
+    doNotShowLabels?: boolean;
+    isBlueLabel?: boolean;
+    disable?: boolean;
+    hideCalendarIcon?: boolean;
+    enableFutureDates?: boolean;
+    initLabel?: string;
+    initSelected?: TimePeriodDateRange;
+    isScheduler?: boolean;
+    pastDates?: boolean;
+    isInsightsModule?: boolean;
+    hideAllTime?: boolean;
+    isLocalFilter?: boolean;
+    minDate?: string;
+    hideStaticRangeKeys?: string[];
+    alignPopUpLeft?: boolean;
+    isReseller?: boolean;
+    alignPopUpRight?: boolean;
+    hideClearIcon?: boolean;
+    inheritParentDimensions?: boolean;
+    dateDisplayFormat?: string;
+    'data-testid'?: string;
+  }
+  export default class TimePeriod extends React.Component<TimePeriodProps> {}
 }
 
 declare module '@birdeye/elemental/core/sass/js/colors' {

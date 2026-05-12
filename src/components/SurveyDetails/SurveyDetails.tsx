@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SurveyResponse } from '../../types/survey.types';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Modal from '@birdeye/elemental/core/atoms/Modal';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
+import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import {
   IconChevronLeft,
@@ -22,6 +23,7 @@ import {
   IconAlertCircle,
   IconClock,
   IconUsers,
+  IconInfo,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
 import ExpirySettings from './ExpirySettings';
@@ -61,6 +63,8 @@ const SortIcon: React.FC<{ col: SortKey; sortKey: SortKey; sortDir: SortDir }> =
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
+const VALID_TABS: DetailTab[] = ['view', 'distribute', 'responses', 'expiry', 'reports'];
+
 const SurveyDetails: React.FC = () => {
   const { surveyId } = useParams<{ surveyId: string }>();
   const navigate = useNavigate();
@@ -68,7 +72,17 @@ const SurveyDetails: React.FC = () => {
   const savedSurveys = useAppSelector(s => s.survey.savedSurveys);
   const survey = savedSurveys.find(s => s.id === surveyId);
 
-  const [activeTab, setActiveTab] = useState<DetailTab>('view');
+  // activeTab is mirrored in the URL (?tab=...) so navigation round-trips
+  // (Survey campaigns drill-down → back) restore the previously open tab.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab') as DetailTab | null;
+  const activeTab: DetailTab = tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : 'view';
+  const setActiveTab = (tab: DetailTab) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab === 'view') next.delete('tab');
+    else next.set('tab', tab);
+    setSearchParams(next, { replace: false });
+  };
   const [sortKey, setSortKey] = useState<SortKey>('score');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -291,18 +305,15 @@ const SurveyDetails: React.FC = () => {
             </div>
 
             <div className={styles.accordionCard}>
-              <button className={styles.accordionHeader} onClick={() => toggleDistribute('campaigns')}>
+              <button
+                className={styles.accordionHeader}
+                onClick={() => navigate(`/surveys/${survey.id}/campaigns`)}
+              >
                 <div className={styles.accordionHeaderLeft}><IconSend size={16} color="#555" /><span>Survey campaigns</span></div>
                 <div className={styles.accordionHeaderRight}>
                   <IconExternalLink size={14} color="#9e9e9e" />
-                  {distributeExpanded.campaigns ? <IconChevronUp size={16} color="#555" /> : <IconChevronDown size={16} color="#555" />}
                 </div>
               </button>
-              {distributeExpanded.campaigns && (
-                <div className={styles.accordionBody}>
-                  <p className={styles.campaignNote}>Manage automated campaigns. <button className={styles.linkNoteAction}>Open Campaigns</button></p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -385,7 +396,6 @@ const SurveyDetails: React.FC = () => {
       {activeTab === 'expiry' && (
         <ExpirySettings
           survey={survey}
-          onSave={config => dispatch(surveyActions.updateExpiration({ surveyId: survey.id, config, actor: survey.owner }))}
           onOpenAuditLog={() => setAuditDrawerOpen(true)}
         />
       )}
@@ -514,9 +524,16 @@ const SurveyDetails: React.FC = () => {
             <p className={styles.modalMeta}>Previously expired: <strong>{fmtDate(survey.expiration.endDate)}</strong></p>
           )}
           <div className={styles.modalField}>
+            <div className={styles.modalLabelRow}>
+              <span className={styles.modalLabel}>New End Date</span>
+              <Tooltip text="Leave empty to reopen without setting a new expiration" position="right" hideOnScroll>
+                <button type="button" className={styles.modalInfoBtn} aria-label="New End Date info">
+                  <IconInfo size={14} />
+                </button>
+              </Tooltip>
+            </div>
             <DatePicker
               name="reopenEndDate"
-              datePickerLabel="New End Date (optional)"
               startDt={reopenEndDate || undefined}
               range={false}
               showTimePicker
@@ -533,7 +550,6 @@ const SurveyDetails: React.FC = () => {
                 setReopenEndDate(Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString());
               }}
             />
-            <span className={styles.modalHint}>Leave empty to reopen without setting a new expiration</span>
           </div>
           <div className={styles.modalNote}>
             All previously-issued distribution links will resume working immediately.

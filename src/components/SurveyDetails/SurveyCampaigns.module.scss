@@ -1,0 +1,458 @@
+@use '../../styles/variables' as *;
+
+// ── Full-width campaign builder ───────────────────────────────
+// One vertical stack of section cards inside the Distribute tab.
+// Mirrors the ExpirySettings spacing tokens & uses elemental atoms.
+.campaign {
+  flex: 1;
+  min-height: 0;
+  background-color: $color-white;
+  display: flex;
+  flex-direction: column;
+}
+
+// Scrolling content area — full-width with 32px padding on all sides.
+// The launch banner sits below this as a non-scrolling footer.
+.scrollArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $spacing-32;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-24;
+}
+
+// ── Page header (back button + title) ──
+// flex-shrink: 0 — inside the column-flex .scrollArea, children would
+// otherwise compress to fit instead of letting the parent overflow-scroll.
+.pageHeaderWrap {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.breadcrumb {
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+  letter-spacing: -0.24px;
+}
+
+.pageTitleRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 0;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  &:hover { background: $color-gray-100; }
+}
+
+.pageTitle {
+  font-size: $font-size-2xl;
+  font-weight: 500;
+  color: $color-gray-900;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.editTitleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 0;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  &:hover { background: $color-gray-100; }
+}
+
+.campaignInner {
+  width: 100%;
+  // Same reason as .pageHeaderWrap — keep intrinsic height so the
+  // .scrollArea above this scrolls rather than shrinking children to fit.
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-xl;
+  overflow: hidden;
+}
+
+// ── Section row ───────────────────────────────────────────────
+// Status dot + title + body (single column). Sections are separated
+// by a 1px horizontal divider — matches the source-of-truth design.
+.section {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-16;
+  padding: $spacing-24 $spacing-32;
+  border-bottom: 1px solid $color-border;
+
+  &:last-of-type { border-bottom: 0; }
+}
+
+.statusCol {
+  flex-shrink: 0;
+  width: 24px;
+  padding-top: 2px;
+  display: flex;
+  justify-content: center;
+}
+
+.statusDot {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusDone {
+  background: #2e7d32;
+  color: $color-white;
+}
+
+.statusPending {
+  background: $color-white;
+  border: 1.5px solid $color-gray-400;
+  color: $color-gray-400;
+}
+
+.statusInner {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: 500;
+  color: $color-gray-900;
+  letter-spacing: -0.28px;
+  margin: 0;
+}
+
+.inlineTitleRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  flex-wrap: wrap;
+}
+
+.inlineLabel {
+  font-size: $font-size-md;
+  color: $color-gray-700;
+}
+
+.inlineLinkBtn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: $font-size-md;
+  color: $color-primary;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+// ── Field layout ──────────────────────────────────────────────
+.fieldRow {
+  // The gray-bg container is a column: the field label sits on top, the
+  // dropdown + action-button row sits below. This is what allows the
+  // button to vertically center against the dropdown specifically
+  // (not the label+dropdown stack).
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  background: $color-gray-50;
+  border-radius: $radius-md;
+  padding: $spacing-16;
+}
+
+.fieldRowInputs {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  width: 100%;
+
+  // Inside a .fieldRowInputs the dropdown column is fixed at 320px; the
+  // action button (Edit / Preview / etc.) sits flush next to it.
+  .fieldGroup {
+    flex: 0 0 320px;
+    max-width: 320px;
+  }
+}
+
+.fieldRowAlignCenter {
+  align-items: center;
+}
+
+.fieldRowNoBg {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-12;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  min-width: 0;
+  flex: 1;
+
+  :global([class*='FormInput__form-input-wrapper__']),
+  :global([class*='SingleSelect__']) {
+    width: 100%;
+  }
+
+  // Aero label-above-field rules (12px label / 14px input / #555 label).
+  :global(.label-outside),
+  :global([class*='FormInput__label-outside__']),
+  :global([class*='TextArea__label-outside__']) {
+    font-size: 12px;
+    color: #555555;
+    margin-bottom: $spacing-4;
+  }
+
+  :global([class*='FormInput__form-input-wrapper__']) input:not([type='checkbox']) {
+    font-size: 14px;
+  }
+}
+
+.endDateFieldGroup {
+  width: 320px;
+}
+
+.timeFieldGroup {
+  width: 320px;
+}
+
+.fieldLabel {
+  font-size: $font-size-sm;
+  font-weight: 400;
+  color: #555555;
+  letter-spacing: -0.24px;
+}
+
+// Inline red asterisk for required labels — matches ExpirySettings.
+.requiredLabel::after {
+  content: ' *';
+  color: #DE1B0C;
+}
+
+.fieldLabelRow {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.infoIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: help;
+  color: $color-gray-500;
+  &:hover { color: $color-gray-700; }
+}
+
+.fieldGrid2 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: $spacing-12;
+  align-items: end;
+}
+
+.fieldGrid3 {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  gap: $spacing-12;
+  align-items: end;
+}
+
+// TimePeriod (Aero "Date picker with preset") renders its trigger with
+// `height: 100%; width: 100%`. Without an explicit-height wrapper the
+// trigger collapses to 0px and the click target disappears, so give the
+// wrapper the same 40px height as the other Aero dropdowns. Cap to 320px
+// to match the rest of the campaign form fields.
+.timePeriodWrap {
+  width: 320px;
+  height: 40px;
+  position: relative;
+}
+
+// Date picker = FormInput trigger + DatePicker popup. Reuses the
+// same `profile-datepicker` anchor pattern as ExpirySettings.
+.datePickerField {
+  position: relative;
+  width: 100%;
+}
+
+// Click target that wraps the readOnly FormInput — elemental swallows
+// the input's own onClick, so the click handler lives here instead.
+.datePickerTrigger {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+
+  // Prevent the inner input from stealing the click and from showing a
+  // text-cursor (it's readOnly, not editable).
+  input { cursor: pointer; pointer-events: none; }
+
+  &:focus-visible {
+    outline: 2px solid $color-border-focus;
+    outline-offset: 2px;
+    border-radius: $radius-sm;
+  }
+}
+
+.datePickerPopup {
+  position: absolute;
+  top: calc(100% + $spacing-4);
+  left: 0;
+  z-index: $z-dropdown;
+  background: $color-white;
+  border-radius: $radius-md;
+  box-shadow: $shadow-dropdown;
+  padding: $spacing-12;
+  min-width: 320px;
+}
+
+// ── Checkbox row (override restrictions) ──────────────────────
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  cursor: pointer;
+  user-select: none;
+  font-size: $font-size-md;
+  color: #555555;
+  letter-spacing: -0.28px;
+  line-height: $line-height-normal;
+  padding: $spacing-12 0 0;
+}
+
+.helperNote {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+  line-height: $line-height-normal;
+  padding: $spacing-4 0 0;
+}
+
+.reminderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-16;
+}
+
+// ── Collapsible section header ────────────────────────────────
+// Used by Advanced Options — full-width button row containing the
+// section title and a chevron / lock chip on the right.
+.collapsibleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-16;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+
+.collapsibleHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+// ── Lock indicator for live campaigns ─────────────────────────
+.lockedNotice {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+  background: $color-gray-100;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: 2px $spacing-8;
+}
+
+// ── Bottom launch banner ──────────────────────────────────────
+// Lives as a sibling of the scroll area, so it stays pinned to the
+// viewport bottom while the form content above scrolls.
+.launchBanner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-16;
+  padding: $spacing-16 $spacing-32;
+  background: #e8f0fe;
+  border-top: 1px solid #c7d4ea;
+}
+
+.launchLeft {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  min-width: 0;
+}
+
+.launchTitle {
+  font-size: $font-size-lg;
+  font-weight: 500;
+  color: $color-gray-900;
+  letter-spacing: -0.32px;
+  margin: 0;
+}
+
+.launchDesc {
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  line-height: $line-height-normal;
+  margin: 0;
+}
+
+.launchRight {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  flex-shrink: 0;
+}
+

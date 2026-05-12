@@ -5,16 +5,18 @@ import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Tag from '@birdeye/elemental/core/atoms/Tag';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
+import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import TimePicker from '@birdeye/elemental/core/components/TimePicker';
+import { useAppDispatch } from '../../store';
+import { surveyActions } from '../../store/surveySlice';
 import type { SavedSurvey, ExpirationConfig } from '../../types/survey.types';
 import { GRACE_PERIOD_OPTIONS } from '../../types/survey.types';
-import { IconClock } from '../../shared/Icons/Icons';
+import { IconClock, IconInfo } from '../../shared/Icons/Icons';
 import styles from './ExpirySettings.module.scss';
 
 interface Props {
   survey: SavedSurvey;
-  onSave: (config: ExpirationConfig) => void;
   onOpenAuditLog: () => void;
 }
 
@@ -118,16 +120,18 @@ const validate = (config: ExpirationConfig): ValidationErrors => {
   return errors;
 };
 
-const sameConfig = (a: ExpirationConfig, b: ExpirationConfig) =>
-  JSON.stringify(a) === JSON.stringify(b);
+const ExpirySettings: React.FC<Props> = ({ survey, onOpenAuditLog }) => {
+  const dispatch = useAppDispatch();
 
-const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => {
-  const initialConfig = useMemo<ExpirationConfig>(
+  // Config is derived directly from the persisted survey in Redux. Every
+  // change dispatches `patchExpiration`, which writes back to the persisted
+  // store — so the form, preview, and refresh-restored state all share one
+  // source of truth.
+  const config = useMemo<ExpirationConfig>(
     () => (survey.expiration ? { ...DEFAULT_CONFIG, ...survey.expiration } : { ...DEFAULT_CONFIG }),
     [survey.expiration]
   );
-  const [config, setConfig] = useState<ExpirationConfig>(initialConfig);
-  const [showErrors, setShowErrors] = useState(false);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const datePickerFieldRef = useRef<HTMLDivElement>(null);
@@ -149,30 +153,25 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
   }, [showDatePicker, showTimePicker]);
 
   const errors = validate(config);
-  const hasErrors = Object.keys(errors).length > 0;
-  const isDirty = !sameConfig(config, initialConfig);
+
+  const commit = (next: ExpirationConfig) => {
+    dispatch(surveyActions.patchExpiration({
+      surveyId: survey.id,
+      config: next,
+      actor: survey.owner,
+    }));
+  };
 
   const patch = <K extends keyof ExpirationConfig>(key: K, value: ExpirationConfig[K]) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+    commit({ ...config, [key]: value });
   };
 
   const patchMsg = (field: keyof ExpirationConfig['closedMessage'], value: string) => {
-    setConfig(prev => ({ ...prev, closedMessage: { ...prev.closedMessage, [field]: value } }));
+    commit({ ...config, closedMessage: { ...config.closedMessage, [field]: value } });
   };
 
   const patchNotif = (field: keyof ExpirationConfig['notifications'], value: boolean) => {
-    setConfig(prev => ({ ...prev, notifications: { ...prev.notifications, [field]: value } }));
-  };
-
-  const handleSave = () => {
-    setShowErrors(true);
-    if (hasErrors) return;
-    onSave(config);
-  };
-
-  const handleDiscard = () => {
-    setConfig(initialConfig);
-    setShowErrors(false);
+    commit({ ...config, notifications: { ...config.notifications, [field]: value } });
   };
 
   const timeParts = isoToTimeParts(config.endDate);
@@ -210,7 +209,9 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
   const isWarn = hoursLeft !== null && hoursLeft <= 72 && hoursLeft > 0;
   const isPast = hoursLeft !== null && hoursLeft <= 0;
-  const showFieldError = (k: keyof ValidationErrors) => showErrors && Boolean(errors[k]);
+  // Errors are surfaced live — the form auto-saves, so every keystroke
+  // reflects the validation state of the current persisted config.
+  const showFieldError = (k: keyof ValidationErrors) => Boolean(errors[k]);
 
   return (
     <div className={styles.expiryTab}>
@@ -261,11 +262,18 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
               <h3 className={styles.sectionTitle}>Schedule</h3>
               <div className={styles.fieldGrid}>
                 <div className={styles.fieldGroup}>
+                  <div className={styles.fieldLabelRow}>
+                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>End Date</span>
+                    <Tooltip text="Survey will automatically close on this date" position="right" hideOnScroll>
+                      <button type="button" className={styles.infoIconBtn} aria-label="End Date info">
+                        <IconInfo size={14} />
+                      </button>
+                    </Tooltip>
+                  </div>
                   <div className={styles.datePickerField} ref={datePickerFieldRef}>
                     <FormInput
                       name="endDate"
                       type="text"
-                      label="End Date *"
                       value={config.endDate ? fmtDateOnly(config.endDate) : ''}
                       placeholder="Select date"
                       onClick={() => setShowDatePicker(true)}
@@ -297,16 +305,22 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                       </div>
                     )}
                   </div>
-                  <span className={styles.hint}>Survey will automatically close on this date</span>
                   {showFieldError('endDate') && <span className={styles.errorText}>{errors.endDate}</span>}
                 </div>
 
                 <div className={styles.fieldGroup}>
+                  <div className={styles.fieldLabelRow}>
+                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Time</span>
+                    <Tooltip text="Time at which the survey closes" position="right" hideOnScroll>
+                      <button type="button" className={styles.infoIconBtn} aria-label="Time info">
+                        <IconInfo size={14} />
+                      </button>
+                    </Tooltip>
+                  </div>
                   <div className={styles.datePickerField} ref={timePickerFieldRef}>
                     <FormInput
                       name="endTime"
                       type="text"
-                      label="Time *"
                       value={config.endDate ? fmtTimeOnly(config.endDate) : ''}
                       placeholder="Select time"
                       onClick={() => setShowTimePicker(true)}
@@ -324,17 +338,22 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                       </div>
                     )}
                   </div>
-                  <span className={styles.hint}>Time at which the survey closes</span>
                 </div>
                 <div className={styles.fieldGroup}>
+                  <div className={styles.fieldLabelRow}>
+                    <span className={styles.fieldLabel}>Timezone</span>
+                    <Tooltip text="Account timezone · contact admin to change" position="right" hideOnScroll>
+                      <button type="button" className={styles.infoIconBtn} aria-label="Timezone info">
+                        <IconInfo size={14} />
+                      </button>
+                    </Tooltip>
+                  </div>
                   <FormInput
                     name="timezone"
                     type="text"
-                    label="Timezone"
                     value={config.timezone}
                     disabled
                   />
-                  <span className={styles.hint}>Account timezone · contact admin to change</span>
                 </div>
               </div>
             </section>
@@ -372,18 +391,21 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
             {/* ── Closed survey message ──────────────────── */}
             <section className={styles.section}>
-              <h3 className={styles.sectionTitle}>Closed Survey Page</h3>
-              <p className={styles.sectionDesc}>
-                Shown to respondents when the survey is no longer accepting responses
-              </p>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Closed Survey Page</h3>
+                <p className={styles.sectionDesc}>
+                  Shown to respondents when the survey is no longer accepting responses
+                </p>
+              </div>
 
               <div className={styles.fieldGroup}>
                 <FormInput
                   name="closedTitle"
                   type="text"
-                  label="Title *"
+                  label="Title"
+                  labelClass={styles.requiredLabel}
                   value={config.closedMessage.title}
-                  onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => patchMsg('title', e.target.value)}
+                  onChange={(_event: unknown, value: string) => patchMsg('title', String(value ?? ''))}
                   required
                 />
                 {showFieldError('title') && <span className={styles.errorText}>{errors.title}</span>}
@@ -392,11 +414,12 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
               <div className={styles.fieldGroup}>
                 <TextArea
                   name="closedBody"
-                  label="Message Body *"
+                  label={<>Message Body <span className={styles.requiredAsterisk}>*</span></>}
                   value={config.closedMessage.body}
-                  onChange={(_: unknown, e: React.ChangeEvent<HTMLTextAreaElement>) => patchMsg('body', e.target.value)}
+                  onChange={(_event: unknown, value: string) => patchMsg('body', String(value ?? ''))}
                   rows={4}
                   autoSize={false}
+                  noFloatingLabel
                 />
                 {showFieldError('body') && <span className={styles.errorText}>{errors.body}</span>}
               </div>
@@ -406,19 +429,20 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
                   <FormInput
                     name="ctaText"
                     type="text"
-                    label="CTA Button Text (optional)"
+                    label="CTA Button Text"
+                    placeholder="Enter text"
                     value={config.closedMessage.ctaText ?? ''}
-                    onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => patchMsg('ctaText', e.target.value)}
+                    onChange={(_event: unknown, value: string) => patchMsg('ctaText', String(value ?? ''))}
                   />
                 </div>
                 <div className={styles.fieldGroup}>
                   <FormInput
                     name="ctaUrl"
                     type="text"
-                    label="CTA URL (optional)"
-                    placeholder="https://example.com"
+                    label="Redirect URL"
+                    placeholder="https://aspendental.com"
                     value={config.closedMessage.ctaUrl ?? ''}
-                    onChange={(_: unknown, e: React.ChangeEvent<HTMLInputElement>) => patchMsg('ctaUrl', e.target.value)}
+                    onChange={(_event: unknown, value: string) => patchMsg('ctaUrl', String(value ?? ''))}
                   />
                 </div>
               </div>
@@ -427,10 +451,12 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
             {/* ── Email notifications ────────────────────── */}
             <section className={styles.section}>
-              <h3 className={styles.sectionTitle}>Email Notifications</h3>
-              <p className={styles.sectionDesc}>
-                Sent to the survey owner ({survey.owner})
-              </p>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Email Notifications</h3>
+                <p className={styles.sectionDesc}>
+                  Sent to the survey owner ({survey.owner})
+                </p>
+              </div>
 
               <label className={styles.checkboxRow}>
                 <FormInput
@@ -465,7 +491,10 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
         </div>
 
-        {/* ── Card footer (save / discard) ───────────────── */}
+        {/* ── Card footer ────────────────────────────────────
+           Form auto-saves to the persisted Redux store on every change,
+           so an explicit Save button is no longer required. The audit-log
+           shortcut stays. */}
         <div className={styles.cardFooter}>
           <Button
             theme="secondary"
@@ -473,17 +502,6 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
             customIcon={<IconClock size={15} color="#555" />}
             onClick={onOpenAuditLog}
           />
-          <div className={styles.footerRight}>
-            {isDirty && (
-              <Button theme="noBorder" label="Discard" onClick={handleDiscard} />
-            )}
-            <Button
-              theme="primary"
-              label="Save Changes"
-              onClick={handleSave}
-              disabled={!isDirty || (showErrors && hasErrors)}
-            />
-          </div>
         </div>
       </div>
 
@@ -491,8 +509,8 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
 
       {/* ── Right-side closed-survey preview ────────────── */}
       <div className={styles.expiryRight}>
+        <span className={styles.previewLabel}>Preview</span>
         <div className={styles.previewPanel}>
-          <span className={styles.previewLabel}>Preview</span>
           <div className={styles.previewContent}>
             <div className={styles.closedPreview}>
               <div className={styles.previewLogo}>apt</div>
@@ -502,16 +520,29 @@ const ExpirySettings: React.FC<Props> = ({ survey, onSave, onOpenAuditLog }) => 
               <p className={styles.previewBody}>
                 {config.closedMessage.body || 'Thank you for your interest.'}
               </p>
-              {config.closedMessage.ctaText && config.closedMessage.ctaUrl && (
-                <a
-                  className={styles.previewCta}
-                  href={config.closedMessage.ctaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {config.closedMessage.ctaText}
-                </a>
-              )}
+              {/* Preview button mirrors the CTA Button Text field exactly —
+                 whatever the user types is what shows on the button. Click
+                 opens the Redirect URL when one is set, otherwise the
+                 button is non-clickable. */}
+              {(() => {
+                const label = config.closedMessage.ctaText ?? '';
+                const url = (config.closedMessage.ctaUrl ?? '').trim();
+                return url
+                  ? (
+                    <a
+                      className={styles.previewCta}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <span className={styles.previewCta} aria-disabled="true">
+                      {label}
+                    </span>
+                  );
+              })()}
             </div>
           </div>
         </div>

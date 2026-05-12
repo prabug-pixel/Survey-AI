@@ -1,5 +1,14 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './TopBar.module.scss';
+
+const isMarketingAutomationPath = (pathname: string) =>
+  /^\/surveys\/[^/]+\/campaigns(\/|$)/.test(pathname);
+
+const productLabelFor = (pathname: string): string | null => {
+  if (isMarketingAutomationPath(pathname)) return 'Marketing Automation AI';
+  return null;
+};
 
 const IconPlusFilled: React.FC<{ size?: number }> = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
@@ -38,9 +47,14 @@ const Avatar: React.FC = () => (
 );
 
 const TopBar: React.FC = () => {
+  const location = useLocation();
+  const productLabel = productLabelFor(location.pathname);
+
   return (
     <header className={styles.topBar} aria-label="Top bar">
-      <div className={styles.left} />
+      <div className={styles.left}>
+        {productLabel && <span className={styles.productLabel}>{productLabel}</span>}
+      </div>
       <div className={styles.right}>
         <button className={styles.addBtn} aria-label="Quick create">
           <IconPlusFilled size={16} />

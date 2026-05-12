@@ -1,3 +1,34 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* ── Aero form-control typography ─────────────────────────────
+ * Aero spec: text-field / text-area label is 12px, body input value is 14px.
+ * elemental ships the input at 15px and labels at varying sizes; pin them
+ * here so every FormInput / TextArea across the app matches the spec.
+ * Note: scoped to inputs with type other than checkbox/radio so the toggle
+ * boxes keep their 24px sizing. */
+[class*='FormInput__form-input-wrapper__'] input:not([type='checkbox']):not([type='radio']),
+[class*='TextArea__form-input-wrapper__'] textarea {
+  font-size: 14px;
+}
+
+[class*='FormInput__form-input-wrapper__'] .label-outside,
+[class*='TextArea__form-input-wrapper__'] .label-outside,
+[class*='FormInput__label-outside__'],
+[class*='TextArea__label-outside__'] {
+  font-size: 12px;
+  color: #555555;
+}
+
+/* Aero spec: 0px gap between label and input. elemental's global CSS sets
+ * `.label-outside { margin-bottom: 10px }` (and TextArea's CSS-module variant
+ * sets 5px). Zero them out everywhere so every FormInput / TextArea sits
+ * flush against its label. */
+.label-outside,
+.template-side-drawer .label-outside,
+[class*='FormInput__label-outside__'],
+[class*='TextArea__label-outside__'],
+[class*='Breadcrumb__label-outside__'] {
+  margin-bottom: 0;
+}
