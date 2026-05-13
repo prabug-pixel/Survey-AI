@@ -86,6 +86,12 @@ export const IconChevronLeft: React.FC<IconProps> = ({ size = 20, color = 'curre
   </svg>
 );
 
+export const IconChevronRight: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M9 6l6 6-6 6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // Aero back-navigation arrow — solid arrow with horizontal line.
 // Use this for any "go back to the previous screen" affordance.
 export const IconArrowLeft: React.FC<IconProps> = ({ size = 20, color = '#1C1B1F', className }) => (

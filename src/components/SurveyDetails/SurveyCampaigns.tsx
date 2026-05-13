@@ -11,7 +11,8 @@ import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { CampaignConfig, LinkExpiryOption, LinkExpiryUnit } from '../../types/survey.types';
 import { DEFAULT_CAMPAIGN_CONFIG, DEFAULT_LINK_EXPIRY } from '../../types/survey.types';
-import { IconArrowLeft, IconChevronDown, IconChevronUp, IconCheck, IconEdit, IconInfo } from '../../shared/Icons/Icons';
+import { IconChevronDown, IconChevronUp, IconCheck, IconEdit, IconInfo } from '../../shared/Icons/Icons';
+import Breadcrumb, { type BreadcrumbItem } from '../shared/Breadcrumb/Breadcrumb';
 import styles from './SurveyCampaigns.module.scss';
 
 // Per spec, the expiration anchors on the send time at runtime — for
@@ -240,26 +241,19 @@ const SurveyCampaigns: React.FC = () => {
     commit({ ...config, status: 'live' });
   };
 
+  const crumbs: BreadcrumbItem[] = [
+    { label: 'Surveys AI', to: '/surveys' },
+    { label: survey.title, to: `/surveys/${survey.id}` },
+    { label: 'Distribute', to: `/surveys/${survey.id}?tab=distribute` },
+    { label: 'Survey campaign' },
+  ];
+
   return (
     <div className={styles.campaign}>
+      <Breadcrumb items={crumbs} />
       <div className={styles.scrollArea}>
       <div className={styles.pageHeaderWrap}>
         <div className={styles.pageTitleRow}>
-          <button
-            type="button"
-            className={styles.backBtn}
-            aria-label="Back to survey"
-            onClick={() => {
-              // history.back() restores the previous URL (including ?tab=...),
-              // which puts SurveyDetails on whatever tab the user was on.
-              // If the user deep-linked directly to this page (no history),
-              // fall back to the Distribute tab.
-              if (window.history.length > 1) navigate(-1);
-              else navigate(`/surveys/${survey.id}?tab=distribute`);
-            }}
-          >
-            <IconArrowLeft size={20} color="#424242" />
-          </button>
           <h1 className={styles.pageTitle}>Survey campaign</h1>
           <button type="button" className={styles.editTitleBtn} aria-label="Rename campaign">
             <IconEdit size={14} color="#757575" />

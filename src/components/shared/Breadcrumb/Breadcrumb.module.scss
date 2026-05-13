@@ -1,0 +1,54 @@
+@use '../../../styles/variables' as *;
+
+// Aero breadcrumb — 14px Roboto Regular, blue link segments, dark
+// current segment, chevron separator at 20px. Matches the Aero
+// "Steps" component spec (Figma 2447:6951).
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  padding: $spacing-8 $spacing-24;
+  background: $color-white;
+  flex-shrink: 0;
+}
+
+.link {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: $spacing-4;
+  font-size: $font-size-md;
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #1976d2;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: $radius-sm;
+
+  &:hover {
+    background: rgba(25, 118, 210, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-border-focus;
+    outline-offset: 2px;
+  }
+}
+
+.current {
+  padding: $spacing-4;
+  font-size: $font-size-md;
+  font-weight: 500;
+  color: #212121;
+  letter-spacing: -0.28px;
+  line-height: 20px;
+}
+
+.separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

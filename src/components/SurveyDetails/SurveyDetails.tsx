@@ -25,6 +25,7 @@ import {
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
 import EditSettings from './EditSettings';
+import Breadcrumb, { type BreadcrumbItem } from '../shared/Breadcrumb/Breadcrumb';
 import styles from './SurveyDetails.module.scss';
 
 type DetailTab = 'view' | 'distribute' | 'responses' | 'edit' | 'reports';
@@ -183,14 +184,39 @@ const SurveyDetails: React.FC = () => {
         { id: 'seed-2', action: 'Published survey', actor: survey.owner, timestamp: new Date(Date.now() - 86400000 * 5).toISOString(), details: `Survey published and set to ${survey.status}` },
       ];
 
+  // Breadcrumb trail — root → survey title → tab → sub-section.
+  // Every segment except the last is clickable so users can hop back
+  // up the path without relying on browser history.
+  const TAB_LABEL: Record<DetailTab, string> = {
+    view: 'View',
+    distribute: 'Distribute',
+    responses: 'Responses',
+    edit: 'Edit settings',
+    reports: 'Reports',
+  };
+  const sectionFromUrl = searchParams.get('section');
+  const SECTION_LABEL: Record<string, string> = { expiry: 'Expiry settings' };
+  const surveyPath = `/surveys/${survey.id}`;
+  const tabHref = (tab: DetailTab) => (tab === 'view' ? surveyPath : `${surveyPath}?tab=${tab}`);
+  const crumbs: BreadcrumbItem[] = [
+    { label: 'Surveys AI', to: '/surveys' },
+    { label: survey.title, to: tabHref('view') },
+  ];
+  if (activeTab !== 'view') {
+    crumbs.push({ label: TAB_LABEL[activeTab], to: tabHref(activeTab) });
+  }
+  if (activeTab === 'edit' && sectionFromUrl && SECTION_LABEL[sectionFromUrl]) {
+    crumbs.push({ label: SECTION_LABEL[sectionFromUrl] });
+  }
+
   return (
     <div className={styles.page}>
+      {/* ── Breadcrumb (replaces the page-level back arrow) ─ */}
+      <Breadcrumb items={crumbs} />
+
       {/* ── Page header ─────────────────────────────────── */}
       <div className={styles.pageHeader}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} aria-label="Go back" onClick={() => navigate('/surveys')}>
-            <IconArrowLeft size={20} color="#424242" />
-          </button>
           <h1 className={styles.title}>{survey.title}</h1>
           <span className={`${styles.statusBadge} ${STATUS_CLASS[survey.status] ?? styles.draft}`}>
             {STATUS_LABEL[survey.status] ?? survey.status}

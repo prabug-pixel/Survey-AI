@@ -13,13 +13,12 @@ import { useSearchParams } from 'react-router-dom';
 import type { SavedSurvey } from '../../types/survey.types';
 import ExpirySettings from './ExpirySettings';
 import {
-  IconArrowLeft,
-  IconPalette,
-  IconAtSign,
-  IconUsers,
-  IconBulb,
-  IconClock,
-} from '../../shared/Icons/Icons';
+  SurveyAppearanceIllustration,
+  EmailNotificationsIllustration,
+  SurveyAccessIllustration,
+  AutoReplyIllustration,
+  ExpirySettingsIllustration,
+} from './EditSettingsIllustrations';
 import styles from './EditSettings.module.scss';
 
 interface Props {
@@ -41,35 +40,35 @@ const TILES: SettingTile[] = [
     key: 'placeholder',
     title: 'Survey appearance',
     description: "Customize this survey's appearance to match your business' branding.",
-    icon: <IconPalette size={32} color="#1976d2" />,
+    icon: <SurveyAppearanceIllustration size={100} />,
     disabled: true,
   },
   {
     key: 'placeholder',
     title: 'Email notifications',
     description: 'Setup rules to trigger email alerts when a response is received.',
-    icon: <IconAtSign size={32} color="#1976d2" />,
+    icon: <EmailNotificationsIllustration size={100} />,
     disabled: true,
   },
   {
     key: 'placeholder',
     title: 'Survey access',
     description: 'Control who can view or edit this survey.',
-    icon: <IconUsers size={32} color="#1976d2" />,
+    icon: <SurveyAccessIllustration size={100} />,
     disabled: true,
   },
   {
     key: 'placeholder',
-    title: 'Auto rules',
-    description: 'Configure automated replies and follow-ups for respondents.',
-    icon: <IconBulb size={32} color="#1976d2" />,
+    title: 'Auto reply',
+    description: 'Configure and send automatic email replies to respondents upon survey completion.',
+    icon: <AutoReplyIllustration size={100} />,
     disabled: true,
   },
   {
     key: 'expiry',
     title: 'Expiry settings',
     description: 'Control when this survey closes and what respondents see afterwards.',
-    icon: <IconClock size={32} color="#1976d2" />,
+    icon: <ExpirySettingsIllustration size={100} />,
   },
 ];
 
@@ -83,29 +82,11 @@ const EditSettings: React.FC<Props> = ({ survey }) => {
     setSearchParams(params, { replace: false });
   };
 
-  const backToLanding = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('section');
-    setSearchParams(params, { replace: false });
-  };
-
   if (section === 'expiry') {
-    return (
-      <div className={styles.sectionWrap}>
-        <div className={styles.sectionHeader}>
-          <button
-            type="button"
-            className={styles.backBtn}
-            aria-label="Back to Edit settings"
-            onClick={backToLanding}
-          >
-            <IconArrowLeft size={20} color="#1C1B1F" />
-          </button>
-          <h2 className={styles.sectionTitle}>Expiry settings</h2>
-        </div>
-        <ExpirySettings survey={survey} />
-      </div>
-    );
+    // The breadcrumb at the SurveyDetails level now exposes the
+    // "Edit settings" hop back to the landing, so we no longer need
+    // a section-level back arrow or title here.
+    return <ExpirySettings survey={survey} />;
   }
 
   return (

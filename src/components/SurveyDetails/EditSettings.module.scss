@@ -23,8 +23,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: $spacing-12;
-  padding: $spacing-24;
+  gap: $spacing-8;
+  padding: $spacing-32 $spacing-24 $spacing-24;
   background: $color-white;
   border: 1px solid $color-border;
   border-radius: $radius-md;
@@ -45,7 +45,7 @@
 
 .tileDisabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.7;
 
   &:hover {
     background: $color-white;
@@ -53,14 +53,14 @@
   }
 }
 
+// Illustration sits flush against the card background — no colored
+// chip behind it, matching the Aero reference. Generous bottom margin
+// so the title doesn't crowd the artwork.
 .tileIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: $radius-md;
-  background: #e8f0fe;
+  margin-bottom: $spacing-12;
 }
 
 .tileTitle {
@@ -77,52 +77,3 @@
   line-height: $line-height-normal;
 }
 
-// ── Section detail — back-arrow header above the embedded flow ─
-.sectionWrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.sectionHeader {
-  display: flex;
-  align-items: center;
-  gap: $spacing-8;
-  padding: $spacing-16 $spacing-24;
-  border-bottom: 1px solid $color-border;
-  background: $color-white;
-  flex-shrink: 0;
-}
-
-.backBtn {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: $radius-sm;
-  flex-shrink: 0;
-
-  &:hover {
-    background: #f5f5f5;
-  }
-
-  &:focus-visible {
-    outline: 2px solid $color-border-focus;
-    outline-offset: 2px;
-  }
-}
-
-.sectionTitle {
-  font-size: $font-size-lg;
-  font-weight: 500;
-  color: $color-gray-900;
-  letter-spacing: -0.32px;
-  margin: 0;
-}
