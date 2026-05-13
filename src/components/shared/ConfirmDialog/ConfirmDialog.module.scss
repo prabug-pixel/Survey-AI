@@ -1,0 +1,68 @@
+@use '../../../styles/variables' as *;
+
+// ── Aero popup pattern (Figma 5730-45674) ────────────────────
+// elemental Modal renders the overlay, container, and close icon.
+// Its built-in title only shows when a customIcon is set, so the
+// title is rendered here in `.title` instead. The right padding
+// reserves room for the close button elemental floats top-right.
+.title {
+  margin: 0 $spacing-32 $spacing-12 0;
+  font-size: $font-size-lg;
+  font-weight: 400;
+  color: #212121;
+  letter-spacing: -0.32px;
+  line-height: 24px;
+}
+
+// Body — 14px regular, gray, max ~22px line-height. Aero spec caps
+// body copy at four lines, so consumers should keep content tight.
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+  font-size: $font-size-md;
+  color: #424242;
+  letter-spacing: -0.28px;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-24;
+}
+
+// Footer — right-aligned, 8px gap, no divider (Aero leaves the
+// container quietly without a rule above the buttons).
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-8;
+}
+
+// ── Body sub-blocks ──────────────────────────────────────────
+// Warning callout shares the Aero slim-alert warning palette so
+// confirmation dialogs look consistent with inline banners.
+.warning {
+  background: #fff9ea;
+  border-radius: $radius-sm;
+  padding: $spacing-12 $spacing-16;
+  font-size: $font-size-sm;
+  color: #5d4500;
+  line-height: $line-height-normal;
+  letter-spacing: -0.24px;
+}
+
+.note {
+  background: #f5f5f5;
+  border-radius: $radius-sm;
+  padding: $spacing-12 $spacing-16;
+  font-size: $font-size-sm;
+  color: #555555;
+  line-height: $line-height-normal;
+  letter-spacing: -0.24px;
+}
+
+// Elemental modal close icon (`#icon-reset`) ships from a portal/root outside
+// this module scope, so use a global selector to persist the preview tweak.
+:global(.ReactModalPortal #icon-reset) {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}

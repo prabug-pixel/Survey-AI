@@ -1,5 +1,10 @@
 // Type declarations for @birdeye/elemental design system components
 
+declare module '*.png' {
+  const src: string;
+  export default src;
+}
+
 declare module '@birdeye/elemental/core/atoms/Button' {
   import React from 'react';
   interface ButtonProps {

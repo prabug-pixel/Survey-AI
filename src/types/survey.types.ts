@@ -213,24 +213,38 @@ export interface AuditLogEntry {
 
 export type CampaignChannel = 'email' | 'text' | 'email_text';
 export type CampaignSchedule = 'immediately' | 'scheduled';
-export type LinkExpiryMode = 'days' | 'hours' | 'custom';
+// Link expiry has two top-level options ("Link Expiry Options"):
+//   • set_amount  → relative count + unit (days/hours/minutes), resolved
+//                   to an absolute timestamp at send time.
+//   • calendar_date → explicit calendar date + time-of-day.
+export type LinkExpiryOption = 'set_amount' | 'calendar_date';
+export type LinkExpiryUnit = 'days' | 'hours' | 'minutes';
+// `mode` collapses both axes for storage compatibility:
+//   set_amount + unit  → mode = 'days' | 'hours' | 'minutes'
+//   calendar_date      → mode = 'custom'
+//   set_amount, no unit picked yet → mode = undefined
+export type LinkExpiryMode = LinkExpiryUnit | 'custom';
 
 export interface LinkExpiryConfig {
-  mode: LinkExpiryMode;
-  // Used when mode === 'days' or 'hours'. Default 60 days from sent.
-  value: number;
-  // Single-date legacy field (kept for back-compat with earlier UI).
+  // The first dropdown's selection. Defaults to 'set_amount' so the form
+  // opens on the relative-count path per spec.
+  option: LinkExpiryOption;
+  // The unit (set_amount) or 'custom' (calendar_date). Undefined when the
+  // user is on the set_amount path but hasn't picked a unit yet — the
+  // Unit value field stays hidden until they do.
+  mode?: LinkExpiryMode;
+  // Numeric value for the set_amount path (days/hours/minutes count).
+  value?: number;
+  // Absolute timestamp for the calendar_date path.
   customDate?: string;
-  // Aero "Date picker with preset" stores a range — start + end ISO dates
-  // plus the preset key (e.g. 'LAST_60_DAYS', 'CUSTOM') that produced it.
+  // Legacy range fields, retained so older saved campaigns still load.
   startDate?: string;
   endDate?: string;
   presetKey?: string;
 }
 
 export const DEFAULT_LINK_EXPIRY: LinkExpiryConfig = {
-  mode: 'days',
-  value: 60,
+  option: 'set_amount',
 };
 
 export interface CampaignConfig {

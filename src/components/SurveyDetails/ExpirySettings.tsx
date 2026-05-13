@@ -3,7 +3,6 @@ import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
-import Tag from '@birdeye/elemental/core/atoms/Tag';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import DatePicker from '@birdeye/elemental/core/components/DatePicker';
@@ -12,7 +11,7 @@ import { useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SavedSurvey, ExpirationConfig } from '../../types/survey.types';
 import { GRACE_PERIOD_OPTIONS } from '../../types/survey.types';
-import { IconClock, IconInfo } from '../../shared/Icons/Icons';
+import { IconClock, IconInfo, IconWarning } from '../../shared/Icons/Icons';
 import styles from './ExpirySettings.module.scss';
 
 interface Props {
@@ -217,26 +216,20 @@ const ExpirySettings: React.FC<Props> = ({ survey, onOpenAuditLog }) => {
     <div className={styles.expiryTab}>
       <div className={styles.expiryLeft}>
 
-      {/* ── Status banner ─────────────────────────────────── */}
+      {/* ── Status banner (Aero slim warning/info banner) ──── */}
       {config.enabled && config.endDate && (
         <div className={`${styles.banner} ${isWarn || isPast ? styles.bannerWarn : styles.bannerInfo}`}>
-          <IconClock size={16} color={isWarn || isPast ? '#e65100' : '#1976d2'} />
-          <div className={styles.bannerContent}>
-            <div className={styles.bannerHead}>
-              <Tag
-                title={isPast ? 'Expired' : isWarn ? 'Expiring Soon' : 'Expiration Active'}
-                color={isPast ? 'red' : isWarn ? 'orange' : 'blue'}
-                size="x-small"
-              />
-              <span className={styles.bannerEffective}>Effective expiration</span>
-            </div>
-            <span className={styles.bannerBody}>
-              Survey closes on <strong>{fmt(config.endDate)}</strong> ({config.timezone})
-              {config.gracePeriodEnabled
-                ? <> · Grace period: <strong>{graceLabel}</strong></>
-                : <> · Grace period: <strong>off</strong></>}
-            </span>
-          </div>
+          <span className={styles.bannerIcon}>
+            {isWarn || isPast
+              ? <IconWarning size={16} color="#f57c00" />
+              : <IconInfo size={20} color="#1976d2" />}
+          </span>
+          <p className={styles.bannerMessage}>
+            {'Survey closes on '}
+            <strong>{fmt(config.endDate)}</strong>
+            {` (${config.timezone}) · Grace period: `}
+            <strong>{config.gracePeriodEnabled ? graceLabel : 'off'}</strong>
+          </p>
         </div>
       )}
 

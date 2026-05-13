@@ -5,32 +5,28 @@ import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
-import TimePeriod from '@birdeye/elemental/core/atoms/TimePeriod';
+import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import TimePicker from '@birdeye/elemental/core/components/TimePicker';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
-import type { CampaignConfig } from '../../types/survey.types';
+import type { CampaignConfig, LinkExpiryOption, LinkExpiryUnit } from '../../types/survey.types';
 import { DEFAULT_CAMPAIGN_CONFIG, DEFAULT_LINK_EXPIRY } from '../../types/survey.types';
-import { IconChevronLeft, IconChevronDown, IconChevronUp, IconCheck, IconEdit, IconInfo } from '../../shared/Icons/Icons';
+import { IconArrowLeft, IconChevronDown, IconChevronUp, IconCheck, IconEdit, IconInfo } from '../../shared/Icons/Icons';
 import styles from './SurveyCampaigns.module.scss';
 
-// Default expiration window — today through 60 days from today,
-// both anchored at 12:00 AM (midnight).
-const DEFAULT_EXPIRY_DAYS = 60;
-const todayAtMidnight = (from: Date = new Date()): Date => {
-  const d = new Date(from);
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-const sixtyDaysFromNow = (from: Date = new Date()): Date => {
-  const d = todayAtMidnight(from);
-  d.setDate(d.getDate() + DEFAULT_EXPIRY_DAYS);
-  return d;
-};
+// Per spec, the expiration anchors on the send time at runtime — for
+// relative units (days/hours) the engine resolves the absolute timestamp
+// when the campaign fires. Only "custom date" mode carries an explicit
+// calendar timestamp.
 
 const fmtTimeOnly = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+    : '';
+
+const fmtDateOnly = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
     : '';
 
 interface TimeParts {
@@ -86,6 +82,20 @@ const SCHEDULE_OPTIONS = [
   { value: 'scheduled', label: 'Schedule for later' },
 ];
 
+// Link expiry mirrors the Marketing Automation "delay" pattern: a
+// top-level option dropdown, then either a unit + numeric value (for
+// the relative path) or a date + time (for the calendar path).
+const LINK_EXPIRY_OPTIONS = [
+  { value: 'set_amount', label: 'For a set amount of time' },
+  { value: 'calendar_date', label: 'Until a calendar date' },
+];
+
+const TIME_UNIT_OPTIONS = [
+  { value: 'days', label: 'Days' },
+  { value: 'hours', label: 'Hours' },
+  { value: 'minutes', label: 'Minutes' },
+];
+
 const StatusDot: React.FC<{ done: boolean }> = ({ done }) => (
   <div className={`${styles.statusDot} ${done ? styles.statusDone : styles.statusPending}`}>
     {done
@@ -132,26 +142,62 @@ const SurveyCampaigns: React.FC = () => {
     [survey.campaign]
   );
 
-  // Expiry edits are blocked once the campaign was launched OR the survey
-  // is already running / expiring (the workflow is in flight either way).
-  const isLive = config.status === 'live'
-    || survey.status === 'running'
-    || survey.status === 'expiring_soon';
+  // Expiry edits are blocked only once *this* campaign has been launched
+  // (its workflow is in flight). A survey may already be in 'running' /
+  // 'expiring_soon' from a prior campaign — that shouldn't lock a fresh
+  // draft campaign's expiry configuration.
+  const isLive = config.status === 'live';
 
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(true);
+  const [expiryDateOpen, setExpiryDateOpen] = useState(false);
   const [expiryTimeOpen, setExpiryTimeOpen] = useState(false);
+  const expiryDateRef = useRef<HTMLDivElement>(null);
   const expiryTimeRef = useRef<HTMLDivElement>(null);
 
+  // Advanced Options sits inside `.scrollArea` (overflow-y: auto), which
+  // clips any absolutely-positioned popup. To let the date/time menus
+  // escape the scroll area and float above the launch banner, we anchor
+  // them with `position: fixed` and snapshot the trigger's viewport rect
+  // each time the popup opens.
+  const [datePopupAnchor, setDatePopupAnchor] = useState<{ bottom: number; left: number; width: number } | null>(null);
+  const [timePopupAnchor, setTimePopupAnchor] = useState<{ bottom: number; left: number; width: number } | null>(null);
+
+  const anchorAbove = (ref: React.RefObject<HTMLDivElement>) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return null;
+    return {
+      bottom: window.innerHeight - rect.top + 4,
+      left: rect.left,
+      width: rect.width,
+    };
+  };
+
+  const openDatePopup = () => {
+    if (isLive) return;
+    setDatePopupAnchor(anchorAbove(expiryDateRef));
+    setExpiryDateOpen(true);
+  };
+
+  const openTimePopup = () => {
+    if (isLive) return;
+    setTimePopupAnchor(anchorAbove(expiryTimeRef));
+    setExpiryTimeOpen(true);
+  };
+
   useEffect(() => {
-    if (!expiryTimeOpen) return;
+    if (!expiryDateOpen && !expiryTimeOpen) return;
     const handler = (e: MouseEvent) => {
-      if (expiryTimeRef.current && !expiryTimeRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (expiryDateOpen && expiryDateRef.current && !expiryDateRef.current.contains(target)) {
+        setExpiryDateOpen(false);
+      }
+      if (expiryTimeOpen && expiryTimeRef.current && !expiryTimeRef.current.contains(target)) {
         setExpiryTimeOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [expiryTimeOpen]);
+  }, [expiryDateOpen, expiryTimeOpen]);
 
   const commit = (next: CampaignConfig) => {
     dispatch(surveyActions.patchCampaign({ surveyId: survey.id, config: next }));
@@ -172,23 +218,9 @@ const SurveyCampaigns: React.FC = () => {
     });
   };
 
-  // Seed the default range on first mount when the user hasn't set one:
-  // today → today + 60 days, both at 12:00 AM. Skipped when the campaign
-  // is already live or a persisted value exists, so we never overwrite.
-  useEffect(() => {
-    if (isLive) return;
-    if (config.options.linkExpiry.startDate && config.options.linkExpiry.endDate) return;
-    const now = new Date();
-    const start = todayAtMidnight(now);
-    const end = sixtyDaysFromNow(now);
-    patchExpiry({
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      presetKey: 'last_60_days',
-      customDate: end.toISOString(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [survey.id]);
+  // No mount-time seeding required — DEFAULT_LINK_EXPIRY already encodes
+  // "60 days from send" (mode: 'days', value: 60), so the form opens to
+  // the spec default without overwriting any persisted choice.
 
   const channelDone = !!config.channel;
   const recipientsDone = !!config.recipientSource;
@@ -196,11 +228,13 @@ const SurveyCampaigns: React.FC = () => {
   const surveyDone = !!survey.id;
   const scheduleDone = !!config.schedule;
   const reminderDone = true;
-  // Link expiration is set when the user has picked a date range
-  // (start + end) via the TimePeriod preset picker.
-  const optionsDone = !!(
-    config.options.linkExpiry.startDate && config.options.linkExpiry.endDate
-  );
+  // Link expiration counts as done when the configured option has a usable
+  // value — set_amount needs both a unit and a positive count; calendar_date
+  // needs a customDate.
+  const linkExpiry = config.options.linkExpiry;
+  const optionsDone = linkExpiry.option === 'calendar_date'
+    ? !!linkExpiry.customDate
+    : !!linkExpiry.mode && (linkExpiry.value ?? 0) > 0;
 
   const handleLaunch = () => {
     commit({ ...config, status: 'live' });
@@ -224,7 +258,7 @@ const SurveyCampaigns: React.FC = () => {
               else navigate(`/surveys/${survey.id}?tab=distribute`);
             }}
           >
-            <IconChevronLeft size={20} color="#424242" />
+            <IconArrowLeft size={20} color="#424242" />
           </button>
           <h1 className={styles.pageTitle}>Survey campaign</h1>
           <button type="button" className={styles.editTitleBtn} aria-label="Rename campaign">
@@ -428,116 +462,232 @@ const SurveyCampaigns: React.FC = () => {
 
             {advancedOpen && (
               <>
-                {/* Expire Date — Aero "Date picker with preset" (TimePeriod
-                   atom). Owns its own trigger, dual-month calendar, preset
-                   list (Today, Last 7/30/60/… days), and Cancel/Apply.
-                   Default range is 60 days from today (seeded on mount). */}
+                {/* Dropdown 1 — Link Expiry Options.
+                   Top-level path picker: relative duration vs explicit date.
+                   Switching paths clears the companion fields so values
+                   from the other path can't survive a mode swap. */}
                 <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
                   <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Expire Date</span>
-                    <Tooltip text="When the survey link is valid — pick a preset or a custom range." position="right" hideOnScroll>
-                      <button type="button" className={styles.infoIconBtn} aria-label="Expire Date info">
-                        <IconInfo size={14} />
-                      </button>
-                    </Tooltip>
+                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Link Expiry Options</span>
                   </div>
-                  <div className={styles.timePeriodWrap}>
-                    <TimePeriod
-                      enableFutureDates
-                      hideAllTime
-                      disable={isLive}
-                      initLabel="Select date"
-                      selectedDateRange={
-                        config.options.linkExpiry.startDate && config.options.linkExpiry.endDate
-                          ? {
-                              startDate: new Date(config.options.linkExpiry.startDate),
-                              endDate: new Date(config.options.linkExpiry.endDate),
-                              key: config.options.linkExpiry.presetKey ?? 'CUSTOM',
-                            }
-                          : undefined
-                      }
-                      onChangeSelectedDateRange={(range) => {
-                        if (!range?.startDate || !range?.endDate) return;
-                        const start = range.startDate instanceof Date
-                          ? range.startDate
-                          : new Date(range.startDate);
-                        const end = range.endDate instanceof Date
-                          ? range.endDate
-                          : new Date(range.endDate);
-                        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
-                        // Preserve the user-picked time when only the range
-                        // changes — TimePeriod doesn't manage time-of-day.
-                        const time = isoToTimeParts(config.options.linkExpiry.endDate);
-                        const endIso = mergeDateAndTime(end.toISOString(), time);
+                  <SingleSelect
+                    name="linkExpiryOption"
+                    displayLabel="Link Expiry Options"
+                    options={LINK_EXPIRY_OPTIONS}
+                    selected={linkExpiry.option}
+                    onChange={(option) => {
+                      const next = option.value as LinkExpiryOption;
+                      if (next === linkExpiry.option) return;
+                      if (next === 'calendar_date') {
                         patchExpiry({
-                          startDate: start.toISOString(),
-                          endDate: endIso,
-                          presetKey: range.key,
-                          customDate: endIso,
+                          option: 'calendar_date',
+                          mode: 'custom',
+                          value: undefined,
                         });
-                      }}
-                    />
-                  </div>
+                      } else {
+                        patchExpiry({
+                          option: 'set_amount',
+                          mode: undefined,
+                          value: undefined,
+                          customDate: undefined,
+                        });
+                      }
+                    }}
+                    showSearch={false}
+                    disabled={isLive}
+                    isAeroDesign
+                  />
                 </div>
 
-                {/* Time — FormInput trigger + TimePicker popup, mirrors the
-                   pattern used in ExpirySettings. The picked time merges
-                   back into the range's endDate ISO. */}
-                <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
-                  <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Time</span>
-                    <Tooltip text="Time of day the link expires" position="right" hideOnScroll>
-                      <button type="button" className={styles.infoIconBtn} aria-label="Time info">
-                        <IconInfo size={14} />
-                      </button>
-                    </Tooltip>
-                  </div>
-                  <div className={styles.datePickerField} ref={expiryTimeRef}>
-                    <div
-                      className={styles.datePickerTrigger}
-                      onClick={() => !isLive && setExpiryTimeOpen(true)}
-                      role="button"
-                      tabIndex={isLive ? -1 : 0}
-                      onKeyDown={(e) => {
-                        if (isLive) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setExpiryTimeOpen(true);
-                        }
-                      }}
-                    >
-                      <FormInput
-                        name="expiryTime"
-                        type="text"
-                        value={fmtTimeOnly(config.options.linkExpiry.endDate)}
-                        placeholder="Select time"
-                        showLeftIcon
-                        customIconClass="icon_phoenix-clock"
-                        readOnly
+                {linkExpiry.option === 'set_amount' ? (
+                  <>
+                    {/* Dropdown 2 — Time unit.
+                       Placeholder "Select time units" until the user picks.
+                       Once picked, the Unit value field below appears. */}
+                    <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                      <div className={styles.fieldLabelRow}>
+                        <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Time unit</span>
+                      </div>
+                      <SingleSelect
+                        name="timeUnit"
+                        displayLabel="Time unit"
+                        options={TIME_UNIT_OPTIONS}
+                        selected={linkExpiry.mode}
+                        onChange={(option) => {
+                          patchExpiry({ mode: option.value as LinkExpiryUnit });
+                        }}
+                        placeholder="Select time units"
+                        showSearch={false}
                         disabled={isLive}
+                        isAeroDesign
                       />
                     </div>
-                    {expiryTimeOpen && (
-                      <div
-                        className={styles.datePickerPopup}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <TimePicker
-                          timeObject={isoToTimeParts(config.options.linkExpiry.endDate)}
-                          changeTime={(option, field) => {
-                            const baseIso = config.options.linkExpiry.endDate ?? new Date().toISOString();
-                            const next: TimeParts = { ...isoToTimeParts(config.options.linkExpiry.endDate) };
-                            if (field === 'hours') next.hours = Number(option.value);
-                            else if (field === 'minutes') next.minutes = Number(option.value);
-                            else next.meridiem = String(option.value).toLowerCase() === 'pm' ? 'pm' : 'am';
-                            const endIso = mergeDateAndTime(baseIso, next);
-                            patchExpiry({ endDate: endIso, customDate: endIso });
+
+                    {/* Input 3 — Unit value (numeric).
+                       Only rendered after a time unit is selected. */}
+                    {linkExpiry.mode && linkExpiry.mode !== 'custom' && (
+                      <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                        <div className={styles.fieldLabelRow}>
+                          <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Unit value</span>
+                        </div>
+                        <FormInput
+                          name="expiryValue"
+                          type="number"
+                          value={linkExpiry.value !== undefined ? String(linkExpiry.value) : ''}
+                          placeholder="Enter unit value"
+                          onChange={(_event: unknown, value: string) => {
+                            if (value === '' || value === null || value === undefined) {
+                              patchExpiry({ value: undefined });
+                              return;
+                            }
+                            const n = Math.max(0, Number(value) || 0);
+                            patchExpiry({ value: n });
                           }}
+                          disabled={isLive}
                         />
                       </div>
                     )}
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Set date — calendar picker for the calendar_date path. */}
+                    <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                      <div className={styles.fieldLabelRow}>
+                        <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Set date</span>
+                      </div>
+                      <div className={styles.datePickerField} ref={expiryDateRef}>
+                        <div
+                          className={styles.datePickerTrigger}
+                          onClick={openDatePopup}
+                          role="button"
+                          tabIndex={isLive ? -1 : 0}
+                          onKeyDown={(e) => {
+                            if (isLive) return;
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              openDatePopup();
+                            }
+                          }}
+                        >
+                          <FormInput
+                            name="expiryDate"
+                            type="text"
+                            value={fmtDateOnly(linkExpiry.customDate)}
+                            placeholder="Select date"
+                            showLeftIcon
+                            customIconClass="icon_phoenix-calendar"
+                            readOnly
+                            disabled={isLive}
+                          />
+                        </div>
+                        {expiryDateOpen && datePopupAnchor && (
+                          <div
+                            className={styles.datePickerPopup}
+                            style={{
+                              position: 'fixed',
+                              bottom: datePopupAnchor.bottom,
+                              left: datePopupAnchor.left,
+                              top: 'auto',
+                              minWidth: datePopupAnchor.width,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <DatePicker
+                              name="expiryDatePopup"
+                              startDt={linkExpiry.customDate || undefined}
+                              range={false}
+                              disablePastDates
+                              enableFutureDates
+                              showApplyButtons
+                              applyButtonLabel="Apply"
+                              sendDateTime={(start) => {
+                                if (!start) {
+                                  patchExpiry({ customDate: undefined });
+                                  setExpiryDateOpen(false);
+                                  return;
+                                }
+                                const parsed = new Date(start);
+                                if (Number.isNaN(parsed.getTime())) return;
+                                const time = isoToTimeParts(linkExpiry.customDate);
+                                const merged = mergeDateAndTime(parsed.toISOString(), time);
+                                patchExpiry({ customDate: merged });
+                                setExpiryDateOpen(false);
+                              }}
+                              cancelCalendarPopup={() => setExpiryDateOpen(false)}
+                              closeOnClickOutside={() => setExpiryDateOpen(false)}
+                              dynamicClass="profile-datepicker"
+                              insidePopup
+                              isRequired
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Select time — paired with the calendar date. */}
+                    <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                      <div className={styles.fieldLabelRow}>
+                        <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Select time</span>
+                        <Tooltip text="Time of day the link expires" position="right" hideOnScroll>
+                          <button type="button" className={styles.infoIconBtn} aria-label="Time info">
+                            <IconInfo size={14} />
+                          </button>
+                        </Tooltip>
+                      </div>
+                      <div className={styles.datePickerField} ref={expiryTimeRef}>
+                        <div
+                          className={styles.datePickerTrigger}
+                          onClick={openTimePopup}
+                          role="button"
+                          tabIndex={isLive ? -1 : 0}
+                          onKeyDown={(e) => {
+                            if (isLive) return;
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              openTimePopup();
+                            }
+                          }}
+                        >
+                          <FormInput
+                            name="expiryTime"
+                            type="text"
+                            value={fmtTimeOnly(linkExpiry.customDate)}
+                            placeholder="Select time"
+                            showLeftIcon
+                            customIconClass="icon_phoenix-clock"
+                            readOnly
+                            disabled={isLive}
+                          />
+                        </div>
+                        {expiryTimeOpen && timePopupAnchor && (
+                          <div
+                            className={styles.datePickerPopup}
+                            style={{
+                              position: 'fixed',
+                              bottom: timePopupAnchor.bottom,
+                              left: timePopupAnchor.left,
+                              top: 'auto',
+                              minWidth: timePopupAnchor.width,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <TimePicker
+                              timeObject={isoToTimeParts(linkExpiry.customDate)}
+                              changeTime={(option, field) => {
+                                const baseIso = linkExpiry.customDate ?? new Date().toISOString();
+                                const next: TimeParts = { ...isoToTimeParts(linkExpiry.customDate) };
+                                if (field === 'hours') next.hours = Number(option.value);
+                                else if (field === 'minutes') next.minutes = Number(option.value);
+                                else next.meridiem = String(option.value).toLowerCase() === 'pm' ? 'pm' : 'am';
+                                patchExpiry({ customDate: mergeDateAndTime(baseIso, next) });
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
