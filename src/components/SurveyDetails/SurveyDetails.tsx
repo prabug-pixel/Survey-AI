@@ -24,10 +24,10 @@ import {
   IconInfo,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
-import ExpirySettings from './ExpirySettings';
+import EditSettings from './EditSettings';
 import styles from './SurveyDetails.module.scss';
 
-type DetailTab = 'view' | 'distribute' | 'responses' | 'expiry' | 'reports';
+type DetailTab = 'view' | 'distribute' | 'responses' | 'edit' | 'reports';
 type SortKey = keyof Pick<SurveyResponse, 'score' | 'contactName' | 'location' | 'respondedOn'>;
 type SortDir = 'asc' | 'desc';
 
@@ -61,7 +61,7 @@ const SortIcon: React.FC<{ col: SortKey; sortKey: SortKey; sortDir: SortDir }> =
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
-const VALID_TABS: DetailTab[] = ['view', 'distribute', 'responses', 'expiry', 'reports'];
+const VALID_TABS: DetailTab[] = ['view', 'distribute', 'responses', 'edit', 'reports'];
 
 const SurveyDetails: React.FC = () => {
   const { surveyId } = useParams<{ surveyId: string }>();
@@ -79,6 +79,9 @@ const SurveyDetails: React.FC = () => {
     const next = new URLSearchParams(searchParams);
     if (tab === 'view') next.delete('tab');
     else next.set('tab', tab);
+    // Clear any sub-section param so switching tabs always lands on the
+    // top of that tab (e.g. Edit settings' landing page, not a deep view).
+    next.delete('section');
     setSearchParams(next, { replace: false });
   };
   const [sortKey, setSortKey] = useState<SortKey>('score');
@@ -227,7 +230,7 @@ const SurveyDetails: React.FC = () => {
 
       {/* ── Tab bar ──────────────────────────────────────── */}
       <div className={styles.tabBar}>
-        {(['view', 'distribute', 'responses', 'expiry', 'reports'] as DetailTab[]).map(tab => (
+        {(['view', 'distribute', 'responses', 'edit', 'reports'] as DetailTab[]).map(tab => (
           <button
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
@@ -237,7 +240,7 @@ const SurveyDetails: React.FC = () => {
             {tab === 'reports' && (<>Reports<IconExternalLink size={14} color={activeTab === 'reports' ? '#1976d2' : '#9e9e9e'} /></>)}
             {tab === 'view' && 'View'}
             {tab === 'distribute' && 'Distribute'}
-            {tab === 'expiry' && 'Expiry settings'}
+            {tab === 'edit' && 'Edit settings'}
           </button>
         ))}
       </div>
@@ -390,11 +393,10 @@ const SurveyDetails: React.FC = () => {
         </div>
       )}
 
-      {/* ── Expiry Settings tab ───────────────────────────── */}
-      {activeTab === 'expiry' && (
-        <ExpirySettings
+      {/* ── Edit Settings tab — landing page + sub-flows ──── */}
+      {activeTab === 'edit' && (
+        <EditSettings
           survey={survey}
-          onOpenAuditLog={() => setAuditDrawerOpen(true)}
         />
       )}
 

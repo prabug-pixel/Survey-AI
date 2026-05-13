@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
-import Button from '@birdeye/elemental/core/atoms/Button';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
@@ -11,12 +10,11 @@ import { useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SavedSurvey, ExpirationConfig } from '../../types/survey.types';
 import { GRACE_PERIOD_OPTIONS } from '../../types/survey.types';
-import { IconClock, IconInfo, IconWarning } from '../../shared/Icons/Icons';
+import { IconInfo, IconWarning } from '../../shared/Icons/Icons';
 import styles from './ExpirySettings.module.scss';
 
 interface Props {
   survey: SavedSurvey;
-  onOpenAuditLog: () => void;
 }
 
 const DEFAULT_CONFIG: ExpirationConfig = {
@@ -119,7 +117,7 @@ const validate = (config: ExpirationConfig): ValidationErrors => {
   return errors;
 };
 
-const ExpirySettings: React.FC<Props> = ({ survey, onOpenAuditLog }) => {
+const ExpirySettings: React.FC<Props> = ({ survey }) => {
   const dispatch = useAppDispatch();
 
   // Config is derived directly from the persisted survey in Redux. Every
@@ -484,18 +482,6 @@ const ExpirySettings: React.FC<Props> = ({ survey, onOpenAuditLog }) => {
 
         </div>
 
-        {/* ── Card footer ────────────────────────────────────
-           Form auto-saves to the persisted Redux store on every change,
-           so an explicit Save button is no longer required. The audit-log
-           shortcut stays. */}
-        <div className={styles.cardFooter}>
-          <Button
-            theme="secondary"
-            label="View Audit Log"
-            customIcon={<IconClock size={15} color="#555" />}
-            onClick={onOpenAuditLog}
-          />
-        </div>
       </div>
 
       </div>
