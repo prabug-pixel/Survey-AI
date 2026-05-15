@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
@@ -107,7 +107,6 @@ const StatusDot: React.FC<{ done: boolean }> = ({ done }) => (
 
 const SurveyCampaigns: React.FC = () => {
   const { surveyId } = useParams<{ surveyId: string }>();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const savedSurveys = useAppSelector(s => s.survey.savedSurveys);
   const survey = savedSurveys.find(s => s.id === surveyId);
@@ -163,7 +162,7 @@ const SurveyCampaigns: React.FC = () => {
   const [datePopupAnchor, setDatePopupAnchor] = useState<{ bottom: number; left: number; width: number } | null>(null);
   const [timePopupAnchor, setTimePopupAnchor] = useState<{ bottom: number; left: number; width: number } | null>(null);
 
-  const anchorAbove = (ref: React.RefObject<HTMLDivElement>) => {
+  const anchorAbove = (ref: React.RefObject<HTMLDivElement | null>) => {
     const rect = ref.current?.getBoundingClientRect();
     if (!rect) return null;
     return {
@@ -404,7 +403,7 @@ const SurveyCampaigns: React.FC = () => {
             </label>
 
             <div className={styles.helperNote}>
-              <IconInfo size={14} color="#9e9e9e" />
+              <IconInfo size={16} color="#9e9e9e" />
               <span>
                 To minimize disruption, text messages are only sent to contacts between 8am–8pm.
                 Your business location that provides their service determines the time zone setting.

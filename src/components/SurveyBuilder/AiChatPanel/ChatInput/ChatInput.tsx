@@ -18,7 +18,7 @@ const SendIcon: React.FC<{ color: string }> = ({ color }) => (
   </svg>
 );
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSend, showMention = false }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const dispatch = useAppDispatch();
   const mentionedQuestionId = useAppSelector((s) => s.chat.mentionedQuestionId);
   const survey = useAppSelector((s) => s.survey.survey);

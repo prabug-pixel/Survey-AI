@@ -9,7 +9,6 @@ import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import {
   IconArrowLeft,
-  IconChevronLeft,
   IconChevronDown,
   IconChevronUp,
   IconExternalLink,
@@ -491,7 +490,7 @@ const SurveyDetails: React.FC = () => {
           </div>
         </div>
         <div className={styles.auditContent}>
-          {auditLog.map((entry, idx) => (
+          {auditLog.map((entry) => (
             <div key={entry.id} className={styles.auditItem}>
               <div className={styles.auditLeft}>
                 <div className={styles.auditDot}><IconClock size={16} color="#555555" /></div>

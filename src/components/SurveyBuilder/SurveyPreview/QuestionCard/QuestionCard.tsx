@@ -7,7 +7,7 @@ import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import RatingScale from '../../../../shared/RatingScale/RatingScale';
 import RadioOption from '../../../../shared/RadioOption/RadioOption';
-import { IconDragHandle, IconCodeConnect, IconTrash, IconClose, IconPlus, IconLocation, IconStar, IconCheck } from '../../../../shared/Icons/Icons';
+import { IconDragHandle, IconCodeConnect, IconTrash, IconClose, IconPlus, IconLocation, IconStar } from '../../../../shared/Icons/Icons';
 import Checkbox from '../../../../shared/Checkbox/Checkbox';
 import SkipLogicBadge from '../../SkipLogicBadge/SkipLogicBadge';
 import styles from './QuestionCard.module.scss';

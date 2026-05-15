@@ -359,12 +359,18 @@
 
 .helperNote {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: $spacing-8;
   font-size: $font-size-sm;
   color: $color-gray-600;
   line-height: $line-height-normal;
   padding: $spacing-4 0 0;
+
+  > svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .reminderRow {
