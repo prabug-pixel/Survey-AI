@@ -14,11 +14,15 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   resolve: {
-    alias: {
+    alias: [
+      // Restore React 19's missing findDOMNode for elemental atoms via react-onclickoutside.
+      // Only matches the bare specifier `react-dom`; `react-dom/client`, `react-dom/server`,
+      // and the shim's own `react-dom/index.js` fall through to the dedupe alias below.
+      { find: /^react-dom$/, replacement: path.resolve(__dirname, 'src/polyfills/react-dom-with-findDOMNode.ts') },
       // Deduplicate React — force Elemental to use our project's React
-      'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom')
-    }
+      { find: 'react-dom', replacement: path.resolve(__dirname, 'node_modules/react-dom') },
+      { find: 'react', replacement: path.resolve(__dirname, 'node_modules/react') }
+    ]
   },
   optimizeDeps: {
     include: ['prop-types', 'react-modal']

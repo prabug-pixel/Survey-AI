@@ -109,7 +109,7 @@ const validate = (config: ExpirationConfig): ValidationErrors => {
   const ctaText = (config.closedMessage.ctaText ?? '').trim();
   const ctaUrl = (config.closedMessage.ctaUrl ?? '').trim();
   if ((ctaText && !ctaUrl) || (!ctaText && ctaUrl)) {
-    errors.cta = 'Set both CTA text and URL, or leave both empty';
+    errors.cta = 'Set both button text and URL, or leave both empty';
   } else if (ctaUrl && !isValidUrl(ctaUrl)) {
     errors.cta = 'Enter a valid URL (including https://)';
   }
@@ -420,7 +420,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                   <FormInput
                     name="ctaText"
                     type="text"
-                    label="CTA Button Text"
+                    label="Button Text"
                     placeholder="Enter text"
                     value={config.closedMessage.ctaText ?? ''}
                     onChange={(_event: unknown, value: string) => patchMsg('ctaText', String(value ?? ''))}

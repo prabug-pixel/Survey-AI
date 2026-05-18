@@ -455,17 +455,17 @@ const SurveyCampaigns: React.FC = () => {
 
             {advancedOpen && (
               <>
-                {/* Dropdown 1 — Link Expiry Options.
+                {/* Dropdown 1 — Link expiry.
                    Top-level path picker: relative duration vs explicit date.
                    Switching paths clears the companion fields so values
                    from the other path can't survive a mode swap. */}
                 <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
                   <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Link Expiry Options</span>
+                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Link expiry</span>
                   </div>
                   <SingleSelect
                     name="linkExpiryOption"
-                    displayLabel="Link Expiry Options"
+                    displayLabel="Link expiry"
                     options={LINK_EXPIRY_OPTIONS}
                     selected={linkExpiry.option}
                     onChange={(option) => {
