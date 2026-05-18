@@ -25,7 +25,7 @@ const DEFAULT_CONFIG: ExpirationConfig = {
   closedMessage: {
     title: 'This survey has closed',
     body: 'Thank you for your interest. This survey is no longer accepting responses.',
-    ctaText: '',
+    ctaText: 'View',
     ctaUrl: '',
   },
   notifications: {

@@ -459,37 +459,39 @@ const SurveyCampaigns: React.FC = () => {
                    Top-level path picker: relative duration vs explicit date.
                    Switching paths clears the companion fields so values
                    from the other path can't survive a mode swap. */}
-                <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                <div className={styles.fieldRow}>
                   <div className={styles.fieldLabelRow}>
                     <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Link expiry</span>
                   </div>
-                  <SingleSelect
-                    name="linkExpiryOption"
-                    displayLabel="Link expiry"
-                    options={LINK_EXPIRY_OPTIONS}
-                    selected={linkExpiry.option}
-                    onChange={(option) => {
-                      const next = option.value as LinkExpiryOption;
-                      if (next === linkExpiry.option) return;
-                      if (next === 'calendar_date') {
-                        patchExpiry({
-                          option: 'calendar_date',
-                          mode: 'custom',
-                          value: undefined,
-                        });
-                      } else {
-                        patchExpiry({
-                          option: 'set_amount',
-                          mode: undefined,
-                          value: undefined,
-                          customDate: undefined,
-                        });
-                      }
-                    }}
-                    showSearch={false}
-                    disabled={isLive}
-                    isAeroDesign
-                  />
+                  <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                    <SingleSelect
+                      name="linkExpiryOption"
+                      displayLabel="Link expiry"
+                      options={LINK_EXPIRY_OPTIONS}
+                      selected={linkExpiry.option}
+                      onChange={(option) => {
+                        const next = option.value as LinkExpiryOption;
+                        if (next === linkExpiry.option) return;
+                        if (next === 'calendar_date') {
+                          patchExpiry({
+                            option: 'calendar_date',
+                            mode: 'custom',
+                            value: undefined,
+                          });
+                        } else {
+                          patchExpiry({
+                            option: 'set_amount',
+                            mode: undefined,
+                            value: undefined,
+                            customDate: undefined,
+                          });
+                        }
+                      }}
+                      showSearch={false}
+                      disabled={isLive}
+                      isAeroDesign
+                    />
+                  </div>
                 </div>
 
                 {linkExpiry.option === 'set_amount' ? (
@@ -497,57 +499,62 @@ const SurveyCampaigns: React.FC = () => {
                     {/* Dropdown 2 — Time unit.
                        Placeholder "Select time units" until the user picks.
                        Once picked, the Unit value field below appears. */}
-                    <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                    <div className={styles.fieldRow}>
                       <div className={styles.fieldLabelRow}>
                         <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Time unit</span>
                       </div>
-                      <SingleSelect
-                        name="timeUnit"
-                        displayLabel="Time unit"
-                        options={TIME_UNIT_OPTIONS}
-                        selected={linkExpiry.mode}
-                        onChange={(option) => {
-                          patchExpiry({ mode: option.value as LinkExpiryUnit });
-                        }}
-                        placeholder="Select time units"
-                        showSearch={false}
-                        disabled={isLive}
-                        isAeroDesign
-                      />
+                      <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                        <SingleSelect
+                          name="timeUnit"
+                          displayLabel="Time unit"
+                          options={TIME_UNIT_OPTIONS}
+                          selected={linkExpiry.mode}
+                          onChange={(option) => {
+                            patchExpiry({ mode: option.value as LinkExpiryUnit });
+                          }}
+                          placeholder="Select time units"
+                          showSearch={false}
+                          disabled={isLive}
+                          isAeroDesign
+                        />
+                      </div>
                     </div>
 
                     {/* Input 3 — Unit value (numeric).
                        Only rendered after a time unit is selected. */}
                     {linkExpiry.mode && linkExpiry.mode !== 'custom' && (
-                      <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                      <div className={styles.fieldRow}>
                         <div className={styles.fieldLabelRow}>
                           <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Unit value</span>
                         </div>
-                        <FormInput
-                          name="expiryValue"
-                          type="number"
-                          value={linkExpiry.value !== undefined ? String(linkExpiry.value) : ''}
-                          placeholder="Enter unit value"
-                          onChange={(_event: unknown, value: string) => {
-                            if (value === '' || value === null || value === undefined) {
-                              patchExpiry({ value: undefined });
-                              return;
-                            }
-                            const n = Math.max(0, Number(value) || 0);
-                            patchExpiry({ value: n });
-                          }}
-                          disabled={isLive}
-                        />
+                        <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                          <FormInput
+                            name="expiryValue"
+                            type="number"
+                            value={linkExpiry.value !== undefined ? String(linkExpiry.value) : ''}
+                            placeholder="Enter unit value"
+                            onChange={(_event: unknown, value: string) => {
+                              if (value === '' || value === null || value === undefined) {
+                                patchExpiry({ value: undefined });
+                                return;
+                              }
+                              const n = Math.max(0, Number(value) || 0);
+                              patchExpiry({ value: n });
+                            }}
+                            disabled={isLive}
+                          />
+                        </div>
                       </div>
                     )}
                   </>
                 ) : (
                   <>
                     {/* Set date — calendar picker for the calendar_date path. */}
-                    <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                    <div className={styles.fieldRow}>
                       <div className={styles.fieldLabelRow}>
                         <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Set date</span>
                       </div>
+                      <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
                       <div className={styles.datePickerField} ref={expiryDateRef}>
                         <div
                           className={styles.datePickerTrigger}
@@ -615,10 +622,11 @@ const SurveyCampaigns: React.FC = () => {
                           </div>
                         )}
                       </div>
+                      </div>
                     </div>
 
                     {/* Select time — paired with the calendar date. */}
-                    <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
+                    <div className={styles.fieldRow}>
                       <div className={styles.fieldLabelRow}>
                         <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Select time</span>
                         <Tooltip text="Time of day the link expires" position="right" hideOnScroll>
@@ -627,6 +635,7 @@ const SurveyCampaigns: React.FC = () => {
                           </button>
                         </Tooltip>
                       </div>
+                      <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
                       <div className={styles.datePickerField} ref={expiryTimeRef}>
                         <div
                           className={styles.datePickerTrigger}
@@ -677,6 +686,7 @@ const SurveyCampaigns: React.FC = () => {
                             />
                           </div>
                         )}
+                      </div>
                       </div>
                     </div>
                   </>
