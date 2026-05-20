@@ -298,7 +298,7 @@ export interface ExpirationConfig {
 export interface SavedSurvey {
   id: string;
   title: string;
-  status: 'draft' | 'running' | 'expiring_soon' | 'expired';
+  status: 'draft' | 'published' | 'expiring_soon' | 'expired';
   sent: number;
   responses: number;
   lastUpdated: string;

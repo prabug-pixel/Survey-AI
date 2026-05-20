@@ -60,7 +60,7 @@ const DEMO_SURVEY_DATA: Survey = {
 const DEMO_SURVEY: SavedSurvey = {
   id: DEMO_ID,
   title: 'Feedback survey',
-  status: 'running',
+  status: 'published',
   sent: 5,
   responses: 3,
   lastUpdated: 'Mar 05, 2026',
@@ -147,9 +147,9 @@ const meta: Meta<typeof SurveyDetails> = {
 export default meta;
 type Story = StoryObj<typeof SurveyDetails>;
 
-export const Running: Story = {
+export const Published: Story = {
   decorators: [withProviders(DEMO_SURVEY)],
-  name: 'Running survey (View tab)',
+  name: 'Published survey (View tab)',
 };
 
 export const Draft: Story = {

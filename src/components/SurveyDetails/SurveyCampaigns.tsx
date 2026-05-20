@@ -143,7 +143,7 @@ const SurveyCampaigns: React.FC = () => {
   );
 
   // Expiry edits are blocked only once *this* campaign has been launched
-  // (its workflow is in flight). A survey may already be in 'running' /
+  // (its workflow is in flight). A survey may already be in 'published' /
   // 'expiring_soon' from a prior campaign — that shouldn't lock a fresh
   // draft campaign's expiry configuration.
   const isLive = config.status === 'live';

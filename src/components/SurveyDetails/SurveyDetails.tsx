@@ -38,16 +38,16 @@ const MOCK_RESPONSES: SurveyResponse[] = [
 ];
 
 const STATUS_LABEL: Record<string, string> = {
-  running: 'Running',
+  published: 'Published',
   draft: 'Draft',
-  expiring_soon: 'Running',
+  expiring_soon: 'Published',
   expired: 'Expired',
 };
 
 const STATUS_CLASS: Record<string, string> = {
-  running: styles.running,
+  published: styles.published,
   draft: styles.draft,
-  expiring_soon: styles.running,
+  expiring_soon: styles.published,
   expired: styles.expired,
 };
 
@@ -127,7 +127,7 @@ const SurveyDetails: React.FC = () => {
   const allQuestions = survey.surveyData?.pages.flatMap(p => p.questions) ?? [];
   const responseRate = survey.sent > 0 ? Math.round((survey.responses / survey.sent) * 100) : 0;
   const isExpired = survey.status === 'expired';
-  const isRunning = survey.status === 'running' || survey.status === 'expiring_soon';
+  const isRunning = survey.status === 'published' || survey.status === 'expiring_soon';
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
@@ -512,7 +512,7 @@ const SurveyDetails: React.FC = () => {
         isOpen={closeConfirmOpen}
         title="Close survey"
         onClose={() => setCloseConfirmOpen(false)}
-        primaryLabel="Delete"
+        primaryLabel="Close"
         primaryTheme="primary"
         onPrimary={handleCloseNow}
       >

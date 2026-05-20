@@ -33,6 +33,11 @@ const SurveyHeader: React.FC = () => {
   };
 
   const handleBack = () => {
+    // Preserve in-progress work: if the user added questions but didn't
+    // publish, persist the survey as a Draft so it appears in All Surveys
+    // instead of being discarded. saveSurveyAsDraft is a no-op when there
+    // are no questions yet.
+    dispatch(surveyActions.saveSurveyAsDraft());
     navigate('/surveys');
   };
 
