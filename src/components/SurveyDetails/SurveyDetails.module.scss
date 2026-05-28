@@ -166,23 +166,6 @@
   }
 }
 
-.filterBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: $radius-sm;
-  border: 1px solid #e5e9f0;
-  background: #fff;
-  cursor: pointer;
-  transition: background $transition-fast;
-
-  &:hover {
-    background: #f5f5f5;
-  }
-}
-
 // ── Tab bar ──────────────────────────────────────────────────
 .tabBar {
   display: flex;

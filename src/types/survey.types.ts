@@ -184,19 +184,14 @@ export const TIMEZONES = [
   'UTC',
 ] as const;
 
-// 1–24 are shown as hours; 48+ are shown as days (the 24h slot already
-// represents "1 day", so we skip a separate "1 day" entry to avoid two
-// options with the same hour value).
 export const GRACE_PERIOD_OPTIONS: { value: number; label: string }[] = [
-  ...Array.from({ length: 24 }, (_, i) => {
-    const hours = i + 1;
-    return { value: hours, label: hours === 1 ? '1 hour' : `${hours} hours` };
-  }),
+  { value: 24, label: '1 day' },
   { value: 48, label: '2 days' },
   { value: 72, label: '3 days' },
   { value: 96, label: '4 days' },
   { value: 120, label: '5 days' },
   { value: 144, label: '6 days' },
+  { value: 168, label: '7 days' },
 ];
 
 export interface AuditLogEntry {
@@ -226,25 +221,27 @@ export type LinkExpiryUnit = 'days' | 'hours' | 'minutes';
 export type LinkExpiryMode = LinkExpiryUnit | 'custom';
 
 export interface LinkExpiryConfig {
-  // The first dropdown's selection. Defaults to 'set_amount' so the form
-  // opens on the relative-count path per spec.
+  // Top-level toggle. When false, no expiry is applied. When true, the
+  // Days-only input below is the only field surfaced.
+  enabled: boolean;
+  // The first dropdown's selection. Kept on the type for legacy compatibility
+  // with older saved campaigns; the UI now only writes 'set_amount'.
   option: LinkExpiryOption;
-  // The unit (set_amount) or 'custom' (calendar_date). Undefined when the
-  // user is on the set_amount path but hasn't picked a unit yet — the
-  // Unit value field stays hidden until they do.
+  // Always 'days' in the current UI. Kept on the type for legacy compatibility.
   mode?: LinkExpiryMode;
-  // Numeric value for the set_amount path (days/hours/minutes count).
+  // Number of days until the link expires.
   value?: number;
-  // Absolute timestamp for the calendar_date path.
+  // Legacy fields, retained so older saved campaigns still load.
   customDate?: string;
-  // Legacy range fields, retained so older saved campaigns still load.
   startDate?: string;
   endDate?: string;
   presetKey?: string;
 }
 
 export const DEFAULT_LINK_EXPIRY: LinkExpiryConfig = {
+  enabled: false,
   option: 'set_amount',
+  mode: 'days',
 };
 
 export interface CampaignConfig {
@@ -284,7 +281,6 @@ export interface ExpirationConfig {
   closedMessage: {
     title: string;
     body: string;
-    ctaText?: string;
     ctaUrl?: string;
   };
   notifications: {

@@ -303,7 +303,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, allQuestions }) =
           <div className={styles.starRow}>
             {[1, 2, 3, 4, 5].map(i => <IconStar key={i} size={24} color="#bdbdbd" />)}
           </div>
-          <div className={styles.feedbackStub}>Please share your feedback</div>
+          <div className={styles.feedbackStub}>Share your feedback</div>
           <div className={styles.reviewFooter}>
             <div className={styles.sourceIcons}>
               <div className={styles.sourceCircle}>G</div>

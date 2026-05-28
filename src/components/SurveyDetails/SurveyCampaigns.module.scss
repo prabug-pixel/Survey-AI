@@ -381,18 +381,15 @@
 }
 
 // ── Collapsible section header ────────────────────────────────
-// Used by Advanced Options — full-width button row containing the
-// section title and a chevron / lock chip on the right.
+// Used by Advanced Options — full-width row containing the
+// section title and the enable toggle (plus a lock chip when the
+// campaign is live).
 .collapsibleHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $spacing-16;
   width: 100%;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
   text-align: left;
   color: inherit;
 }

@@ -184,7 +184,7 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question }) => {
               <span key={i} className={styles.star}>★</span>
             ))}
           </div>
-          <div className={styles.inputStub} style={{ marginTop: 8 }}>Please share your feedback</div>
+          <div className={styles.inputStub} style={{ marginTop: 8 }}>Share your feedback</div>
         </div>
       )}
     </div>

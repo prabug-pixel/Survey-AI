@@ -124,8 +124,12 @@
   align-items: center;
   justify-content: space-between;
   gap: $spacing-16;
-  padding: $spacing-20 $spacing-24;
+  padding: $spacing-20 $spacing-24 0;
   border-bottom: 0;
+}
+
+.cardHeaderExpanded {
+  padding-bottom: 0;
 }
 
 .cardHeaderText {
@@ -153,6 +157,18 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-32;
+}
+
+.formFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-12;
+  padding: $spacing-16 $spacing-24;
+  border-top: 1px solid $color-gray-200;
+  background: $color-white;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
 }
 
 // ── Sections ──────────────────────────────────────────────────
@@ -401,22 +417,16 @@
   margin: 0;
 }
 
-.previewCta {
-  display: inline-flex;
-  align-items: center;
-  height: 34px;
-  padding: $spacing-10 $spacing-24;
-  background: rgba(25, 118, 210, 1);
-  color: rgba(255, 255, 255, 1);
-  border-radius: $radius-sm;
-  font-size: $font-size-md;
-  font-weight: 400;
-  text-decoration: none;
-  margin-top: $spacing-8;
-  transition: background $transition-fast;
+.previewRedirect {
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+  margin: $spacing-8 0 0;
+  max-width: 480px;
+  line-height: $line-height-relaxed;
 
-  &:hover {
-    background: $color-primary-hover;
+  strong {
+    color: $color-gray-700;
+    word-break: break-all;
   }
 }
 

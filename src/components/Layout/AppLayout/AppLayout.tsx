@@ -9,23 +9,20 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+// L2 nav belongs only on the survey landing page. Drill-down routes
+// (/surveys/:id, /surveys/:id/campaigns, /surveys/create) get their
+// own in-page navigation (breadcrumb + tab bar) and should not show it.
+const isSurveyLandingPath = (pathname: string) =>
+  pathname === '/surveys' || pathname === '/surveys/';
+
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const isSurveyCreateFlow =
-    location.pathname === '/surveys/create' ||
-    location.pathname.startsWith('/surveys/create/');
-  // Marketing Automation drill-down (Survey campaigns) is a product surface
-  // outside the Surveys L2 nav scope — hide the Surveys L2 there.
-  const isMarketingAutomationFlow = /^\/surveys\/[^/]+\/campaigns(\/|$)/.test(location.pathname);
-  const showL2 =
-    location.pathname.startsWith('/surveys') &&
-    !isSurveyCreateFlow &&
-    !isMarketingAutomationFlow;
+  const showL2Nav = isSurveyLandingPath(location.pathname);
 
   return (
     <div className={styles.appLayout}>
       <Sidebar />
-      {showL2 && <SurveyL2Nav />}
+      {showL2Nav && <SurveyL2Nav />}
       <div className={styles.contentColumn}>
         <TopBar />
         <main className={styles.mainContent}>{children}</main>

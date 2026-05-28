@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
+import Button from '@birdeye/elemental/core/atoms/Button';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import DatePicker from '@birdeye/elemental/core/components/DatePicker';
-import TimePicker from '@birdeye/elemental/core/components/TimePicker';
 import { useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SavedSurvey, ExpirationConfig } from '../../types/survey.types';
@@ -25,7 +25,6 @@ const DEFAULT_CONFIG: ExpirationConfig = {
   closedMessage: {
     title: 'This survey has closed',
     body: 'Thank you for your interest. This survey is no longer accepting responses.',
-    ctaText: 'View',
     ctaUrl: '',
   },
   notifications: {
@@ -41,9 +40,6 @@ const fmt = (iso: string) =>
 
 const fmtDateOnly = (iso: string) =>
   new Date(iso).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-
-const fmtTimeOnly = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
 interface TimeParts {
   hours: number;          // 1..12
@@ -86,7 +82,7 @@ interface ValidationErrors {
   endDate?: string;
   title?: string;
   body?: string;
-  cta?: string;
+  redirectUrl?: string;
 }
 
 const validate = (config: ExpirationConfig): ValidationErrors => {
@@ -106,12 +102,9 @@ const validate = (config: ExpirationConfig): ValidationErrors => {
     errors.body = 'Message body is required';
   }
 
-  const ctaText = (config.closedMessage.ctaText ?? '').trim();
   const ctaUrl = (config.closedMessage.ctaUrl ?? '').trim();
-  if ((ctaText && !ctaUrl) || (!ctaText && ctaUrl)) {
-    errors.cta = 'Set both button text and URL, or leave both empty';
-  } else if (ctaUrl && !isValidUrl(ctaUrl)) {
-    errors.cta = 'Enter a valid URL (including https://)';
+  if (ctaUrl && !isValidUrl(ctaUrl)) {
+    errors.redirectUrl = 'Enter a valid URL starting with https://';
   }
 
   return errors;
@@ -120,55 +113,70 @@ const validate = (config: ExpirationConfig): ValidationErrors => {
 const ExpirySettings: React.FC<Props> = ({ survey }) => {
   const dispatch = useAppDispatch();
 
-  // Config is derived directly from the persisted survey in Redux. Every
-  // change dispatches `patchExpiration`, which writes back to the persisted
-  // store — so the form, preview, and refresh-restored state all share one
-  // source of truth.
-  const config = useMemo<ExpirationConfig>(
+  // The persisted config (source of truth from Redux). The form edits a local
+  // `draft` copy; Save commits the draft back via `patchExpiration`, Cancel
+  // discards it. CTAs only surface when draft diverges from baseline.
+  const baseline = useMemo<ExpirationConfig>(
     () => (survey.expiration ? { ...DEFAULT_CONFIG, ...survey.expiration } : { ...DEFAULT_CONFIG }),
     [survey.expiration]
   );
 
+  const [draft, setDraft] = useState<ExpirationConfig>(baseline);
+
+  // Re-sync draft when the persisted config changes externally (e.g. after a
+  // Close Now / Reopen action elsewhere). Skip while the user has unsaved
+  // edits to avoid clobbering in-progress changes.
+  const isDirty = useMemo(
+    () => JSON.stringify(draft) !== JSON.stringify(baseline),
+    [draft, baseline]
+  );
+  useEffect(() => {
+    if (!isDirty) setDraft(baseline);
+  }, [baseline, isDirty]);
+
+  const config = draft;
+
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
   const datePickerFieldRef = useRef<HTMLDivElement>(null);
-  const timePickerFieldRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!showDatePicker && !showTimePicker) return;
+    if (!showDatePicker) return;
     const handleOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-      if (showDatePicker && datePickerFieldRef.current && !datePickerFieldRef.current.contains(target)) {
+      if (datePickerFieldRef.current && !datePickerFieldRef.current.contains(target)) {
         setShowDatePicker(false);
-      }
-      if (showTimePicker && timePickerFieldRef.current && !timePickerFieldRef.current.contains(target)) {
-        setShowTimePicker(false);
       }
     };
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
-  }, [showDatePicker, showTimePicker]);
+  }, [showDatePicker]);
 
   const errors = validate(config);
+  const hasErrors = Object.keys(errors).length > 0;
 
-  const commit = (next: ExpirationConfig) => {
+  const patch = <K extends keyof ExpirationConfig>(key: K, value: ExpirationConfig[K]) => {
+    setDraft(prev => ({ ...prev, [key]: value }));
+  };
+
+  const patchMsg = (field: keyof ExpirationConfig['closedMessage'], value: string) => {
+    setDraft(prev => ({ ...prev, closedMessage: { ...prev.closedMessage, [field]: value } }));
+  };
+
+  const patchNotif = (field: keyof ExpirationConfig['notifications'], value: boolean) => {
+    setDraft(prev => ({ ...prev, notifications: { ...prev.notifications, [field]: value } }));
+  };
+
+  const handleSave = () => {
+    if (hasErrors) return;
     dispatch(surveyActions.patchExpiration({
       surveyId: survey.id,
-      config: next,
+      config: draft,
       actor: survey.owner,
     }));
   };
 
-  const patch = <K extends keyof ExpirationConfig>(key: K, value: ExpirationConfig[K]) => {
-    commit({ ...config, [key]: value });
-  };
-
-  const patchMsg = (field: keyof ExpirationConfig['closedMessage'], value: string) => {
-    commit({ ...config, closedMessage: { ...config.closedMessage, [field]: value } });
-  };
-
-  const patchNotif = (field: keyof ExpirationConfig['notifications'], value: boolean) => {
-    commit({ ...config, notifications: { ...config.notifications, [field]: value } });
+  const handleCancel = () => {
+    setDraft(baseline);
   };
 
   const timeParts = isoToTimeParts(config.endDate);
@@ -185,29 +193,6 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
     patch('endDate', mergeDateAndTime(parsed.toISOString(), timeParts));
   };
 
-  const handleTimeChange = (
-    option: { value: number | string; label: string },
-    field: 'hours' | 'minutes' | 'meridiem'
-  ) => {
-    const baseIso = config.endDate ?? new Date().toISOString();
-    const next: TimeParts = { ...timeParts };
-    if (field === 'hours') next.hours = Number(option.value);
-    else if (field === 'minutes') next.minutes = Number(option.value);
-    else next.meridiem = String(option.value).toLowerCase() === 'pm' ? 'pm' : 'am';
-    patch('endDate', mergeDateAndTime(baseIso, next));
-  };
-
-  const hoursLeft = config.endDate
-    ? (new Date(config.endDate).getTime() - Date.now()) / 3600000
-    : null;
-
-  const graceLabel = GRACE_PERIOD_OPTIONS.find(o => o.value === config.gracePeriodHours)?.label
-    ?? `${config.gracePeriodHours}h`;
-
-  const isWarn = hoursLeft !== null && hoursLeft <= 72 && hoursLeft > 0;
-  const isPast = hoursLeft !== null && hoursLeft <= 0;
-  // Errors are surfaced live — the form auto-saves, so every keystroke
-  // reflects the validation state of the current persisted config.
   const showFieldError = (k: keyof ValidationErrors) => Boolean(errors[k]);
 
   return (
@@ -215,25 +200,35 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
       <div className={styles.expiryLeft}>
 
       {/* ── Status banner (Aero slim warning/info banner) ──── */}
-      {config.enabled && config.endDate && (
-        <div className={`${styles.banner} ${isWarn || isPast ? styles.bannerWarn : styles.bannerInfo}`}>
-          <span className={styles.bannerIcon}>
-            {isWarn || isPast
-              ? <IconWarning size={16} color="#f57c00" />
-              : <IconInfo size={20} color="#1976d2" />}
-          </span>
-          <p className={styles.bannerMessage}>
-            {'Survey closes on '}
-            <strong>{fmt(config.endDate)}</strong>
-            {` (${config.timezone}) · Grace period: `}
-            <strong>{config.gracePeriodEnabled ? graceLabel : 'off'}</strong>
-          </p>
-        </div>
-      )}
+      {/* Banner reflects the saved state so users don't see a misleading
+         "Survey closes on X" line while their changes are still in draft. */}
+      {(() => {
+        if (!baseline.enabled || !baseline.endDate) return null;
+        const savedHoursLeft = (new Date(baseline.endDate).getTime() - Date.now()) / 3600000;
+        const savedWarn = savedHoursLeft <= 72 && savedHoursLeft > 0;
+        const savedPast = savedHoursLeft <= 0;
+        const savedGraceLabel = GRACE_PERIOD_OPTIONS.find(o => o.value === baseline.gracePeriodHours)?.label
+          ?? `${baseline.gracePeriodHours}h`;
+        return (
+          <div className={`${styles.banner} ${savedWarn || savedPast ? styles.bannerWarn : styles.bannerInfo}`}>
+            <span className={styles.bannerIcon}>
+              {savedWarn || savedPast
+                ? <IconWarning size={16} color="#f57c00" />
+                : <IconInfo size={20} color="#1976d2" />}
+            </span>
+            <p className={styles.bannerMessage}>
+              {'Survey closes on '}
+              <strong>{fmt(baseline.endDate)}</strong>
+              {` (${baseline.timezone}) · Grace period: `}
+              <strong>{baseline.gracePeriodEnabled ? savedGraceLabel : 'off'}</strong>
+            </p>
+          </div>
+        );
+      })()}
 
       {/* ── Main settings card ────────────────────────────── */}
       <div className={styles.card}>
-        <div className={styles.cardHeader}>
+        <div className={`${styles.cardHeader} ${config.enabled ? styles.cardHeaderExpanded : ''}`}>
           <div className={styles.cardHeaderText}>
             <h2 className={styles.cardTitle}>Survey Expiration</h2>
             <p className={styles.cardDesc}>Control when your survey is available to respondents</p>
@@ -254,9 +249,9 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               <div className={styles.fieldGrid}>
                 <div className={styles.fieldGroup}>
                   <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>End Date</span>
-                    <Tooltip text="Survey will automatically close on this date" position="right" hideOnScroll>
-                      <button type="button" className={styles.infoIconBtn} aria-label="End Date info">
+                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>End date</span>
+                    <Tooltip text="The survey closes automatically on this date" position="right" hideOnScroll>
+                      <button type="button" className={styles.infoIconBtn} aria-label="End date info">
                         <IconInfo size={14} />
                       </button>
                     </Tooltip>
@@ -290,7 +285,6 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                           cancelCalendarPopup={() => setShowDatePicker(false)}
                           closeOnClickOutside={() => setShowDatePicker(false)}
                           dynamicClass="profile-datepicker"
-                          insidePopup
                           isRequired
                         />
                       </div>
@@ -301,39 +295,8 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
 
                 <div className={styles.fieldGroup}>
                   <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Time</span>
-                    <Tooltip text="Time at which the survey closes" position="right" hideOnScroll>
-                      <button type="button" className={styles.infoIconBtn} aria-label="Time info">
-                        <IconInfo size={14} />
-                      </button>
-                    </Tooltip>
-                  </div>
-                  <div className={styles.datePickerField} ref={timePickerFieldRef}>
-                    <FormInput
-                      name="endTime"
-                      type="text"
-                      value={config.endDate ? fmtTimeOnly(config.endDate) : ''}
-                      placeholder="Select time"
-                      onClick={() => setShowTimePicker(true)}
-                      onFocus={() => setShowTimePicker(true)}
-                      showLeftIcon
-                      customIconClass="icon_phoenix-clock"
-                      readOnly
-                    />
-                    {showTimePicker && (
-                      <div className={styles.datePickerPopup}>
-                        <TimePicker
-                          timeObject={timeParts}
-                          changeTime={handleTimeChange}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.fieldGroup}>
-                  <div className={styles.fieldLabelRow}>
                     <span className={styles.fieldLabel}>Timezone</span>
-                    <Tooltip text="Account timezone · contact admin to change" position="right" hideOnScroll>
+                    <Tooltip text="Account timezone. Contact your admin to change it." position="right" hideOnScroll>
                       <button type="button" className={styles.infoIconBtn} aria-label="Timezone info">
                         <IconInfo size={14} />
                       </button>
@@ -353,10 +316,11 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
             <section className={styles.section}>
               <div className={styles.sectionTitleRow}>
                 <div className={styles.sectionTitleText}>
-                  <h3 className={styles.sectionTitle}>Grace Period for In-Progress Sessions</h3>
+                  <h3 className={styles.sectionTitle}>Grace period for in-progress sessions</h3>
                   <p className={styles.sectionDesc}>
-                    Respondents who answered at least one question before expiry can continue for this duration.
-                    After it ends, partial responses are saved and they see the closed-survey page.
+                    Applies to multi-page surveys. Respondents who answered at least one question before expiry
+                    can continue for this duration. After it ends, we save their partial responses and show
+                    them the closed-survey page.
                   </p>
                 </div>
                 <Toggle
@@ -383,9 +347,9 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
             {/* ── Closed survey message ──────────────────── */}
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Closed Survey Page</h3>
+                <h3 className={styles.sectionTitle}>Closed survey page</h3>
                 <p className={styles.sectionDesc}>
-                  Shown to respondents when the survey is no longer accepting responses
+                  Respondents see this when the survey stops accepting responses.
                 </p>
               </div>
 
@@ -405,7 +369,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               <div className={styles.fieldGroup}>
                 <TextArea
                   name="closedBody"
-                  label={<>Message Body <span className={styles.requiredAsterisk}>*</span></>}
+                  label={<>Message body <span className={styles.requiredAsterisk}>*</span></>}
                   value={config.closedMessage.body}
                   onChange={(_event: unknown, value: string) => patchMsg('body', String(value ?? ''))}
                   rows={4}
@@ -415,49 +379,38 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 {showFieldError('body') && <span className={styles.errorText}>{errors.body}</span>}
               </div>
 
-              <div className={styles.fieldGrid}>
-                <div className={styles.fieldGroup}>
-                  <FormInput
-                    name="ctaText"
-                    type="text"
-                    label="Button Text"
-                    placeholder="Enter text"
-                    value={config.closedMessage.ctaText ?? ''}
-                    onChange={(_event: unknown, value: string) => patchMsg('ctaText', String(value ?? ''))}
-                  />
-                </div>
-                <div className={styles.fieldGroup}>
-                  <FormInput
-                    name="ctaUrl"
-                    type="text"
-                    label="Redirect URL"
-                    placeholder="https://aspendental.com"
-                    value={config.closedMessage.ctaUrl ?? ''}
-                    onChange={(_event: unknown, value: string) => patchMsg('ctaUrl', String(value ?? ''))}
-                  />
-                </div>
+              <div className={styles.fieldGroup}>
+                <FormInput
+                  name="ctaUrl"
+                  type="text"
+                  label="Auto-redirect URL"
+                  placeholder="https://aspendental.com"
+                  value={config.closedMessage.ctaUrl ?? ''}
+                  onChange={(_event: unknown, value: string) => patchMsg('ctaUrl', String(value ?? ''))}
+                />
+                <span className={styles.hint}>
+                  When set, we redirect respondents to this URL after a short delay.
+                </span>
+                {showFieldError('redirectUrl') && <span className={styles.errorText}>{errors.redirectUrl}</span>}
               </div>
-              {showFieldError('cta') && <span className={styles.errorText}>{errors.cta}</span>}
             </section>
 
             {/* ── Email notifications ────────────────────── */}
             <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Email Notifications</h3>
-                <p className={styles.sectionDesc}>
-                  Sent to the survey owner ({survey.owner})
-                </p>
-              </div>
-
-              <label className={styles.checkboxRow}>
-                <FormInput
-                  name="notifEnabled"
-                  type="checkbox"
+              <div className={styles.sectionTitleRow}>
+                <div className={styles.sectionTitleText}>
+                  <h3 className={styles.sectionTitle}>Email notifications</h3>
+                  <p className={styles.sectionDesc}>
+                    Sent to the survey owner ({survey.owner}).
+                  </p>
+                </div>
+                <Toggle
+                  name="notif-enabled"
                   checked={config.notifications.enabled}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => patchNotif('enabled', e.target.checked)}
+                  onChange={(_: unknown, e: { target: { checked: boolean } }) => patchNotif('enabled', e.target.checked)}
+                  roundedToggle
                 />
-                <span>Enable expiration notifications</span>
-              </label>
+              </div>
 
               {config.notifications.enabled && (
                 <div className={styles.checkIndent}>
@@ -482,6 +435,13 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
 
         </div>
 
+        {isDirty && (
+          <div className={styles.formFooter}>
+            <Button theme="secondary" label="Cancel" onClick={handleCancel} />
+            <Button theme="primary" label="Save changes" onClick={handleSave} disabled={hasErrors} />
+          </div>
+        )}
+
       </div>
 
       </div>
@@ -499,28 +459,14 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               <p className={styles.previewBody}>
                 {config.closedMessage.body || 'Thank you for your interest.'}
               </p>
-              {/* Preview button mirrors the CTA Button Text field exactly —
-                 whatever the user types is what shows on the button. Click
-                 opens the Redirect URL when one is set, otherwise the
-                 button is non-clickable. */}
               {(() => {
-                const label = config.closedMessage.ctaText ?? '';
                 const url = (config.closedMessage.ctaUrl ?? '').trim();
-                return url
-                  ? (
-                    <a
-                      className={styles.previewCta}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    <span className={styles.previewCta} aria-disabled="true">
-                      {label}
-                    </span>
-                  );
+                if (!url) return null;
+                return (
+                  <p className={styles.previewRedirect}>
+                    Redirecting you to <strong>{url}</strong> in a few seconds…
+                  </p>
+                );
               })()}
             </div>
           </div>

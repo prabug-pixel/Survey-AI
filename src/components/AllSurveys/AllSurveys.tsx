@@ -204,7 +204,7 @@ const AllSurveys: React.FC = () => {
 
           {sorted.length === 0 && (
             <div className={styles.emptyState}>
-              No surveys yet. Click <strong>Create survey</strong> to get started.
+              No surveys yet. Select <strong>Create survey</strong> to start.
             </div>
           )}
         </div>

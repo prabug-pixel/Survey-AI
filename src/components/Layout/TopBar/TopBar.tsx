@@ -7,6 +7,7 @@ const isMarketingAutomationPath = (pathname: string) =>
 
 const productLabelFor = (pathname: string): string | null => {
   if (isMarketingAutomationPath(pathname)) return 'Marketing Automation AI';
+  if (pathname.startsWith('/surveys')) return 'Surveys AI';
   return null;
 };
 

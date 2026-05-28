@@ -39,14 +39,14 @@ const TILES: SettingTile[] = [
   {
     key: 'placeholder',
     title: 'Survey appearance',
-    description: "Customize this survey's appearance to match your business' branding.",
+    description: "Customize the appearance to match your branding.",
     icon: <SurveyAppearanceIllustration size={100} />,
     disabled: true,
   },
   {
     key: 'placeholder',
     title: 'Email notifications',
-    description: 'Setup rules to trigger email alerts when a response is received.',
+    description: 'Set up rules to trigger email alerts when someone responds.',
     icon: <EmailNotificationsIllustration size={100} />,
     disabled: true,
   },
@@ -60,14 +60,14 @@ const TILES: SettingTile[] = [
   {
     key: 'placeholder',
     title: 'Auto reply',
-    description: 'Configure and send automatic email replies to respondents upon survey completion.',
+    description: 'Set up automatic email replies when respondents complete the survey.',
     icon: <AutoReplyIllustration size={100} />,
     disabled: true,
   },
   {
     key: 'expiry',
     title: 'Expiry settings',
-    description: 'Control when this survey closes and what respondents see afterwards.',
+    description: 'Control when this survey closes and what respondents see after.',
     icon: <ExpirySettingsIllustration size={100} />,
   },
 ];

@@ -5,22 +5,18 @@ import { surveyActions } from '../../store/surveySlice';
 import type { SurveyResponse } from '../../types/survey.types';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
 import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
-import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
-import DatePicker from '@birdeye/elemental/core/components/DatePicker';
 import {
   IconArrowLeft,
   IconChevronDown,
   IconChevronUp,
   IconExternalLink,
   IconMoreVert,
-  IconFilter,
   IconLink,
   IconCode,
   IconSend,
   IconCopy,
   IconBarChart,
   IconClock,
-  IconInfo,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
 import EditSettings from './EditSettings';
@@ -100,7 +96,6 @@ const SurveyDetails: React.FC = () => {
   const [auditDrawerOpen, setAuditDrawerOpen] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
-  const [reopenEndDate, setReopenEndDate] = useState('');
 
   const rowMenuRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -118,7 +113,7 @@ const SurveyDetails: React.FC = () => {
     return (
       <div className={styles.notFound}>
         <p>Survey not found.</p>
-        <button className={styles.notFoundBtn} onClick={() => navigate('/surveys')}>Back to All Surveys</button>
+        <button className={styles.notFoundBtn} onClick={() => navigate('/surveys')}>Back to all surveys</button>
       </div>
     );
   }
@@ -168,11 +163,9 @@ const SurveyDetails: React.FC = () => {
   const handleReopen = () => {
     dispatch(surveyActions.reopenSurvey({
       surveyId: survey.id,
-      newEndDate: reopenEndDate || undefined,
       actor: survey.owner,
     }));
     setReopenDialogOpen(false);
-    setReopenEndDate('');
   };
 
   // Seed audit log entries for surveys without any
@@ -231,8 +224,6 @@ const SurveyDetails: React.FC = () => {
             {actionsOpen && (
               <div className={styles.actionsDropdown}>
                 <button className={styles.actionsItem} onClick={handleEdit}>Edit</button>
-                <button className={styles.actionsItem} onClick={() => { setActionsOpen(false); setActiveTab('distribute'); }}>Distribute</button>
-                <button className={styles.actionsItem}>Duplicate</button>
                 {isRunning && (
                   <button className={`${styles.actionsItem} ${styles.warnItem}`} onClick={() => { setActionsOpen(false); setCloseConfirmOpen(true); }}>
                     Close now
@@ -247,9 +238,6 @@ const SurveyDetails: React.FC = () => {
               </div>
             )}
           </div>
-          <button className={styles.filterBtn} aria-label="Filter">
-            <IconFilter size={20} color="#555" />
-          </button>
         </div>
       </div>
 
@@ -510,60 +498,31 @@ const SurveyDetails: React.FC = () => {
       {/* ── Close Confirm Dialog (Aero popup pattern) ─────── */}
       <ConfirmDialog
         isOpen={closeConfirmOpen}
-        title="Close survey"
+        title="Close this survey?"
         onClose={() => setCloseConfirmOpen(false)}
-        primaryLabel="Close"
+        primaryLabel="Close survey"
         primaryTheme="primary"
         onPrimary={handleCloseNow}
       >
         <p>
-          You're closing the {survey.title}. All in-progress sessions will end now.
-          You can reopen the survey later.
+          You're closing {survey.title}. All in-progress sessions will end.
+          You can reopen it later.
         </p>
       </ConfirmDialog>
 
       {/* ── Reopen Dialog (Aero popup pattern) ───────────── */}
       <ConfirmDialog
         isOpen={reopenDialogOpen}
-        title="Reopen Survey"
+        title="Reopen this survey?"
         onClose={() => setReopenDialogOpen(false)}
-        primaryLabel="Reopen Survey"
+        primaryLabel="Reopen survey"
         onPrimary={handleReopen}
       >
-        <p>Set a new end date to reopen this survey, or leave blank to reopen with no expiration.</p>
         {survey.expiration?.endDate && (
           <p className={styles.modalMeta}>Previously expired: <strong>{fmtDate(survey.expiration.endDate)}</strong></p>
         )}
-        <div className={styles.modalField}>
-          <div className={styles.modalLabelRow}>
-            <span className={styles.modalLabel}>New End Date</span>
-            <Tooltip text="Leave empty to reopen without setting a new expiration" position="right" hideOnScroll>
-              <button type="button" className={styles.modalInfoBtn} aria-label="New End Date info">
-                <IconInfo size={14} />
-              </button>
-            </Tooltip>
-          </div>
-          <DatePicker
-            name="reopenEndDate"
-            startDt={reopenEndDate || undefined}
-            range={false}
-            showTimePicker
-            disablePastDates
-            enableFutureDates
-            showApplyButtons={false}
-            inlineApplyButtonTrigger
-            sendDateTime={(startDt) => {
-              if (!startDt) {
-                setReopenEndDate('');
-                return;
-              }
-              const parsed = new Date(startDt);
-              setReopenEndDate(Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString());
-            }}
-          />
-        </div>
         <p className={styles.modalMeta}>
-          Previously-issued links resume immediately. This action will be logged.
+          Previously-issued links resume immediately. We'll log this change.
         </p>
       </ConfirmDialog>
 
