@@ -318,9 +318,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 <div className={styles.sectionTitleText}>
                   <h3 className={styles.sectionTitle}>Grace period for in-progress sessions</h3>
                   <p className={styles.sectionDesc}>
-                    Applies to multi-page surveys. Respondents who answered at least one question before expiry
-                    can continue for this duration. After it ends, we save their partial responses and show
-                    them the closed-survey page.
+                    Respondents who started before closing this survey get extra time to finish and their partial responses are saved
                   </p>
                 </div>
                 <Toggle
