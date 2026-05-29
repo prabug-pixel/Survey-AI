@@ -36,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'appointments', icon: AppointmentsIcon,         label: 'Appointments' },
   { id: 'social',       icon: SocialIcon,               label: 'Social' },
   { id: 'surveys',      icon: SurveysIcon,              label: 'Surveys',    path: '/surveys' },
-  { id: 'ticketing',    icon: TicketingIcon,            label: 'Ticketing' },
+  { id: 'ticketing',    icon: TicketingIcon,            label: 'Ticketing',  path: '/ticketing' },
   { id: 'contacts',     icon: ContactsIcon,             label: 'Contacts' },
   { id: 'campaigns',    icon: CampaignsIcon,            label: 'Campaigns' },
   { id: 'automation',   icon: MarketingAutomationIcon,  label: 'Marketing Automation' },
@@ -61,6 +61,7 @@ const Sidebar: React.FC = () => {
     // so highlight the automation icon while the user is in that flow.
     if (/^\/surveys\/[^/]+\/campaigns(\/|$)/.test(location.pathname)) return 'automation';
     if (location.pathname.startsWith('/surveys')) return 'surveys';
+    if (location.pathname.startsWith('/ticketing')) return 'ticketing';
     return null;
   };
 

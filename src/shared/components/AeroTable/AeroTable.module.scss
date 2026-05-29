@@ -1,0 +1,166 @@
+// ============================================================
+// AeroTable styles — every value here is taken directly from
+// the Aero Design System Figma (Table frame 2239:21987).
+// Do not introduce new tokens here; bind to Aero variables only.
+// ============================================================
+@use '../../../styles/variables' as *;
+
+// Tokens lifted from the Aero variable definitions.
+$aero-bg:                $color-white;            // bg/primary/0
+$aero-border:            #eaeaea;                 // borders/primary/1
+$aero-text-primary:      #212121;                 // text/onLightSurface/Primary
+$aero-text-secondary:    #555;                    // text/onLightSurface/Secondary
+$aero-row-hover:         #fafafa;                 // implicit "Hover=Yes" tint
+$aero-corner-sm:         4px;                     // Corner Radius/sm (Default-Web)
+$aero-corner-lg:         12px;                    // Corner Radius/lg
+$aero-corner-xl:         16px;                    // Corner Radius/xl
+
+.container {
+  background: $aero-bg;
+  // Aero spec: 24 px horizontal canvas padding. Callers that have
+  // their own page padding can set fullWidth=false and zero this
+  // out with their own wrapper, but the default keeps parity with
+  // the design.
+  padding: 0 24px;
+  overflow-x: auto;
+}
+
+.fullWidth { width: 100%; }
+
+// Opt-in for callers whose own page wrapper already supplies the
+// 24 px horizontal padding — keeps the table flush with the page
+// chrome instead of doubling the inset.
+.flush { padding-left: 0; padding-right: 0; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+  // Roboto in Figma uses variable axis 'wdth' 100. The web fonts
+  // we ship don't expose a variable axis, so a regular weight maps
+  // 1:1 — no special font-variation-settings needed.
+}
+
+// ── Header ────────────────────────────────────────────────────
+.thead { background: $aero-bg; }
+
+.tr { background: $aero-bg; }
+
+.th {
+  text-align: left;
+  vertical-align: middle;
+  height: 48px;
+  padding: $aero-corner-xl $aero-corner-sm; // 16px / 4px per Figma
+  border-bottom: 1px solid $aero-border;
+  color: $aero-text-secondary;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.24px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.thLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  min-width: 0;
+}
+
+.thSortable {
+  cursor: pointer;
+  &:hover { color: $aero-text-primary; }
+}
+
+.thSorted {
+  color: $aero-text-primary;
+  font-weight: 500;
+}
+
+.sortIcon {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  // Figma uses 20px chevrons; ours are 16px native and read at the
+  // same optical size as the 12px label without overpowering it.
+}
+
+.thAction {
+  width: 56px;
+  padding: 0;
+}
+
+// ── Body ──────────────────────────────────────────────────────
+.tbody { background: $aero-bg; }
+
+.bodyRow {
+  background: $aero-bg;
+  transition: background 120ms ease;
+}
+
+.hoverable .bodyRow:hover {
+  background: $aero-row-hover;
+}
+
+.clickable { cursor: pointer; }
+
+.td {
+  vertical-align: middle;
+  height: 48px;
+  padding: $aero-corner-lg $aero-corner-sm; // 12px / 4px per Figma
+  border-bottom: 1px solid $aero-border;
+  color: $aero-text-primary;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tdAction {
+  width: 56px;
+  padding: 0 $aero-corner-sm;
+  text-align: right;
+}
+
+// Row actions stay hidden until the row is hovered, per Aero spec.
+// Keyboard users can still reach them via :focus-within on the row.
+.rowActionWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  justify-content: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease;
+}
+
+.bodyRow:hover .rowActionWrap,
+.bodyRow:focus-within .rowActionWrap {
+  opacity: 1;
+  visibility: visible;
+}
+
+// ── Empty state ───────────────────────────────────────────────
+.emptyRow { background: $aero-bg; }
+
+.emptyCell {
+  text-align: center;
+  padding: 48px 24px;
+  border-bottom: 1px solid $aero-border;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: $aero-text-primary;
+}
+
+.emptyDescription {
+  margin-top: $spacing-4;
+  font-size: 12px;
+  color: $aero-text-secondary;
+}

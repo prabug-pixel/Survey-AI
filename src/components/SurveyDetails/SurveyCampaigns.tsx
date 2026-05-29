@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';

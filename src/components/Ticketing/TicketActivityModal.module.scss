@@ -1,0 +1,328 @@
+@use '../../styles/variables' as *;
+
+// ── Header bar ─────────────────────────────────────────────
+// Matches the Aero pattern used in ConfirmDialog (16/24 line height,
+// neutral gray icon buttons), but adds a row of inline actions
+// (open-in-new, kebab, close) so the standalone elemental close
+// icon is suppressed in the parent.
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-16;
+  margin: -$spacing-12 -$spacing-12 $spacing-16;
+  padding: 0 0 $spacing-12;
+  border-bottom: 1px solid $color-border-light;
+}
+
+.headerTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  min-width: 0;
+  flex: 1;
+}
+
+.ticketId {
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: $color-gray-900;
+  letter-spacing: -0.28px;
+  flex-shrink: 0;
+}
+
+.severityPill {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  padding: 2px $spacing-8;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.severityPillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: $radius-full;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: $color-gray-100; }
+}
+
+// ── Ticket head (above body grid) ──────────────────────────
+.ticketHead {
+  display: flex;
+  gap: $spacing-12;
+  align-items: center;
+  margin-bottom: $spacing-16;
+}
+
+// ── Two-column body ────────────────────────────────────────
+.body {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: $spacing-24;
+  align-items: start;
+}
+
+// ── Main column ────────────────────────────────────────────
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+  min-width: 0;
+}
+
+.ticketIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  background: $color-gray-100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ticketHeadText {
+  flex: 1;
+  min-width: 0;
+}
+
+.ticketTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $color-gray-900;
+  letter-spacing: -0.32px;
+  line-height: 22px;
+  margin: 0 0 $spacing-4;
+}
+
+.ticketMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-base;
+  color: $color-gray-700;
+}
+
+.metaSep {
+  color: $color-gray-400;
+}
+
+.metaDue {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.ticketBody {
+  margin: 0;
+  font-size: $font-size-md;
+  color: $color-gray-800;
+  line-height: $line-height-relaxed;
+}
+
+.divider {
+  height: 1px;
+  background: $color-border-light;
+}
+
+// ── Activity feed ──────────────────────────────────────────
+.sectionLabel {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-gray-600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.activityItem {
+  display: flex;
+  gap: $spacing-12;
+  align-items: flex-start;
+}
+
+.activityAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-white;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.tone-green { background: #2e7d32; }
+.tone-red   { background: #d32f2f; }
+.tone-blue  { background: #1976d2; }
+.tone-gray  { background: $color-gray-500; }
+
+.activityText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.activityMessage {
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  line-height: $line-height-normal;
+}
+
+.activityTime {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+// ── Comment block ──────────────────────────────────────────
+.commentBlock {
+  border: 1px solid $color-border-light;
+  border-radius: $radius-md;
+  padding: $spacing-12;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+  background: $color-gray-50;
+}
+
+.commentFooter {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// ── Side rail ──────────────────────────────────────────────
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-20;
+  padding-left: $spacing-20;
+  border-left: 1px solid $color-border-light;
+}
+
+.sideGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.sideGroupLabel {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-gray-600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.sideField {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.sideFieldLabel {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-gray-700;
+  letter-spacing: -0.24px;
+}
+
+.staticField {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 36px;
+  padding: 0 $spacing-12;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+}
+
+.staticFieldPlain {
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  padding: $spacing-4 0;
+}
+
+// ── Watchers row (avatar + input) ──────────────────────────
+.watcherRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.watcherInput {
+  flex: 1;
+  min-width: 0;
+}
+
+// ── Custom field bits ──────────────────────────────────────
+.requiredStar {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  cursor: pointer;
+
+  input { margin: 0; }
+}
+
+.miniAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: $radius-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  color: $color-white;
+  flex-shrink: 0;
+}

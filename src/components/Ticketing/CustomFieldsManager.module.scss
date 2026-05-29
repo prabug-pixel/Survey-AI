@@ -1,0 +1,144 @@
+@use '../../styles/variables' as *;
+
+// Page chrome only. The table itself is owned by AeroTable and
+// must not be styled from here — anything inside the table belongs
+// in the AeroTable SCSS module so the Aero spec stays the source of
+// truth.
+
+.page {
+  padding: $spacing-24;
+  background: $color-white;
+  min-height: 100%;
+}
+
+// ── Breadcrumb + title ─────────────────────────────────────
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-md;
+  color: $color-gray-700;
+  margin-bottom: $spacing-12;
+}
+
+.crumbLink {
+  color: #1976d2;
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.crumbSep { color: $color-gray-400; }
+
+.crumbCurrent {
+  color: $color-gray-900;
+  font-weight: 500;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-16;
+  margin-bottom: $spacing-20;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: $color-gray-900;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.titleActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+}
+
+// ── Search input ───────────────────────────────────────────
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 36px;
+  padding: 0 $spacing-12;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+
+  input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: $font-size-md;
+    color: $color-gray-900;
+    min-width: 180px;
+
+    &::placeholder { color: $color-gray-500; }
+  }
+}
+
+.createBtn {
+  height: 36px;
+  padding: 0 $spacing-16;
+  border: 0;
+  border-radius: $radius-sm;
+  background: #1976d2;
+  color: $color-white;
+  font-size: $font-size-md;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: #1565c0; }
+}
+
+// ── Inline cell content helpers ────────────────────────────
+// These render inside AeroTable cells but are content, not chrome —
+// so they live with their owning page rather than the table.
+
+.fieldName {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-weight: 400;
+}
+
+.builtInTag {
+  display: inline-block;
+  padding: 2px $spacing-8;
+  background: #e3f2fd;
+  color: #1565c0;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.hiddenTag {
+  display: inline-block;
+  padding: 2px $spacing-8;
+  background: $color-gray-100;
+  color: $color-gray-700;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.rowIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: $color-gray-100; }
+  &:disabled { cursor: not-allowed; opacity: 0.4; }
+}

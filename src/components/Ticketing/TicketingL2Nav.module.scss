@@ -1,0 +1,91 @@
+@use '../../styles/variables' as *;
+
+// Matches SurveyL2Nav so the two product nav panels feel cohesive.
+.l2Nav {
+  width: 222px;
+  height: 100vh;
+  background: #fafafa;
+  border-right: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.productTitle {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 $spacing-24;
+  font-size: $font-size-xl;
+  font-weight: 400;
+  color: $color-gray-900;
+  letter-spacing: -0.36px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.navItems {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  padding: $spacing-8 $spacing-16;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+}
+
+.navItem,
+.createBtn,
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  height: 28px;
+  padding: $spacing-4 $spacing-8;
+  border-radius: $radius-sm;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: $color-gray-900;
+  letter-spacing: -0.28px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: background $transition-fast;
+  flex-shrink: 0;
+
+  &:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.sectionHeader {
+  margin-top: $spacing-8;
+  color: $color-gray-600;
+  font-size: $font-size-sm;
+  text-transform: none;
+}
+
+.sectionLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.navLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active {
+  background: #e5e9f0;
+}
