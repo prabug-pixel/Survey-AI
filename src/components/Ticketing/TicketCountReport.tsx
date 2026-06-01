@@ -12,6 +12,7 @@ import AeroTable from '../../shared/components/AeroTable';
 import type { AeroColumn } from '../../shared/components/AeroTable';
 import AeroBarChart, { AERO_CHART_COLORS } from '../../shared/components/AeroBarChart';
 import type { AeroBarDatum, AeroBarSeries } from '../../shared/components/AeroBarChart';
+import { IconCustomize, IconMoreVertical } from '../../shared/Icons/Icons';
 import styles from './ReportPages.module.scss';
 
 const formatCount = (n: number): string => {
@@ -161,7 +162,24 @@ const ReportCard: React.FC<ReportCardProps> = ({ title, badge, headline, range =
         {title}
         {badge && <span className={styles.cardBadge}>{badge}</span>}
       </h2>
-      <button className={styles.rangeChip} type="button">{range}</button>
+      <div className={styles.headerActions}>
+        <button className={styles.rangeChip} type="button">{range}</button>
+        <button
+          className={styles.iconBtn}
+          type="button"
+          aria-label={`Customize ${title}`}
+        >
+          <IconCustomize size={16} color="#212121" />
+        </button>
+        <button
+          className={styles.iconBtn}
+          type="button"
+          aria-label={`More options for ${title}`}
+          aria-haspopup="menu"
+        >
+          <IconMoreVertical size={16} color="#212121" />
+        </button>
+      </div>
     </header>
 
     <div className={styles.headlineRow}>
@@ -332,7 +350,6 @@ const TicketCountReport: React.FC = () => {
 
       <ReportCard
         title="Tickets closed by user over time"
-        badge="NEW"
         range="Last 30 days"
         headline={[{ value: String(grandTotal), label: 'Total tickets closed' }]}
       >

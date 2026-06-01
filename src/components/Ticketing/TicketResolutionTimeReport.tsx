@@ -8,6 +8,7 @@
 import React from 'react';
 import AeroBarChart, { AERO_CHART_COLORS } from '../../shared/components/AeroBarChart';
 import type { AeroBarDatum } from '../../shared/components/AeroBarChart';
+import { IconCustomize, IconMoreVertical } from '../../shared/Icons/Icons';
 import styles from './ReportPages.module.scss';
 
 // Same numeric formatter the screenshots show — `1.7K` for thousands,
@@ -109,7 +110,24 @@ const ReportCard: React.FC<ReportCardProps> = ({ title, headline, range = 'All t
   <section className={styles.reportCard}>
     <header className={styles.cardHeader}>
       <h2 className={styles.cardTitle}>{title}</h2>
-      <button className={styles.rangeChip} type="button">{range}</button>
+      <div className={styles.headerActions}>
+        <button className={styles.rangeChip} type="button">{range}</button>
+        <button
+          className={styles.iconBtn}
+          type="button"
+          aria-label={`Customize ${title}`}
+        >
+          <IconCustomize size={16} color="#212121" />
+        </button>
+        <button
+          className={styles.iconBtn}
+          type="button"
+          aria-label={`More options for ${title}`}
+          aria-haspopup="menu"
+        >
+          <IconMoreVertical size={16} color="#212121" />
+        </button>
+      </div>
     </header>
 
     <div className={styles.headlineRow}>

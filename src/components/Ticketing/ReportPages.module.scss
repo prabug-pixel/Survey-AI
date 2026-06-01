@@ -103,6 +103,40 @@ $aero-border:    #eaeaea;
   &:hover { background: $color-gray-50; }
 }
 
+// ── Chart widget header actions ─────────────────────────────
+// Aero spec: range chip + a customize button + an overflow ("more")
+// button, all 28 × 28 with a 4 px corner radius and a 1 px border.
+// Buttons sit right of the range chip with an 8 px gap.
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $aero-border;
+  border-radius: $radius-sm;
+  background: $color-white;
+  color: #212121;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 120ms ease, border-color 120ms ease;
+
+  &:hover { background: $color-gray-50; }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary, #1976d2);
+    outline-offset: 1px;
+  }
+}
+
 // ── Headline metric row ─────────────────────────────────────
 // Figma headline metric: value "100" 16 px Bold, label 11 px Regular
 // stacked underneath, then horizontal items separated by 24 px.

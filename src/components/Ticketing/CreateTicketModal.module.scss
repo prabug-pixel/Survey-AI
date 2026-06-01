@@ -6,14 +6,13 @@
   align-items: center;
   justify-content: space-between;
   margin: (-$spacing-12) (-$spacing-12) $spacing-16;
-  padding: 0 0 $spacing-12;
-  border-bottom: 1px solid $color-border-light;
+  padding: 0 0 $spacing-12 $spacing-12;
   flex-shrink: 0;
 }
 
 .title {
   font-size: $font-size-lg;
-  font-weight: 600;
+  font-weight: 400;
   color: $color-gray-900;
   letter-spacing: -0.32px;
   margin: 0;
@@ -54,7 +53,7 @@
 
 .sectionLabel {
   font-size: $font-size-md;
-  font-weight: 600;
+  font-weight: 400;
   color: $color-gray-700;
   margin: 0 0 $spacing-4;
 }

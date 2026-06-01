@@ -121,21 +121,31 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
       </div>
 
       <div className={styles.body}>
-        {grouped.map(({ section, fields: sectionFields }) => (
-          <section key={section} className={styles.section}>
-            <h3 className={styles.sectionLabel}>{FIELD_SECTION_LABELS[section]}</h3>
-            <div className={styles.grid}>
-              {sectionFields.map(field => (
-                <FieldRow
-                  key={field.id}
-                  field={field}
-                  value={values[field.id]}
-                  onChange={v => setValue(field.id, v)}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+        {grouped.map(({ section, fields: sectionFields }) => {
+          // Compute which fields should span the full row. A field
+          // spans full width when (a) its type is intrinsically full
+          // (longText / checkbox), or (b) it is the last field in the
+          // section and would otherwise land alone in the left column
+          // — i.e. the section ends on an odd field. This avoids the
+          // trailing white-space gap the Figma calls out.
+          const fullWidthFlags = computeFullWidthFlags(sectionFields);
+          return (
+            <section key={section} className={styles.section}>
+              <h3 className={styles.sectionLabel}>{FIELD_SECTION_LABELS[section]}</h3>
+              <div className={styles.grid}>
+                {sectionFields.map((field, i) => (
+                  <FieldRow
+                    key={field.id}
+                    field={field}
+                    value={values[field.id]}
+                    onChange={v => setValue(field.id, v)}
+                    forceFullWidth={fullWidthFlags[i]}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
 
       <div className={styles.footer}>
@@ -151,6 +161,52 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
   );
 };
 
+// Two-column grid bookkeeping. Walks the fields in order, simulates
+// how they'd flow through a 2-col grid, and promotes any "orphan" to
+// full width. A field is flagged full-width when:
+//   • its type is intrinsically full (longText / checkbox), OR
+//   • it lands in the left column AND the next slot would be a row-
+//     break (next field is intrinsically full OR there is no next).
+//
+// The rule is structural, not positional: it applies to every orphan
+// the section produces — first, middle, or last — so future fields
+// added by admins automatically flow into a clean 2-col layout with
+// no trailing whitespace gaps.
+const isIntrinsicallyFull = (field: CustomField) =>
+  field.type === 'longText' || field.type === 'checkbox';
+
+const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
+  const flags = sectionFields.map(isIntrinsicallyFull);
+
+  let col: 0 | 1 = 0;
+  for (let i = 0; i < sectionFields.length; i++) {
+    if (flags[i]) {
+      // Full-width row consumes both columns, so the next field
+      // resets to column 0.
+      col = 0;
+      continue;
+    }
+
+    if (col === 0) {
+      // Look ahead: if the next slot would force a row break (no
+      // next field, or next field is intrinsically full) this one is
+      // orphaned. Promote it to full width so it never sits with an
+      // empty right-hand neighbour.
+      const next = sectionFields[i + 1];
+      const nextBreaksRow = !next || isIntrinsicallyFull(next);
+      if (nextBreaksRow) {
+        flags[i] = true;
+        col = 0;
+        continue;
+      }
+    }
+
+    col = col === 0 ? 1 : 0;
+  }
+
+  return flags;
+};
+
 // ── Field row ──────────────────────────────────────────────
 // Renders a single configured field. Layout rule: longText fields and
 // checkboxes span the full row; everything else fits the 2-col grid.
@@ -158,10 +214,12 @@ interface FieldRowProps {
   field: CustomField;
   value: string | boolean | undefined;
   onChange: (v: string | boolean) => void;
+  /** When true, render this field across both grid columns. */
+  forceFullWidth?: boolean;
 }
 
-const FieldRow: React.FC<FieldRowProps> = ({ field, value, onChange }) => {
-  const isFullWidth = field.type === 'longText' || field.type === 'checkbox';
+const FieldRow: React.FC<FieldRowProps> = ({ field, value, onChange, forceFullWidth }) => {
+  const isFullWidth = forceFullWidth || isIntrinsicallyFull(field);
 
   if (field.type === 'checkbox') {
     return (
