@@ -123,6 +123,7 @@ const SourcesManager: React.FC = () => {
         columns={columns}
         data={sources}
         getRowKey={s => s.id}
+        resizable
         emptyTitle="No sources yet"
         rowAction={src => (
           <>

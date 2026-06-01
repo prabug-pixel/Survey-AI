@@ -47,6 +47,7 @@ $aero-corner-xl:         16px;                    // Corner Radius/xl
 .tr { background: $aero-bg; }
 
 .th {
+  position: relative;
   text-align: left;
   vertical-align: middle;
   height: 48px;
@@ -89,6 +90,61 @@ $aero-corner-xl:         16px;                    // Corner Radius/xl
 .thAction {
   width: 56px;
   padding: 0;
+}
+
+// ── Column resize handle ──────────────────────────────────────
+// Aero spec (figma 303:58880): a 12 px wide hit area on the right
+// edge of every resizable header. The visible "rail" is a 2 px
+// vertical bar that sits centred in the hit area, idle gray and
+// turning Aero brand-blue on hover or while a drag is in progress.
+.thResizable { }
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  right: -6px;          // overhang so the handle straddles the column edge
+  width: 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  z-index: 1;
+  touch-action: none;   // pointer events take over before native scroll/select
+
+  &:hover .resizeBar,
+  &:focus-visible .resizeBar {
+    background: var(--primary, #1976d2);
+    width: 2px;
+  }
+}
+
+.resizeBar {
+  display: block;
+  width: 1px;
+  height: 60%;
+  background: transparent;
+  transition: background 120ms ease, width 120ms ease;
+}
+
+// When the user is actively dragging, lock the bar in its "active"
+// look so the cue holds even as the cursor leaves the hit area.
+.resizeHandleActive .resizeBar,
+.thResizing .resizeHandle .resizeBar {
+  background: var(--primary, #1976d2);
+  width: 2px;
+}
+
+// During an active resize the column itself takes a faint left/right
+// border tint per the Figma. Keeps the user oriented while dragging.
+.thResizing {
+  background: rgba(25, 118, 210, 0.04);
+}
+
+// Hides the table's outer horizontal scrollbar from collapsing under
+// the dragged column — the container already paints its own.
+.resizable .table {
+  width: 100%;
 }
 
 // ── Body ──────────────────────────────────────────────────────
@@ -142,6 +198,19 @@ $aero-corner-xl:         16px;                    // Corner Radius/xl
 .bodyRow:focus-within .rowActionWrap {
   opacity: 1;
   visibility: visible;
+}
+
+// ── Summary row (pinned under the header) ─────────────────────
+// Sits at the top of <tbody>, above the data rows. Plain white,
+// bold figures, slightly heavier divider so the eye treats it as
+// a header-level row rather than another data row.
+.summaryRow {
+  background: $aero-bg;
+}
+
+.summaryCell {
+  font-weight: 600;
+  border-bottom: 1px solid $aero-border;
 }
 
 // ── Empty state ───────────────────────────────────────────────

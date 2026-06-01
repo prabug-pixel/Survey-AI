@@ -10,15 +10,19 @@ interface NavLink {
   path: string;
 }
 
+// Sources / Assignment rules / SLA rules are kept as back-pocket routes —
+// the pages still mount at /ticketing/settings/{sources,assignment,sla}
+// so direct links work, but they're hidden from the L2 nav for v1.0.
 const SETTINGS_LINKS: NavLink[] = [
-  { label: 'Fields',           path: '/ticketing/settings/fields' },
-  { label: 'Sources',          path: '/ticketing/settings/sources' },
-  { label: 'Assignment rules', path: '/ticketing/settings/assignment' },
-  { label: 'SLA rules',        path: '/ticketing/settings/sla' },
+  { label: 'Fields', path: '/ticketing/settings/fields' },
 ];
 
+// Agent productivity is kept as a back-pocket route — the page still mounts at
+// /ticketing/reports/agent-productivity so direct links work, but it's hidden
+// from the L2 nav for v1.0.
 const REPORTS_LINKS: NavLink[] = [
-  { label: 'Agent productivity', path: '/ticketing/reports/agent-productivity' },
+  { label: 'Ticket resolution time', path: '/ticketing/reports/resolution-time' },
+  { label: 'Ticket count',           path: '/ticketing/reports/ticket-count' },
 ];
 
 const TicketingL2Nav: React.FC = () => {

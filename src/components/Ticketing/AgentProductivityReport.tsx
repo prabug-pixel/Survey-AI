@@ -181,6 +181,7 @@ const AgentProductivityReport: React.FC = () => {
         data={visibleRows}
         getRowKey={r => r.agent}
         hoverable={false}
+        resizable
         emptyTitle="No closed tickets in this range"
       />
     </div>

@@ -374,11 +374,12 @@
   align-items: center;
   justify-content: flex-start;
   gap: $spacing-4;
-  height: 22px;
+  height: 24px;
   padding: 2px $spacing-8;
   border-radius: $radius-sm;
-  font-size: $font-size-sm;
-  font-weight: 500;
-  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 400;
+  // No text-transform — source already renders sentence case
+  // ("Medium severity", "High severity", "Low severity").
   letter-spacing: 0.4px;
 }

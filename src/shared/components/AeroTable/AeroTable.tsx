@@ -18,7 +18,7 @@
 // `data` (rows). Cell content uses `column.render(row)` so each
 // row stays typed without ceremony.
 // ============================================================
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './AeroTable.module.scss';
 import { IconChevronUp, IconChevronDown } from '../../Icons/Icons';
 
@@ -50,6 +50,11 @@ export interface AeroColumn<T> {
   renderHeader?: () => React.ReactNode;
   /** Built-in default sort comparator. Falls back to `row[key]` string compare. */
   sortValue?: (row: T) => string | number;
+  /**
+   * Opt this column out of resize when the table has `resizable` enabled.
+   * Columns are resizable by default whenever the table-level flag is on.
+   */
+  resizable?: boolean;
 }
 
 export interface AeroTableProps<T> {
@@ -83,13 +88,38 @@ export interface AeroTableProps<T> {
   ariaLabel?: string;
   /** Apply a subtle hover row background (default true per Aero spec). */
   hoverable?: boolean;
+  /**
+   * Allow the user to drag-resize column boundaries from the header. Off
+   * by default so existing tables keep their declarative widths; opt-in
+   * per surface (the Aero spec frame "Resize" 303:58880).
+   */
+  resizable?: boolean;
+  /** Minimum pixel width the user can drag a column down to (default 56). */
+  minColumnWidth?: number;
+  /**
+   * Optional summary row pinned to the top of the body — useful for
+   * totals or aggregates that should sit directly under the header
+   * row and stay aligned with the columns. One entry per column, in
+   * column order. Cells render with bold text and a heavier bottom
+   * border to separate them from the data rows below.
+   */
+  summaryRow?: React.ReactNode[];
 }
 
-const buildWidthStyle = (col: AeroColumn<unknown>): React.CSSProperties => {
+const buildWidthStyle = (
+  col: AeroColumn<unknown>,
+  overrideWidth?: number,
+): React.CSSProperties => {
   const style: React.CSSProperties = {};
-  if (col.width !== undefined) style.width = col.width;
-  if (col.minWidth !== undefined) style.minWidth = col.minWidth;
-  if (col.maxWidth !== undefined) style.maxWidth = col.maxWidth;
+  if (overrideWidth !== undefined) {
+    style.width = `${overrideWidth}px`;
+    style.minWidth = `${overrideWidth}px`;
+    style.maxWidth = `${overrideWidth}px`;
+  } else {
+    if (col.width !== undefined) style.width = col.width;
+    if (col.minWidth !== undefined) style.minWidth = col.minWidth;
+    if (col.maxWidth !== undefined) style.maxWidth = col.maxWidth;
+  }
   if (col.align && col.align !== 'left') style.textAlign = col.align;
   return style;
 };
@@ -116,11 +146,65 @@ function AeroTable<T>(props: AeroTableProps<T>) {
     className,
     ariaLabel,
     hoverable = true,
+    resizable = false,
+    minColumnWidth = 56,
+    summaryRow,
   } = props;
 
   // Uncontrolled fallback sort state.
   const [internalSort, setInternalSort] = useState<AeroSortState | null>(null);
   const sort = controlledSort !== undefined ? controlledSort : internalSort;
+
+  // ── Column resize state ──────────────────────────────────────
+  // `colWidths` holds user-overridden widths by column key. We seed the
+  // value lazily from the live DOM measurement on mousedown so the user
+  // can drag from the column's current rendered width — no need to know
+  // it up-front.
+  const [colWidths, setColWidths] = useState<Record<string, number>>({});
+  const [activeResizeKey, setActiveResizeKey] = useState<string | null>(null);
+  const headerRefs = useRef<Record<string, HTMLTableCellElement | null>>({});
+
+  const startResize = useCallback(
+    (colKey: string, e: React.PointerEvent<HTMLSpanElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const headerEl = headerRefs.current[colKey];
+      if (!headerEl) return;
+      const startX = e.clientX;
+      const startWidth = headerEl.getBoundingClientRect().width;
+
+      setActiveResizeKey(colKey);
+
+      const onMove = (ev: PointerEvent) => {
+        const next = Math.max(minColumnWidth, startWidth + (ev.clientX - startX));
+        setColWidths(w => ({ ...w, [colKey]: next }));
+      };
+      const onUp = () => {
+        setActiveResizeKey(null);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    },
+    [minColumnWidth],
+  );
+
+  // Apply a global "resizing" body cursor so the cursor stays
+  // col-resize even when the pointer drifts off the handle.
+  useEffect(() => {
+    if (!activeResizeKey) return;
+    const prevCursor = document.body.style.cursor;
+    const prevSelect = document.body.style.userSelect;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    return () => {
+      document.body.style.cursor = prevCursor;
+      document.body.style.userSelect = prevSelect;
+    };
+  }, [activeResizeKey]);
 
   const handleSort = (col: AeroColumn<T>) => {
     if (!col.sortable) return;
@@ -154,12 +238,20 @@ function AeroTable<T>(props: AeroTableProps<T>) {
     fullWidth ? styles.fullWidth : '',
     flush ? styles.flush : '',
     hoverable ? styles.hoverable : '',
+    resizable ? styles.resizable : '',
     className ?? '',
   ].filter(Boolean).join(' ');
 
+  // `table-layout: fixed` is required so explicit pixel widths on `<th>`
+  // actually constrain the column — the default `auto` layout uses
+  // content size as a hint and will ignore narrow widths when content
+  // doesn't fit. Only flipped when the table opts into resize so other
+  // surfaces keep their content-driven sizing.
+  const tableStyle: React.CSSProperties = resizable ? { tableLayout: 'fixed' } : {};
+
   return (
     <div className={containerClass}>
-      <table className={styles.table} role="table" aria-label={ariaLabel}>
+      <table className={styles.table} role="table" aria-label={ariaLabel} style={tableStyle}>
         <thead className={styles.thead}>
           <tr className={styles.tr}>
             {columns.map(col => {
@@ -167,12 +259,16 @@ function AeroTable<T>(props: AeroTableProps<T>) {
               const ariaSort = isSorted
                 ? (sort?.order === 'asc' ? 'ascending' : 'descending')
                 : (col.sortable ? 'none' : undefined);
+              const canResize = resizable && col.resizable !== false;
+              const userWidth = colWidths[col.key];
+              const isActiveResize = activeResizeKey === col.key;
               return (
                 <th
                   key={col.key}
+                  ref={el => { headerRefs.current[col.key] = el; }}
                   scope="col"
-                  className={`${styles.th} ${isSorted ? styles.thSorted : ''} ${col.sortable ? styles.thSortable : ''}`}
-                  style={buildWidthStyle(col as AeroColumn<unknown>)}
+                  className={`${styles.th} ${isSorted ? styles.thSorted : ''} ${col.sortable ? styles.thSortable : ''} ${canResize ? styles.thResizable : ''} ${isActiveResize ? styles.thResizing : ''}`}
+                  style={buildWidthStyle(col as AeroColumn<unknown>, userWidth)}
                   aria-sort={ariaSort}
                   onClick={col.sortable ? () => handleSort(col) : undefined}
                 >
@@ -186,6 +282,18 @@ function AeroTable<T>(props: AeroTableProps<T>) {
                       </span>
                     )}
                   </span>
+                  {canResize && (
+                    <span
+                      className={`${styles.resizeHandle} ${isActiveResize ? styles.resizeHandleActive : ''}`}
+                      role="separator"
+                      aria-orientation="vertical"
+                      aria-label={`Resize ${col.label} column`}
+                      onPointerDown={e => startResize(col.key, e)}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <span className={styles.resizeBar} aria-hidden />
+                    </span>
+                  )}
                 </th>
               );
             })}
@@ -194,6 +302,20 @@ function AeroTable<T>(props: AeroTableProps<T>) {
         </thead>
 
         <tbody className={styles.tbody}>
+          {summaryRow && (
+            <tr className={`${styles.tr} ${styles.summaryRow}`}>
+              {columns.map((col, i) => (
+                <td
+                  key={col.key}
+                  className={`${styles.td} ${styles.summaryCell}`}
+                  style={buildWidthStyle(col as AeroColumn<unknown>, colWidths[col.key])}
+                >
+                  {summaryRow[i]}
+                </td>
+              ))}
+              {rowAction && <td className={`${styles.td} ${styles.tdAction} ${styles.summaryCell}`} aria-hidden />}
+            </tr>
+          )}
           {rows.length === 0 ? (
             <tr className={styles.emptyRow}>
               <td className={styles.emptyCell} colSpan={columns.length + (rowAction ? 1 : 0)}>
@@ -214,7 +336,7 @@ function AeroTable<T>(props: AeroTableProps<T>) {
                     <td
                       key={col.key}
                       className={styles.td}
-                      style={buildWidthStyle(col as AeroColumn<unknown>)}
+                      style={buildWidthStyle(col as AeroColumn<unknown>, colWidths[col.key])}
                     >
                       {col.render(row)}
                     </td>

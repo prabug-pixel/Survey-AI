@@ -137,6 +137,7 @@ const CustomFieldsManager: React.FC = () => {
         data={filtered}
         getRowKey={f => f.id}
         flush
+        resizable
         emptyTitle="No custom fields yet"
         emptyDescription={<>Click <strong>Create custom field</strong> to add one.</>}
         rowAction={field => {

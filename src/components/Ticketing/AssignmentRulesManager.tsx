@@ -152,6 +152,7 @@ const AssignmentRulesManager: React.FC = () => {
         columns={assignmentColumns}
         data={assignmentRules}
         getRowKey={r => r.id}
+        resizable
         emptyTitle="No assignment rules yet"
         rowAction={rule => (
           <>

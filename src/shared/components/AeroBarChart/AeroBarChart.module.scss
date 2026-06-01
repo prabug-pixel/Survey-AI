@@ -1,0 +1,77 @@
+// ============================================================
+// AeroBarChart styles — values bound to Aero Design System
+// (figma file: xecPAre4cKkeXEdvTig1oI, frames 12549:25717 +
+// 12549:35763). Typography, axis stroke, and gutter measurements
+// mirror those frames directly.
+// ============================================================
+@use '../../../styles/variables' as *;
+
+$aero-axis:           #eaeaea;
+$aero-text-primary:   #212121;
+$aero-text-secondary: #555;
+
+// Figma frame uses Inter (Aero's brand font); SCSS variables route
+// to var(--font-sans) which currently resolves to Roboto. Keep the
+// stack ordered so both sites match the intended hierarchy.
+//
+// `display: inline-block` (not block + width:100%) so the wrapper
+// shrinks to fit its SVG. Combined with the explicit pixel width
+// on the SVG itself this prevents the parent's flex / 100 % width
+// from stretching the chart and squashing categories.
+.chartWrap {
+  display: inline-block;
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+  vertical-align: top;
+}
+
+// Explicit pixel sizing is set inline on the SVG; this only handles
+// presentational defaults.
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.axisLine {
+  stroke: $aero-axis;
+  stroke-width: 1;
+}
+
+// Figma: bar value = 11 px regular, slightly tightened tracking.
+.valueLabel {
+  font-size: 11px;
+  font-weight: 400;
+  fill: $aero-text-primary;
+  letter-spacing: -0.22px;
+}
+
+// Figma: category label = 11 px regular, secondary text.
+.categoryLabel {
+  font-size: 11px;
+  font-weight: 400;
+  fill: $aero-text-secondary;
+  letter-spacing: -0.22px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-16;
+  margin-top: $spacing-12;
+  padding: 0 $spacing-4;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-6;
+  font-size: 11px;
+  color: $aero-text-secondary;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}

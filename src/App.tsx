@@ -11,6 +11,8 @@ import SourcesManager from './components/Ticketing/SourcesManager';
 import AssignmentRulesManager from './components/Ticketing/AssignmentRulesManager';
 import SlaRulesManager from './components/Ticketing/SlaRulesManager';
 import AgentProductivityReport from './components/Ticketing/AgentProductivityReport';
+import TicketResolutionTimeReport from './components/Ticketing/TicketResolutionTimeReport';
+import TicketCountReport from './components/Ticketing/TicketCountReport';
 import { CustomFieldsProvider } from './components/Ticketing/CustomFieldsContext';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
@@ -29,6 +31,8 @@ const App: React.FC = () => (
           <Route path="/ticketing/settings/assignment" element={<ErrorBoundary><AssignmentRulesManager /></ErrorBoundary>} />
           <Route path="/ticketing/settings/sla"        element={<ErrorBoundary><SlaRulesManager /></ErrorBoundary>} />
           <Route path="/ticketing/reports/agent-productivity" element={<ErrorBoundary><AgentProductivityReport /></ErrorBoundary>} />
+          <Route path="/ticketing/reports/resolution-time"    element={<ErrorBoundary><TicketResolutionTimeReport /></ErrorBoundary>} />
+          <Route path="/ticketing/reports/ticket-count"       element={<ErrorBoundary><TicketCountReport /></ErrorBoundary>} />
           <Route path="/survey/create" element={<Navigate to="/surveys/create" replace />} />
           <Route path="*" element={<Navigate to="/surveys" replace />} />
         </Routes>

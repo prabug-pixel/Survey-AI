@@ -151,6 +151,7 @@ const SlaRulesManager: React.FC = () => {
         columns={slaColumns}
         data={slaRules}
         getRowKey={r => r.id}
+        resizable
         emptyTitle="No SLA rules yet"
         rowAction={rule => (
           <>
