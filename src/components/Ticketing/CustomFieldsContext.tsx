@@ -16,7 +16,30 @@ export type CustomFieldType =
   | 'checkbox'
   | 'user';
 
-export type CustomFieldKind = 'severity' | 'sentiment' | 'rootCause' | 'rootCauseComment' | 'custom';
+export type CustomFieldKind =
+  // Customer-info system fields
+  | 'firstName' | 'lastName' | 'assignTo' | 'status'
+  | 'location'  | 'city'     | 'state'
+  // Contact-info system fields
+  | 'email'     | 'phone'
+  // Ticket-info system fields
+  | 'source'    | 'description'
+  // Ticket-card meta (rendered on the list-view card right rail, not in the
+  // create-ticket form). Toggling these on/off lives behind the same Visible
+  // toggle as everything else.
+  | 'date'      | 'watchers'
+  // Preset ticket fields (existing built-ins)
+  | 'severity'  | 'sentiment' | 'rootCause' | 'rootCauseComment'
+  // User-added fields
+  | 'custom';
+
+// Maximum number of fields that can be marked `visible` simultaneously.
+// `visible` controls which fields render on the list-view ticket card's
+// right rail — beyond five, the rail starts to overflow the row height.
+export const MAX_CARD_VISIBLE_FIELDS = 5;
+
+/** Logical grouping used when rendering fields in the Create ticket modal. */
+export type FieldSection = 'customer' | 'contact' | 'ticket';
 
 export interface CustomField {
   id: string;
@@ -25,11 +48,34 @@ export interface CustomField {
   description?: string;
   options?: string[];
   required: boolean;
-  visible: boolean;       // shows in the activity modal side rail
+  /** When true, the field renders on the list-view ticket card's right rail.
+   *  Capped at `MAX_CARD_VISIBLE_FIELDS` across the whole config. */
+  visible: boolean;
   filterable: boolean;
-  /** Built-ins (severity / sentiment / rootCause) cannot be deleted, only edited. */
+  /** System fields cannot be deleted, only edited. See `isCustomField`. */
   kind: CustomFieldKind;
+  /** Section this field belongs to in the Create ticket modal. */
+  section: FieldSection;
 }
+
+// Severity / Sentiment / Root cause are seeded but treated as business-added
+// custom fields (they appear under "Custom fields" in the activity modal and
+// surface a "Custom" tag in Settings). Everything else seeded — name, email,
+// status, source, etc. — is a true system field with no tag.
+const CUSTOM_FIELD_KINDS: ReadonlySet<CustomFieldKind> = new Set<CustomFieldKind>([
+  'severity', 'sentiment', 'rootCause', 'rootCauseComment', 'custom',
+]);
+
+export const isCustomField = (field: CustomField): boolean =>
+  CUSTOM_FIELD_KINDS.has(field.kind);
+
+export const FIELD_SECTION_LABELS: Record<FieldSection, string> = {
+  customer: 'Customer information',
+  contact:  'Contact Information',
+  ticket:   'Ticket details',
+};
+
+export const FIELD_SECTION_ORDER: FieldSection[] = ['customer', 'contact', 'ticket'];
 
 // ── Sources (1.1 + 1.5) ────────────────────────────────────
 export type SourceChannel =
@@ -90,7 +136,7 @@ export interface SlaRule {
 interface CustomFieldsContextValue {
   // Fields
   fields: CustomField[];
-  addField: (f: Omit<CustomField, 'id' | 'kind'> & { kind?: CustomFieldKind }) => void;
+  addField: (f: Omit<CustomField, 'id' | 'kind' | 'section'> & { kind?: CustomFieldKind; section?: FieldSection }) => void;
   updateField: (id: string, patch: Partial<CustomField>) => void;
   removeField: (id: string) => void;
 
@@ -119,7 +165,155 @@ const CustomFieldsContext = createContext<CustomFieldsContextValue | null>(null)
 // Seeded to match the AmeriGas PRD so the mock demonstrates the
 // real use cases (Severity/Sentiment/Root cause, Outlook inboxes,
 // 24h executive vs 48h review SLA, etc.) on first load.
+// Single source of truth for every field/property that appears in the
+// Create ticket modal AND the Settings > Fields list. System fields
+// (firstName, status, source, …) are seeded with a unique kind so they
+// can't be removed and render without a tag. Severity / Sentiment /
+// Root cause are seeded as business-added "Custom" fields (see
+// `isCustomField`) and render the Custom tag.
 const SEED_FIELDS: CustomField[] = [
+  // ── Customer information ──
+  {
+    id: 'cf-firstName',
+    name: 'First Name',
+    type: 'text',
+    required: true,
+    visible: false,
+    filterable: false,
+    kind: 'firstName',
+    section: 'customer',
+  },
+  {
+    id: 'cf-lastName',
+    name: 'Last Name',
+    type: 'text',
+    required: false,
+    visible: false,
+    filterable: false,
+    kind: 'lastName',
+    section: 'customer',
+  },
+  {
+    id: 'cf-assignTo',
+    name: 'Assign to',
+    type: 'user',
+    required: false,
+    visible: false,
+    filterable: true,
+    kind: 'assignTo',
+    section: 'customer',
+  },
+  {
+    id: 'cf-status',
+    name: 'Status',
+    type: 'dropdown',
+    options: ['New', 'Assigned', 'In progress', 'Closed'],
+    required: false,
+    visible: true,
+    filterable: true,
+    kind: 'status',
+    section: 'customer',
+  },
+  {
+    id: 'cf-location',
+    name: 'Location',
+    type: 'dropdown',
+    options: ['100 feet road', 'Cut n Looks Unisex Salon', 'Jennifer Smere Dental'],
+    required: false,
+    visible: true,
+    filterable: true,
+    kind: 'location',
+    section: 'customer',
+  },
+  {
+    id: 'cf-city',
+    name: 'City',
+    type: 'text',
+    required: false,
+    visible: false,
+    filterable: false,
+    kind: 'city',
+    section: 'customer',
+  },
+  {
+    id: 'cf-state',
+    name: 'State',
+    type: 'dropdown',
+    options: ['Alabama', 'California', 'Florida', 'Illinois', 'New York', 'Texas'],
+    required: false,
+    visible: false,
+    filterable: true,
+    kind: 'state',
+    section: 'customer',
+  },
+
+  // ── Contact information ──
+  {
+    id: 'cf-email',
+    name: 'Email',
+    type: 'text',
+    required: false,
+    visible: false,
+    filterable: false,
+    kind: 'email',
+    section: 'contact',
+  },
+  {
+    id: 'cf-phone',
+    name: 'Phone',
+    type: 'text',
+    required: false,
+    visible: false,
+    filterable: false,
+    kind: 'phone',
+    section: 'contact',
+  },
+
+  // ── Ticket details ──
+  {
+    id: 'cf-source',
+    name: 'Source',
+    type: 'dropdown',
+    options: ['Social', 'Reviews', 'Survey', 'Email', 'Phone', 'Chat', 'Internal'],
+    required: false,
+    visible: false,
+    filterable: true,
+    kind: 'source',
+    section: 'ticket',
+  },
+  {
+    id: 'cf-description',
+    name: 'Ticket description',
+    type: 'longText',
+    required: false,
+    visible: false,
+    filterable: false,
+    kind: 'description',
+    section: 'ticket',
+  },
+  // ── Ticket-card meta ──
+  // These two surface ticket meta on the list-view card rail. They're not
+  // user-fillable so they're skipped by the Create ticket modal renderer.
+  {
+    id: 'cf-date',
+    name: 'Date',
+    type: 'date',
+    required: false,
+    visible: true,
+    filterable: true,
+    kind: 'date',
+    section: 'ticket',
+  },
+  {
+    id: 'cf-watchers',
+    name: 'Watchers',
+    type: 'number',
+    required: false,
+    visible: true,
+    filterable: false,
+    kind: 'watchers',
+    section: 'ticket',
+  },
   {
     id: 'cf-severity',
     name: 'Severity',
@@ -130,6 +324,7 @@ const SEED_FIELDS: CustomField[] = [
     visible: true,
     filterable: true,
     kind: 'severity',
+    section: 'ticket',
   },
   {
     id: 'cf-sentiment',
@@ -138,9 +333,10 @@ const SEED_FIELDS: CustomField[] = [
     description: 'Reviewer / customer sentiment',
     options: ['Positive', 'Neutral', 'Negative', 'Mixed'],
     required: false,
-    visible: true,
+    visible: false,
     filterable: true,
     kind: 'sentiment',
+    section: 'ticket',
   },
   {
     id: 'cf-rootCause',
@@ -149,9 +345,10 @@ const SEED_FIELDS: CustomField[] = [
     description: 'Operational/diagnostic categorization',
     options: ['Process error', 'Delivery service team', 'Customer service', 'Field-related'],
     required: false,
-    visible: true,
+    visible: false,
     filterable: true,
     kind: 'rootCause',
+    section: 'ticket',
   },
   {
     id: 'cf-rootCauseComment',
@@ -159,9 +356,10 @@ const SEED_FIELDS: CustomField[] = [
     type: 'longText',
     description: 'Elaboration paired with Root cause (separate from general comments)',
     required: false,
-    visible: true,
+    visible: false,
     filterable: false,
     kind: 'rootCauseComment',
+    section: 'ticket',
   },
 ];
 
@@ -234,9 +432,16 @@ export const CustomFieldsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [assignmentRules, setAssignmentRules] = useState<AssignmentRule[]>(SEED_ASSIGNMENT);
   const [slaRules, setSlaRules] = useState<SlaRule[]>(SEED_SLA);
 
-  // Fields
-  const addField = useCallback((f: Omit<CustomField, 'id' | 'kind'> & { kind?: CustomFieldKind }) => {
-    setFields(prev => [...prev, { ...f, kind: f.kind ?? 'custom', id: `cf-${Date.now()}` }]);
+  // Fields — new entries added from Settings default to the 'ticket'
+  // section so they slot in alongside Severity / Sentiment / Root cause
+  // in the Create ticket modal.
+  const addField = useCallback((f: Omit<CustomField, 'id' | 'kind' | 'section'> & { kind?: CustomFieldKind; section?: FieldSection }) => {
+    setFields(prev => [...prev, {
+      ...f,
+      kind: f.kind ?? 'custom',
+      section: f.section ?? 'ticket',
+      id: `cf-${Date.now()}`,
+    }]);
   }, []);
   const updateField = useCallback((id: string, patch: Partial<CustomField>) => {
     setFields(prev => prev.map(f => (f.id === id ? { ...f, ...patch } : f)));

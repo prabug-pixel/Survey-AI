@@ -14,7 +14,7 @@ import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import { IconPlus, IconClose } from '../../shared/Icons/Icons';
-import { FIELD_TYPE_OPTIONS } from './CustomFieldsContext';
+import { FIELD_TYPE_OPTIONS, MAX_CARD_VISIBLE_FIELDS, useCustomFields } from './CustomFieldsContext';
 import type { CustomField, CustomFieldType } from './CustomFieldsContext';
 import styles from './CustomFieldEditor.module.scss';
 
@@ -28,13 +28,23 @@ interface Props {
 const blankOptions = (): string[] => ['Option 1', 'Option 2'];
 
 const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }) => {
+  const { fields } = useCustomFields();
   const [name, setName] = useState('');
   const [type, setType] = useState<CustomFieldType>('text');
   const [description, setDescription] = useState('');
   const [options, setOptions] = useState<string[]>(blankOptions());
   const [required, setRequired] = useState(false);
   const [filterable, setFilterable] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
+
+  // Count *other* fields currently marked visible so we can disable the
+  // toggle once the cap is reached. If we're editing a field that's already
+  // visible, that one doesn't count against the cap.
+  const otherVisibleCount = fields.reduce(
+    (n, f) => n + (f.visible && f.id !== initial?.id ? 1 : 0),
+    0,
+  );
+  const visibleAtCap = !visible && otherVisibleCount >= MAX_CARD_VISIBLE_FIELDS;
 
   // Sync local state when the modal opens for create vs edit.
   useEffect(() => {
@@ -54,7 +64,7 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
       setOptions(blankOptions());
       setRequired(false);
       setFilterable(false);
-      setVisible(true);
+      setVisible(false);
     }
   }, [isOpen, initial]);
 
@@ -85,6 +95,15 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
         onCloseModal: onClose,
         shouldCloseOnOverlayClick: true,
         shouldCloseOnEsc: true,
+        // Cap the popup height so a long Options list scrolls inside the
+        // body while the header and footer stay pinned.
+        dialogStyles: {
+          content: {
+            maxHeight: 600,
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        },
       }}
       size="medium"
     >
@@ -204,15 +223,26 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
 
           <div className={styles.toggleRow}>
             <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>Visible</span>
-              <span className={styles.toggleHint}>Show on the ticket activity panel</span>
+              <span className={styles.toggleTitle}>Visible on ticket card</span>
+              <span className={styles.toggleHint}>
+                {visibleAtCap
+                  ? `Limit reached — at most ${MAX_CARD_VISIBLE_FIELDS} fields can be shown on the list view ticket card. Hide one to enable this.`
+                  : `Show on the right rail of each ticket card in the list view (max ${MAX_CARD_VISIBLE_FIELDS}).`}
+              </span>
             </div>
-            <Toggle
-              name="cfVisible"
-              checked={visible}
-              roundedToggle
-              onChange={() => setVisible(v => !v)}
-            />
+            <span
+              title={visibleAtCap
+                ? `At most ${MAX_CARD_VISIBLE_FIELDS} fields can be visible. Hide one first.`
+                : undefined}
+            >
+              <Toggle
+                name="cfVisible"
+                checked={visible}
+                roundedToggle
+                disabled={visibleAtCap}
+                onChange={() => setVisible(v => !v)}
+              />
+            </span>
           </div>
         </div>
       </div>

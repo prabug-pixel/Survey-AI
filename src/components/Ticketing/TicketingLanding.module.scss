@@ -2,12 +2,22 @@
 
 // ── Page shell ──────────────────────────────────────────────
 // Mirrors AllSurveys: full-height column with a sticky header
-// and a scrollable list region underneath.
+// and a scrollable list region underneath. The inline filter
+// panel sits as a flex sibling of .mainColumn so opening it
+// pushes the list rather than overlaying it.
 .page {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100%;
   background: $color-white;
+  overflow: hidden;
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -114,7 +124,7 @@
   padding: 0 $spacing-16;
   border-radius: $radius-sm;
   border: 0;
-  background: $color-primary;
+  background: #1976d2;
   color: $color-white;
   font-size: $font-size-md;
   font-weight: 500;
@@ -173,6 +183,22 @@
   background: #1877f2;
 }
 
+// Dark navy treatment shared by the operational source types
+// (survey, email, phone, internal) — matches the source avatars
+// in the reference screens.
+.source-survey,
+.source-email,
+.source-phone,
+.source-internal {
+  background: #213a5c;
+}
+
+// Chat sessions use the Birdeye primary blue to differentiate from
+// the inbound-channel sources above.
+.source-chat {
+  background: $color-primary;
+}
+
 // ── Ticket body ─────────────────────────────────────────────
 .ticketBody {
   display: flex;
@@ -220,6 +246,32 @@
   color: $color-gray-700;
   font-size: $font-size-sm;
   font-weight: 500;
+}
+
+.ticketSubtitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-6;
+  font-size: $font-size-base;
+  color: $color-gray-600;
+}
+
+.subtitleText {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitleLink {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: $color-primary;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
 }
 
 .ticketContent {
@@ -316,89 +368,17 @@
   background: #1976d2;
 }
 
-// ── Filter row (severity chips + source select) ────────────
-.filterRow {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: $spacing-16;
-  padding: $spacing-12 $spacing-24;
-  border-bottom: 1px solid $color-border-light;
-  background: $color-white;
-  flex-shrink: 0;
-}
-
-.filterGroup {
-  display: flex;
-  align-items: center;
-  gap: $spacing-8;
-}
-
-.filterLabel {
-  font-size: $font-size-sm;
-  font-weight: 600;
-  color: $color-gray-600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-4;
-  height: 28px;
-  padding: 0 $spacing-12;
-  border-radius: 999px;
-  border: 1px solid $color-border-light;
-  background: $color-white;
-  font-size: $font-size-sm;
-  font-weight: 500;
-  color: $color-gray-800;
-  cursor: pointer;
-  transition: background $transition-fast;
-
-  &:hover:not(.chipActive) { background: $color-gray-100; }
-}
-
-.chipActive {
-  background: $color-gray-900;
-  color: $color-white;
-  border-color: $color-gray-900;
-}
-
-.chipDot {
-  width: 8px;
-  height: 8px;
-  border-radius: $radius-full;
-  flex-shrink: 0;
-}
-
-.sourceSelect {
-  height: 28px;
-  padding: 0 $spacing-8;
-  border-radius: $radius-sm;
-  border: 1px solid $color-border-light;
-  background: $color-white;
-  font-size: $font-size-sm;
-  color: $color-gray-900;
-  cursor: pointer;
-}
-
 // ── Severity badge in row meta ─────────────────────────────
 .severityBadge {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: $spacing-4;
+  height: 22px;
   padding: 2px $spacing-8;
   border-radius: $radius-sm;
-  font-size: $font-size-xs;
-  font-weight: 600;
+  font-size: $font-size-sm;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-}
-
-.severityDot {
-  width: 6px;
-  height: 6px;
-  border-radius: $radius-full;
 }

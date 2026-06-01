@@ -5,14 +5,16 @@
 // neutral gray icon buttons), but adds a row of inline actions
 // (open-in-new, kebab, close) so the standalone elemental close
 // icon is suppressed in the parent.
+// The Ticket ID row + the bulb-title block read as ONE visual header,
+// so the divider lives on .ticketHead (the bottom of the block) and
+// the bar above just sits tight against it without its own border.
 .headerBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $spacing-16;
-  margin: -$spacing-12 -$spacing-12 $spacing-16;
-  padding: 0 0 $spacing-12;
-  border-bottom: 1px solid $color-border-light;
+  margin: 0 0 $spacing-8;
+  padding: 0;
 }
 
 .headerTitleGroup {
@@ -24,8 +26,8 @@
 }
 
 .ticketId {
-  font-size: $font-size-md;
-  font-weight: 600;
+  font-size: $font-size-lg;
+  font-weight: 500;
   color: $color-gray-900;
   letter-spacing: -0.28px;
   flex-shrink: 0;
@@ -64,7 +66,7 @@
   width: 28px;
   height: 28px;
   border-radius: $radius-sm;
-  border: 1px solid $color-border-light;
+  border: none;
   background: $color-white;
   cursor: pointer;
   transition: background $transition-fast;
@@ -73,19 +75,31 @@
 }
 
 // ── Ticket head (above body grid) ──────────────────────────
+// Carries the divider for the whole header block — the Ticket ID
+// row above shares the same visual unit and has no border of its
+// own.
 .ticketHead {
   display: flex;
   gap: $spacing-12;
   align-items: center;
+  padding-bottom: $spacing-16;
   margin-bottom: $spacing-16;
+  border-bottom: 1px solid $color-border-light;
 }
 
 // ── Two-column body ────────────────────────────────────────
+// The modal caps its content at 600 px and flips it into a flex
+// column (see TicketActivityModal.tsx), so the body claims the
+// remaining vertical space here. `min-height: 0` is required for
+// the children's `overflow-y: auto` to actually kick in inside a
+// flex container.
 .body {
   display: grid;
   grid-template-columns: 1fr 260px;
   gap: $spacing-24;
-  align-items: start;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 // ── Main column ────────────────────────────────────────────
@@ -94,6 +108,11 @@
   flex-direction: column;
   gap: $spacing-16;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  // Keep the scrollbar from sitting flush against the right divider
+  // so the side rail still feels visually separated.
+  padding-right: $spacing-4;
 }
 
 .ticketIcon {
@@ -114,7 +133,7 @@
 
 .ticketTitle {
   font-size: $font-size-lg;
-  font-weight: 600;
+  font-weight: 400;
   color: $color-gray-900;
   letter-spacing: -0.32px;
   line-height: 22px;
@@ -230,12 +249,17 @@
 }
 
 // ── Side rail ──────────────────────────────────────────────
+// Scrolls on its own so admins with lots of custom fields don't
+// blow the modal past its 600 px cap.
 .side {
   display: flex;
   flex-direction: column;
   gap: $spacing-20;
   padding-left: $spacing-20;
+  padding-right: $spacing-4;
   border-left: 1px solid $color-border-light;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .sideGroup {

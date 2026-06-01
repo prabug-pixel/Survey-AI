@@ -334,7 +334,13 @@ export const IconPlusCircle: React.FC<IconProps> = ({ size = 20, color = '#1976d
 
 export const IconFilter: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M3 7h18M6 12h12M9 17h6"
+      stroke={color}
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -384,6 +390,19 @@ export const IconBarChart: React.FC<IconProps> = ({ size = 20, color = 'currentC
     <line x1="12" y1="20" x2="12" y2="4" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
     <line x1="6" y1="20" x2="6" y2="14" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
     <line x1="2" y1="20" x2="22" y2="20" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+export const IconMail: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="3" y="5" width="18" height="14" rx="2" stroke={color} strokeWidth="1.5" />
+    <path d="M3 7l9 6 9-6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const IconPhone: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 

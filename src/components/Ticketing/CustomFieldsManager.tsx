@@ -2,7 +2,7 @@
 // CustomFieldsManager — Settings > Fields page. Lists every
 // custom field that has been defined for tickets and lets the
 // user create / edit / remove them. Fields with `visible: true`
-// surface inside the TicketActivityModal's side rail.
+// surface on the list-view ticket card right rail (capped at 5).
 //
 // Uses the shared AeroTable so the table chrome (row height,
 // borders, type ramp, sort affordances) stays 1:1 with the Aero
@@ -16,7 +16,7 @@ import {
 } from '../../shared/Icons/Icons';
 import AeroTable from '../../shared/components/AeroTable';
 import type { AeroColumn } from '../../shared/components/AeroTable';
-import { FIELD_TYPE_LABELS, useCustomFields } from './CustomFieldsContext';
+import { FIELD_TYPE_LABELS, isCustomField, useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
 import CustomFieldEditor from './CustomFieldEditor';
 import styles from './CustomFieldsManager.module.scss';
@@ -79,7 +79,7 @@ const CustomFieldsManager: React.FC = () => {
       render: field => (
         <span className={styles.fieldName}>
           {field.name}
-          {field.kind !== 'custom' && <span className={styles.builtInTag}>Built-in</span>}
+          {isCustomField(field) && <span className={styles.customTag}>Custom</span>}
           {!field.visible && <span className={styles.hiddenTag}>Hidden</span>}
         </span>
       ),
@@ -140,7 +140,7 @@ const CustomFieldsManager: React.FC = () => {
         emptyTitle="No custom fields yet"
         emptyDescription={<>Click <strong>Create custom field</strong> to add one.</>}
         rowAction={field => {
-          const isBuiltIn = field.kind !== 'custom';
+          const isSystem = field.kind !== 'custom';
           return (
             <>
               <button
@@ -155,8 +155,8 @@ const CustomFieldsManager: React.FC = () => {
                 type="button"
                 className={styles.rowIconBtn}
                 aria-label={`Remove ${field.name}`}
-                disabled={isBuiltIn}
-                title={isBuiltIn ? 'Built-in fields cannot be removed' : undefined}
+                disabled={isSystem}
+                title={isSystem ? 'System fields cannot be removed' : undefined}
                 onClick={() => removeField(field.id)}
               >
                 <IconTrash size={16} color="#555" />

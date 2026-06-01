@@ -8,7 +8,11 @@
 .page {
   padding: $spacing-24;
   background: $color-white;
-  min-height: 100%;
+  // Parent (AppLayout > mainContent) is overflow: hidden, so this column
+  // owns its own vertical scroll. Without an explicit height the page can't
+  // overflow, leaving long field lists clipped at the viewport edge.
+  height: 100%;
+  overflow-y: auto;
 }
 
 // ── Breadcrumb + title ─────────────────────────────────────
@@ -43,8 +47,8 @@
 }
 
 .title {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 400;
   color: $color-gray-900;
   letter-spacing: -0.4px;
   margin: 0;
@@ -106,11 +110,11 @@
   font-weight: 400;
 }
 
-.builtInTag {
+.customTag {
   display: inline-block;
   padding: 2px $spacing-8;
-  background: #e3f2fd;
-  color: #1565c0;
+  background: #f3e8ff;
+  color: #6a1b9a;
   font-size: $font-size-xs;
   border-radius: $radius-sm;
   text-transform: uppercase;

@@ -16,8 +16,6 @@ import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import {
   IconClose,
-  IconMoreVert,
-  IconExternalLink,
   IconCalendar,
   IconLocation,
   IconBulb,
@@ -87,12 +85,23 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
   const [assignee, setAssignee] = useState<string>('abhinav');
   const [comment, setComment] = useState('');
 
-  // Custom fields configured under Settings > Fields. Only the ones the
-  // admin marked visible appear on the activity panel. Values are kept
+  // Custom fields configured under Settings > Fields. Values are kept
   // locally keyed by field id; a real implementation would persist per
   // ticket, but the structure is the same.
   const { fields: customFields } = useCustomFields();
-  const visibleCustomFields = customFields.filter(f => f.visible);
+  // The fixed rows above (Status, Assignee, Watchers, Location, Channel,
+  // Created, Due date) already cover the customer/contact system kinds,
+  // so the side rail's "Custom fields" section only surfaces ticket-axis
+  // presets (severity/sentiment/root cause) plus anything user-added.
+  // The `visible` flag is intentionally ignored here — it now controls the
+  // list-view ticket card rail, not this modal.
+  const visibleCustomFields = customFields.filter(f =>
+    f.kind === 'severity' ||
+    f.kind === 'sentiment' ||
+    f.kind === 'rootCause' ||
+    f.kind === 'rootCauseComment' ||
+    f.kind === 'custom',
+  );
   const [customValues, setCustomValues] = useState<Record<string, string | boolean>>({});
   const setCustomValue = (id: string, v: string | boolean) =>
     setCustomValues(prev => ({ ...prev, [id]: v }));
@@ -120,8 +129,23 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
         onCloseModal: onClose,
         shouldCloseOnOverlayClick: true,
         shouldCloseOnEsc: true,
+        // Cap the modal width and height and turn the content into a
+        // flex column so the body grid below can flex into the
+        // remaining space and scroll the two columns independently
+        // (the side rail in particular, per the design). The width
+        // cap narrows the elemental "large" preset (1050 px) so the
+        // two-column layout reads as a focused activity panel rather
+        // than a wide form.
+        dialogStyles: {
+          content: {
+            maxWidth: 850,
+            maxHeight: 600,
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        },
       }}
-      size="mediumLarge"
+      size="large"
     >
       {/* ── Header bar ───────────────────────────────────── */}
       <div className={styles.headerBar}>
@@ -145,12 +169,6 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
           )}
         </div>
         <div className={styles.headerActions}>
-          <button type="button" className={styles.iconBtn} aria-label="Open in new tab">
-            <IconExternalLink size={16} color="#555" />
-          </button>
-          <button type="button" className={styles.iconBtn} aria-label="More options">
-            <IconMoreVert size={18} color="#555" />
-          </button>
           <button type="button" className={styles.iconBtn} aria-label="Close" onClick={onClose}>
             <IconClose size={16} color="#555" />
           </button>
