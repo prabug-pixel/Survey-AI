@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: ExpirationConfig = {
   gracePeriodHours: 24,
   closedMessage: {
     title: 'This survey is closed',
-    body: 'This survey is no longer accepting responses.',
+    body: 'This survey is no longer accepting responses',
     ctaUrl: '',
   },
   notifications: {
@@ -318,7 +318,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 <div className={styles.sectionTitleText}>
                   <h3 className={styles.sectionTitle}>Grace period for in-progress sessions</h3>
                   <p className={styles.sectionDesc}>
-                    Respondents who started the survey before it closes can continue for a limited time.
+                    Respondents who started the survey before it closes can continue for a limited time
                   </p>
                 </div>
                 <Toggle
@@ -347,7 +347,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Closed survey page</h3>
                 <p className={styles.sectionDesc}>
-                  Respondents see this after the survey closes.
+                  Respondents see this after the survey closes
                 </p>
               </div>
 
@@ -387,7 +387,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                   onChange={(_event: unknown, value: string) => patchMsg('ctaUrl', String(value ?? ''))}
                 />
                 <span className={styles.hint}>
-                  Redirect respondents to this page after the survey closes.
+                  Redirect respondents to this page after the survey closes
                 </span>
                 {showFieldError('redirectUrl') && <span className={styles.errorText}>{errors.redirectUrl}</span>}
               </div>
@@ -399,7 +399,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 <div className={styles.sectionTitleText}>
                   <h3 className={styles.sectionTitle}>Email notifications</h3>
                   <p className={styles.sectionDesc}>
-                    Sent to the survey owner ({survey.owner}).
+                    Send notifications to the survey owner
                   </p>
                 </div>
                 <Toggle
@@ -413,9 +413,9 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               {config.notifications.enabled && (
                 <div className={styles.checkIndent}>
                   {([
-                    { name: 'notif72h', field: 'hours72' as const, label: '72 hours before expiration' },
-                    { name: 'notif24h', field: 'hours24' as const, label: '24 hours before expiration' },
-                    { name: 'notifAuto', field: 'onAutoClose' as const, label: 'When survey auto-closes' },
+                    { name: 'notif72h', field: 'hours72' as const, label: '72 hours before the survey closes' },
+                    { name: 'notif24h', field: 'hours24' as const, label: '24 hours before the survey closes' },
+                    { name: 'notifAuto', field: 'onAutoClose' as const, label: 'When the survey closes' },
                   ] as const).map(({ name, field, label }) => (
                     <label key={name} className={styles.checkboxRow}>
                       <FormInput
@@ -446,7 +446,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
 
       {/* ── Right-side closed-survey preview ────────────── */}
       <div className={styles.expiryRight}>
-        <span className={styles.previewLabel}>Preview</span>
+        <span className={styles.previewLabel}>Respondents see this page after the survey closes</span>
         <div className={styles.previewPanel}>
           <div className={styles.previewContent}>
             <div className={styles.closedPreview}>
