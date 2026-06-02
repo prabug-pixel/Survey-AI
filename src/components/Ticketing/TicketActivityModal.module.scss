@@ -126,6 +126,49 @@
   flex-shrink: 0;
 }
 
+// ── Review-source ticket head ──────────────────────────────
+// Reviewer avatar mirrors the list-view source avatar treatment.
+// Red is the catch-all tone for first-letter-of-name reviewer chips,
+// chosen so it stays neutral whether the review came from Google,
+// Facebook, etc.
+.reviewerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  background: #d32f2f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: $color-white;
+  text-transform: uppercase;
+}
+
+.starRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: $spacing-4;
+}
+
+.reviewerName {
+  font-weight: 500;
+  color: $color-gray-900;
+}
+
+.featuredChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-8;
+  background: $color-gray-100;
+  color: $color-gray-700;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  border-radius: $radius-sm;
+}
+
 .ticketHeadText {
   flex: 1;
   min-width: 0;
@@ -234,13 +277,15 @@
 
 // ── Comment block ──────────────────────────────────────────
 .commentBlock {
-  border: 1px solid $color-border-light;
+  border: 0;
   border-radius: $radius-md;
-  padding: $spacing-12;
+  padding: $spacing-12 0 0;
   display: flex;
   flex-direction: column;
-  gap: $spacing-12;
-  background: $color-gray-50;
+  justify-content: space-between;
+  gap: 0;
+  background: $color-white;
+  height: 100%;
 }
 
 .commentFooter {
@@ -301,22 +346,338 @@
   color: $color-gray-900;
 }
 
+// Aero "Text field - Standard" Read-only variant. Same shape as an
+// editable input but uses the neutral hover surface (#f2f4f7) plus a
+// soft selected-state border (#e5e9f0) so users read that the field
+// is locked. Text shifts to secondary (#555) for the same reason.
+.readOnlyField {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 36px;
+  padding: 0 $spacing-12;
+  border-radius: $radius-sm;
+  border: 1px solid #e5e9f0;
+  background: #f2f4f7;
+  cursor: default;
+  width: 100%;
+}
+
+.readOnlyFieldText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: $font-size-md;
+  color: #555;
+  letter-spacing: -0.28px;
+  line-height: 20px;
+}
+
 .staticFieldPlain {
   font-size: $font-size-md;
   color: $color-gray-900;
   padding: $spacing-4 0;
 }
 
-// ── Watchers row (avatar + input) ──────────────────────────
-.watcherRow {
+// ── Scoped select (Add watchers / Assign to) ───────────────
+// Mirrors the Birdeye "Text field - Standard" treatment from Figma:
+// gray inline label with a blue scope picker, then a 36px row with a
+// 1px #ccc border, rounded 4px, value text + chevron on the right.
+.scopedSelect {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.scopedLabelRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  height: 18px;
+  font-size: $font-size-sm;
+  color: $color-gray-900;
+}
+
+.scopedLabel {
+  font-weight: 400;
+}
+
+.scopedScopeWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.scopedScopeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #1976d2;
+  font: inherit;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  letter-spacing: -0.24px;
+}
+
+.scopedScopeMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 140px;
+  z-index: 20;
+  background: $color-white;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10);
+  padding: $spacing-4 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scopedScopeOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.scopedScopeOptionActive {
+  background: $color-gray-100;
+}
+
+.scopedFieldWrap {
+  position: relative;
+}
+
+.scopedField {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  background: $color-white;
+  border: 1px solid #ccc;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+
+  &:hover { border-color: $color-gray-400; }
+  &[aria-expanded='true'] { border-color: #1976d2; }
+}
+
+.scopedFieldValue {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scopedFieldPlaceholder {
+  color: $color-gray-500;
+}
+
+.scopedValueMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+  background: $color-white;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: $spacing-4 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scopedValueOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-sm;
+  color: $color-gray-900;
+
+  &:hover { background: $color-gray-50; }
+}
+
+// ── Multi-select dropdown (Add watchers) ───────────────────
+// Mirrors the Birdeye design-system "Dropdown menus / Multi-select"
+// node from Figma: header, search, Select-all + checkbox tiles,
+// divider, footer with primary Apply button.
+.msMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: $color-white;
+  border-radius: $radius-sm;
+  box-shadow: 0 4px 8px rgba(33, 33, 33, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: $spacing-12;
+}
+
+.msHeader {
+  padding: $spacing-8 $spacing-24 $spacing-8 $spacing-16;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  letter-spacing: -0.24px;
+  color: #8f8f8f;
+}
+
+.msBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  padding: 0 $spacing-16;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.msSearch {
   display: flex;
   align-items: center;
   gap: $spacing-8;
+  height: 36px;
+  padding: $spacing-8 $spacing-12;
+  border: 1px solid #e5e9f0;
+  border-radius: $radius-sm;
+  background: $color-white;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font: inherit;
+    font-size: $font-size-md;
+    color: $color-gray-900;
+    letter-spacing: -0.28px;
+
+    &::placeholder { color: #8f8f8f; }
+  }
 }
 
-.watcherInput {
+.msTile {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-8 $spacing-8 0;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  letter-spacing: -0.28px;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.msCheckbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid $color-gray-400;
+  border-radius: 2px;
+  background: $color-white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.msCheckboxOn {
+  background: #1976d2;
+  border-color: #1976d2;
+}
+
+// Visually hidden — the styled .msCheckbox box is the visual; the real
+// input is kept for keyboard/a11y and form semantics.
+.msCheckboxInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.msTileLabel {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msEmpty {
+  padding: $spacing-12 $spacing-8;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+.msDivider {
+  height: 1px;
+  background: #eaeaea;
+  margin-top: $spacing-4;
+}
+
+.msFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: $spacing-20;
+}
+
+.msApply {
+  height: 36px;
+  padding: 0 $spacing-16;
+  border: 0;
+  border-radius: $radius-sm;
+  background: #1976d2;
+  color: $color-white;
+  font: inherit;
+  font-size: $font-size-md;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover { background: #1565c0; }
 }
 
 // ── Custom field bits ──────────────────────────────────────
@@ -334,17 +695,4 @@
   cursor: pointer;
 
   input { margin: 0; }
-}
-
-.miniAvatar {
-  width: 24px;
-  height: 24px;
-  border-radius: $radius-full;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: $font-size-xs;
-  font-weight: 600;
-  color: $color-white;
-  flex-shrink: 0;
 }

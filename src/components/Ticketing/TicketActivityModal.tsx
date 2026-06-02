@@ -8,7 +8,7 @@
 // FormInput, TextArea, Button) and project tokens — no new
 // design primitives are introduced.
 // ============================================================
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Modal from '@birdeye/elemental/core/atoms/Modal';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
@@ -19,9 +19,13 @@ import {
   IconCalendar,
   IconLocation,
   IconBulb,
+  IconChevronDown,
+  IconCheck,
+  IconSearch,
+  IconStarFilled,
 } from '../../shared/Icons/Icons';
-import { useCustomFields, SEVERITY_COLORS } from './CustomFieldsContext';
-import type { CustomField, SeverityLevel } from './CustomFieldsContext';
+import { useCustomFields } from './CustomFieldsContext';
+import type { CustomField } from './CustomFieldsContext';
 import styles from './TicketActivityModal.module.scss';
 
 export interface TicketActivityEntry {
@@ -48,6 +52,12 @@ export interface TicketRecord {
   activity: TicketActivityEntry[];
   /** Pre-populated values for built-in custom fields (severity, sentiment, etc.). */
   customValues?: Record<string, string | boolean>;
+  /** Review-only fields. Set on tickets that came in from a review source
+   *  (Google, Facebook, etc.) so the modal swaps the bulb/title treatment
+   *  for the red-avatar + star-row header. Leave undefined on other types. */
+  rating?: 1 | 2 | 3 | 4 | 5;
+  reviewerName?: string;
+  featured?: boolean;
 }
 
 interface Props {
@@ -70,6 +80,41 @@ const ASSIGNEE_OPTIONS = [
   { value: 'prabu', label: 'Prabu G' },
 ];
 
+// Scope picker for the Watchers / Assign-to fields. The same roster gets
+// surfaced under three lenses — individual users, roles, or teams.
+type Scope = 'user' | 'roles' | 'teams';
+const SCOPE_ORDER: Scope[] = ['user', 'roles', 'teams'];
+const SCOPE_LABEL: Record<Scope, string> = {
+  user: 'User',
+  roles: 'Roles',
+  teams: 'Teams',
+};
+const ROLE_OPTIONS = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'manager', label: 'Manager' },
+  { value: 'agent', label: 'Agent' },
+];
+const TEAM_OPTIONS = [
+  { value: 'support', label: 'Support' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'engineering', label: 'Engineering' },
+];
+const OPTIONS_BY_SCOPE: Record<Scope, { value: string; label: string }[]> = {
+  user: ASSIGNEE_OPTIONS,
+  roles: ROLE_OPTIONS,
+  teams: TEAM_OPTIONS,
+};
+
+// Inline star row used by the review-source ticket head. Kept inline so
+// the modal stays self-contained — the list view has its own copy.
+const ReviewStarRow: React.FC<{ count: 1 | 2 | 3 | 4 | 5 }> = ({ count }) => (
+  <div className={styles.starRow} aria-label={`${count} of 5 stars`}>
+    {[1, 2, 3, 4, 5].map(i => (
+      <IconStarFilled key={i} size={16} color={i <= count ? '#fbc02d' : '#e0e0e0'} />
+    ))}
+  </div>
+);
+
 // Render-side label normalizer for the Status select so saved tickets
 // using free-form casing ("Closed", "open") still light up the dropdown.
 const statusValueFromLabel = (label: string): string => {
@@ -82,8 +127,16 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
   // The host page can wire these to a real store later — for now they
   // demonstrate the layout works with existing form components.
   const [status, setStatus] = useState<string>(ticket ? statusValueFromLabel(ticket.status) : 'open');
-  const [assignee, setAssignee] = useState<string>('abhinav');
   const [comment, setComment] = useState('');
+
+  // Watchers and Assign-to share the same scope-picker shape: pick a
+  // scope (User / Roles / Teams) which swaps the options shown in the
+  // dropdown below, then pick a value from that scoped list. Watchers
+  // is multi-select; Assign-to is single-select.
+  const [watcherScope, setWatcherScope] = useState<Scope>('user');
+  const [watcherValues, setWatcherValues] = useState<string[]>([]);
+  const [assigneeScope, setAssigneeScope] = useState<Scope>('user');
+  const [assigneeValue, setAssigneeValue] = useState<string>('abhinav');
 
   // Custom fields configured under Settings > Fields. Values are kept
   // locally keyed by field id; a real implementation would persist per
@@ -114,6 +167,10 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
     setStatus(statusValueFromLabel(ticket.status));
     setComment('');
     setCustomValues(ticket.customValues ?? {});
+    setWatcherScope('user');
+    setWatcherValues([]);
+    setAssigneeScope('user');
+    setAssigneeValue('abhinav');
   }, [ticket]);
 
   if (!ticket) return null;
@@ -151,22 +208,6 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
       <div className={styles.headerBar}>
         <div className={styles.headerTitleGroup}>
           <span className={styles.ticketId}>Ticket #{ticket.id}</span>
-          {customValues['cf-severity'] && (
-            <span
-              className={styles.severityPill}
-              style={{
-                background: SEVERITY_COLORS[customValues['cf-severity'] as SeverityLevel].bg,
-                color: SEVERITY_COLORS[customValues['cf-severity'] as SeverityLevel].fg,
-              }}
-            >
-              <span
-                className={styles.severityPillDot}
-                style={{ background: SEVERITY_COLORS[customValues['cf-severity'] as SeverityLevel].dot }}
-                aria-hidden
-              />
-              {String(customValues['cf-severity'])}
-            </span>
-          )}
         </div>
         <div className={styles.headerActions}>
           <button type="button" className={styles.iconBtn} aria-label="Close" onClick={onClose}>
@@ -177,26 +218,52 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
 
       {/* Ticket head sits above the two-column body so the main and side
          rail both start at the same Y — keeps "ASSIGNMENT" aligned with
-         the body text rather than the icon. */}
+         the body text rather than the icon. Review-source tickets swap
+         the bulb/title for a reviewer avatar + star row + name/date/
+         Featured chip, matching the list-view treatment. */}
       <div className={styles.ticketHead}>
-        <div className={styles.ticketIcon}>
-          <IconBulb size={20} color="#fbc02d" />
-        </div>
-        <div className={styles.ticketHeadText}>
-          <h2 className={styles.ticketTitle}>{ticket.title}</h2>
-          <div className={styles.ticketMeta}>
-            <span>{ticket.createdOn}</span>
-            {ticket.dueOn && (
-              <>
+        {ticket.rating !== undefined ? (
+          <>
+            <div className={styles.reviewerAvatar}>
+              {(ticket.reviewerName ?? '?').charAt(0).toUpperCase()}
+            </div>
+            <div className={styles.ticketHeadText}>
+              <ReviewStarRow count={ticket.rating} />
+              <div className={styles.ticketMeta}>
+                <span className={styles.reviewerName}>{ticket.reviewerName}</span>
                 <span className={styles.metaSep}>·</span>
-                <span className={styles.metaDue}>
-                  <IconCalendar size={14} color="#9e9e9e" />
-                  Due {ticket.dueOn}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
+                <span>{ticket.createdOn}</span>
+                {ticket.featured && (
+                  <>
+                    <span className={styles.metaSep}>·</span>
+                    <span className={styles.featuredChip}>Featured</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.ticketIcon}>
+              <IconBulb size={20} color="#fbc02d" />
+            </div>
+            <div className={styles.ticketHeadText}>
+              <h2 className={styles.ticketTitle}>{ticket.title}</h2>
+              <div className={styles.ticketMeta}>
+                <span>{ticket.createdOn}</span>
+                {ticket.dueOn && (
+                  <>
+                    <span className={styles.metaSep}>·</span>
+                    <span className={styles.metaDue}>
+                      <IconCalendar size={14} color="#9e9e9e" />
+                      Due {ticket.dueOn}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ── Body: main + side rail ──────────────────────── */}
@@ -265,38 +332,31 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
               />
             </div>
 
-            <div className={styles.sideField}>
-              <label className={styles.sideFieldLabel}>Assignee</label>
-              <SingleSelect
-                name="ticketAssignee"
-                displayLabel="Assignee"
-                options={ASSIGNEE_OPTIONS}
-                selected={assignee}
-                onChange={(option) => setAssignee(String(option.value))}
-                showSearch={false}
-                isAeroDesign
-              />
-            </div>
+            <ScopedSelect
+              multi
+              label="Add watchers"
+              scope={watcherScope}
+              onScopeChange={s => {
+                setWatcherScope(s);
+                setWatcherValues([]);
+              }}
+              value={watcherValues}
+              onChange={setWatcherValues}
+              placeholder="Select watchers"
+              multiCountLabel={n => `${n} watchers`}
+            />
 
-            <div className={styles.sideField}>
-              <label className={styles.sideFieldLabel}>Watchers</label>
-              <div className={styles.watcherRow}>
-                {ticket.watcherInitials && (
-                  <span className={`${styles.miniAvatar} ${styles['tone-blue']}`}>
-                    {ticket.watcherInitials}
-                  </span>
-                )}
-                <div className={styles.watcherInput}>
-                  <FormInput
-                    name="ticketWatchers"
-                    type="text"
-                    value=""
-                    placeholder="Add watchers"
-                    onChange={() => undefined}
-                  />
-                </div>
-              </div>
-            </div>
+            <ScopedSelect
+              label="Assign to"
+              scope={assigneeScope}
+              onScopeChange={s => {
+                setAssigneeScope(s);
+                setAssigneeValue('');
+              }}
+              value={assigneeValue}
+              onChange={setAssigneeValue}
+              placeholder="Select an assignee"
+            />
           </div>
 
           <div className={styles.sideGroup}>
@@ -304,17 +364,16 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
 
             <div className={styles.sideField}>
               <label className={styles.sideFieldLabel}>Location</label>
-              <div className={styles.staticField}>
-                <IconLocation size={14} color="#9e9e9e" />
-                <span>{ticket.location}</span>
+              <div className={styles.readOnlyField}>
+                <IconLocation size={16} color="#555" />
+                <span className={styles.readOnlyFieldText}>{ticket.location}</span>
               </div>
             </div>
 
             <div className={styles.sideField}>
               <label className={styles.sideFieldLabel}>Channel</label>
-              <div className={styles.staticField}>
-                <IconBulb size={14} color="#fbc02d" />
-                <span>{ticket.channel}</span>
+              <div className={styles.readOnlyField}>
+                <span className={styles.readOnlyFieldText}>{ticket.channel}</span>
               </div>
             </div>
 
@@ -327,11 +386,6 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
                 </div>
               </div>
             )}
-
-            <div className={styles.sideField}>
-              <label className={styles.sideFieldLabel}>Created</label>
-              <div className={styles.staticFieldPlain}>{ticket.createdOn}</div>
-            </div>
           </div>
 
           {visibleCustomFields.length > 0 && (
@@ -350,6 +404,237 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
         </aside>
       </div>
     </Modal>
+  );
+};
+
+// ScopedSelect — the "Add watchers" / "Assign to" pattern: a label row
+// with an inline scope picker (User / Roles / Teams) followed by a
+// field-shaped value picker whose options swap with the scope. Mirrors
+// the Birdeye design-system "Text field - Standard" treatment in Figma
+// (36px row, 1px #ccc border, chevron-down on the right).
+type ScopedSelectProps = {
+  label: string;
+  scope: Scope;
+  onScopeChange: (s: Scope) => void;
+  placeholder?: string;
+} & (
+  | { multi?: false; value: string; onChange: (v: string) => void; multiCountLabel?: never }
+  | { multi: true; value: string[]; onChange: (v: string[]) => void; multiCountLabel?: (n: number) => string }
+);
+
+// Header for the multi-select dropdown — singularize the scope label
+// ("Users" → "user") to match Figma copy ("Select user").
+const scopeNoun = (s: Scope): string => SCOPE_LABEL[s].toLowerCase().replace(/s$/, '');
+
+const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
+  const { label, scope, onScopeChange, placeholder = 'Select…' } = props;
+  const options = OPTIONS_BY_SCOPE[scope];
+  const [scopeOpen, setScopeOpen] = useState(false);
+  const [valueOpen, setValueOpen] = useState(false);
+  const scopeRef = useRef<HTMLDivElement>(null);
+  const valueRef = useRef<HTMLDivElement>(null);
+
+  // Multi mode stages picks in a local draft and only commits on Apply,
+  // so closing the dropdown without Apply discards the changes (matches
+  // the Figma "Apply" pattern).
+  const [draft, setDraft] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  useEffect(() => {
+    if (valueOpen && props.multi) {
+      setDraft(props.value);
+      setSearch('');
+    }
+  }, [valueOpen, props.multi, props.multi ? props.value : null]);
+
+  let displayLabel = '';
+  if (props.multi) {
+    const selected = props.value;
+    if (selected.length === 1) {
+      displayLabel = options.find(o => o.value === selected[0])?.label ?? '';
+    } else if (selected.length > 1) {
+      displayLabel = props.multiCountLabel
+        ? props.multiCountLabel(selected.length)
+        : `${selected.length} selected`;
+    }
+  } else {
+    displayLabel = options.find(o => o.value === props.value)?.label ?? '';
+  }
+
+  useEffect(() => {
+    if (!scopeOpen && !valueOpen) return;
+    const onMouseDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (scopeRef.current && !scopeRef.current.contains(t)) setScopeOpen(false);
+      if (valueRef.current && !valueRef.current.contains(t)) setValueOpen(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [scopeOpen, valueOpen]);
+
+  // Multi-mode dropdown bits (filtered options, select-all state, draft toggles).
+  const filteredOptions = props.multi
+    ? options.filter(o => o.label.toLowerCase().includes(search.trim().toLowerCase()))
+    : options;
+  const allFilteredSelected =
+    filteredOptions.length > 0 && filteredOptions.every(o => draft.includes(o.value));
+  const toggleDraft = (v: string) =>
+    setDraft(prev => (prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]));
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      setDraft(prev => prev.filter(v => !filteredOptions.some(o => o.value === v)));
+    } else {
+      const merged = new Set(draft);
+      filteredOptions.forEach(o => merged.add(o.value));
+      setDraft([...merged]);
+    }
+  };
+
+  return (
+    <div className={styles.scopedSelect}>
+      <div className={styles.scopedLabelRow}>
+        <span className={styles.scopedLabel}>{label}: </span>
+        <div className={styles.scopedScopeWrap} ref={scopeRef}>
+          <button
+            type="button"
+            className={styles.scopedScopeBtn}
+            aria-haspopup="listbox"
+            aria-expanded={scopeOpen}
+            onClick={() => setScopeOpen(o => !o)}
+          >
+            <span>{SCOPE_LABEL[scope]}</span>
+            <IconChevronDown size={14} color="#1976d2" />
+          </button>
+          {scopeOpen && (
+            <div className={styles.scopedScopeMenu} role="listbox">
+              {SCOPE_ORDER.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  role="option"
+                  aria-selected={s === scope}
+                  className={`${styles.scopedScopeOption} ${s === scope ? styles.scopedScopeOptionActive : ''}`}
+                  onClick={() => {
+                    onScopeChange(s);
+                    setScopeOpen(false);
+                  }}
+                >
+                  <span>{SCOPE_LABEL[s]}</span>
+                  {s === scope && <IconCheck size={14} color="#212121" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className={styles.scopedFieldWrap} ref={valueRef}>
+        <button
+          type="button"
+          className={styles.scopedField}
+          aria-haspopup="listbox"
+          aria-expanded={valueOpen}
+          onClick={() => setValueOpen(o => !o)}
+        >
+          <span
+            className={`${styles.scopedFieldValue} ${displayLabel ? '' : styles.scopedFieldPlaceholder}`}
+          >
+            {displayLabel || placeholder}
+          </span>
+          <IconChevronDown size={16} color="#9e9e9e" />
+        </button>
+        {valueOpen && props.multi && (
+          <div className={styles.msMenu} role="dialog" aria-label={`Select ${scopeNoun(scope)}`}>
+            <div className={styles.msHeader}>Select {scopeNoun(scope)}</div>
+            <div className={styles.msBody}>
+              <div className={styles.msSearch}>
+                <IconSearch size={16} color="#8f8f8f" />
+                <input
+                  type="text"
+                  value={search}
+                  placeholder="Search"
+                  onChange={e => setSearch(e.target.value)}
+                  aria-label="Search options"
+                />
+              </div>
+              <label className={styles.msTile}>
+                <span
+                  className={`${styles.msCheckbox} ${allFilteredSelected ? styles.msCheckboxOn : ''}`}
+                  aria-hidden
+                >
+                  {allFilteredSelected && <IconCheck size={14} color="#ffffff" />}
+                </span>
+                <input
+                  type="checkbox"
+                  className={styles.msCheckboxInput}
+                  checked={allFilteredSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="Select all"
+                />
+                <span className={styles.msTileLabel}>Select all</span>
+              </label>
+              {filteredOptions.map(o => {
+                const checked = draft.includes(o.value);
+                return (
+                  <label key={o.value} className={styles.msTile}>
+                    <span
+                      className={`${styles.msCheckbox} ${checked ? styles.msCheckboxOn : ''}`}
+                      aria-hidden
+                    >
+                      {checked && <IconCheck size={14} color="#ffffff" />}
+                    </span>
+                    <input
+                      type="checkbox"
+                      className={styles.msCheckboxInput}
+                      checked={checked}
+                      onChange={() => toggleDraft(o.value)}
+                    />
+                    <span className={styles.msTileLabel}>{o.label}</span>
+                  </label>
+                );
+              })}
+              {filteredOptions.length === 0 && (
+                <div className={styles.msEmpty}>No matches</div>
+              )}
+            </div>
+            <div className={styles.msDivider} />
+            <div className={styles.msFooter}>
+              <button
+                type="button"
+                className={styles.msApply}
+                onClick={() => {
+                  props.onChange(draft);
+                  setValueOpen(false);
+                }}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        )}
+        {valueOpen && !props.multi && (
+          <div className={styles.scopedValueMenu} role="listbox">
+            {options.map(o => {
+              const selected = o.value === props.value;
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  className={styles.scopedValueOption}
+                  onClick={() => {
+                    props.onChange(o.value);
+                    setValueOpen(false);
+                  }}
+                >
+                  <span>{o.label}</span>
+                  {selected && <IconCheck size={14} color="#212121" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

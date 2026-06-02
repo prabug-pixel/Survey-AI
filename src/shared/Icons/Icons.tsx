@@ -36,6 +36,14 @@ export const IconStar: React.FC<IconProps> = ({ size = 20, color = 'currentColor
   </svg>
 );
 
+// Solid star — used for review ratings where the gold star reads as a
+// fill, not an outline. Mirrors Material's `star` icon (24×24 grid).
+export const IconStarFilled: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className={className}>
+    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
+  </svg>
+);
+
 export const IconCalendar: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
     <rect x="3" y="4" width="18" height="17" rx="2" stroke={color} strokeWidth="1.5" />

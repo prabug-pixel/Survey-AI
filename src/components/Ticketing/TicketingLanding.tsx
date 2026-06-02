@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-  IconStar,
+  IconStarFilled,
   IconCalendar,
   IconChat,
   IconMoreVert,
@@ -88,6 +88,9 @@ const TICKETS: Ticket[] = [
       watcherInitials: 'PG',
       location: 'Jennifer Smere Dental',
       channel: 'Google Reviews',
+      rating: 4,
+      reviewerName: 'Prashant Kumar',
+      featured: true,
       activity: [
         { id: 'a1', actor: 'Prabu G', actorInitials: 'PG', actorTone: 'green', message: 'Prabu G assigned the ticket to Priyanshi', timestamp: 'May 27, 2026 09:12:08 AM' },
         { id: 'a2', actor: 'System',  actorInitials: 'SY', actorTone: 'gray',  message: 'System created the ticket and assigned to Priyanshi', timestamp: 'May 27, 2026 08:42:36 AM' },
@@ -124,6 +127,9 @@ const TICKETS: Ticket[] = [
       assigneeInitials: 'PG',
       location: 'Cut n Looks Unisex Salon',
       channel: 'Facebook',
+      rating: 5,
+      reviewerName: 'Trusted Customer',
+      featured: true,
       activity: [
         { id: 'a1', actor: 'System', actorInitials: 'SY', actorTone: 'gray', message: 'System created the ticket and assigned to Prabu G', timestamp: 'May 26, 2026 11:04:21 AM' },
       ],
@@ -159,6 +165,9 @@ const TICKETS: Ticket[] = [
       assigneeInitials: 'PG',
       location: 'Cut n Looks Unisex Salon',
       channel: 'Facebook',
+      rating: 5,
+      reviewerName: 'Angela Whitworth',
+      featured: true,
       activity: [
         { id: 'a1', actor: 'System', actorInitials: 'SY', actorTone: 'gray', message: 'System created the ticket and assigned to Prabu G', timestamp: 'May 26, 2026 09:31:00 AM' },
       ],
@@ -361,7 +370,7 @@ const AvatarGlyph: React.FC<{ source: TicketAvatarSource }> = ({ source }) => {
 const StarRow: React.FC<{ count: 1 | 2 | 3 | 4 | 5 }> = ({ count }) => (
   <div className={styles.starRow} aria-label={`${count} of 5 stars`}>
     {[1, 2, 3, 4, 5].map(i => (
-      <IconStar key={i} size={14} color={i <= count ? '#fbc02d' : '#e0e0e0'} />
+      <IconStarFilled key={i} size={14} color={i <= count ? '#fbc02d' : '#e0e0e0'} />
     ))}
   </div>
 );
