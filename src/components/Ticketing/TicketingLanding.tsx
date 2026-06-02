@@ -382,15 +382,14 @@ const renderRailContent = (field: CustomField, ticket: Ticket): React.ReactNode 
   switch (field.kind) {
     case 'severity':
       return (
-        <span
-          className={styles.severityBadge}
-          style={{
-            background: SEVERITY_COLORS[ticket.severity].bg,
-            color: SEVERITY_COLORS[ticket.severity].fg,
-          }}
-        >
-          {ticket.severity} severity
-        </span>
+        <>
+          <span
+            className={styles.severityDot}
+            style={{ background: SEVERITY_COLORS[ticket.severity].dot }}
+            aria-hidden
+          />
+          <span>{ticket.severity} severity</span>
+        </>
       );
     case 'date':
       return (
@@ -561,11 +560,24 @@ const TicketingLanding: React.FC = () => {
               </div>
 
               <div className={styles.ticketBody}>
-                <div className={styles.ticketMetaLine}>
-                  <span className={styles.authorName}>{ticket.authorName}</span>
-                  <span className={styles.metaDot}>•</span>
-                  <span className={styles.reviewDate}>{ticket.reviewedOn}</span>
-                  {ticket.featured && <span className={styles.featuredTag}>Featured</span>}
+                <div className={styles.ticketHeaderLine}>
+                  <div className={styles.ticketMetaLine}>
+                    <span className={styles.authorName}>{ticket.authorName}</span>
+                    <span className={styles.metaDot}>•</span>
+                    <span className={styles.reviewDate}>{ticket.reviewedOn}</span>
+                    {ticket.featured && <span className={styles.featuredTag}>Featured</span>}
+                  </div>
+                  <div className={styles.ticketSide}>
+                    {visibleRailFields.map(field => {
+                      const content = renderRailContent(field, ticket);
+                      if (!content) return null;
+                      return (
+                        <div key={field.id} className={styles.sideRow}>
+                          {content}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {ticket.rating !== undefined && (
@@ -615,18 +627,6 @@ const TicketingLanding: React.FC = () => {
                     <IconMoreVert size={18} color="#555" />
                   </button>
                 </div>
-              </div>
-
-              <div className={styles.ticketSide}>
-                {visibleRailFields.map(field => {
-                  const content = renderRailContent(field, ticket);
-                  if (!content) return null;
-                  return (
-                    <div key={field.id} className={styles.sideRow}>
-                      {content}
-                    </div>
-                  );
-                })}
               </div>
             </article>
           ))}

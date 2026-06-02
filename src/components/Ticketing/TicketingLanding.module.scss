@@ -149,7 +149,7 @@
 // ── Ticket row ──────────────────────────────────────────────
 .ticketRow {
   display: grid;
-  grid-template-columns: 56px 1fr 220px;
+  grid-template-columns: 56px 1fr;
   gap: $spacing-16;
   padding: $spacing-20 0;
   border-bottom: 1px solid $color-border-light;
@@ -218,11 +218,20 @@
   gap: 1px;
 }
 
+.ticketHeaderLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-16;
+  min-width: 0;
+}
+
 .ticketMetaLine {
   display: flex;
   align-items: center;
   gap: $spacing-8;
   font-size: $font-size-md;
+  min-width: 0;
 }
 
 .authorName {
@@ -298,6 +307,7 @@
 .ticketActions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: $spacing-8;
   margin-top: $spacing-8;
 }
@@ -332,13 +342,13 @@
   &:hover { background: $color-gray-100; }
 }
 
-// ── Right-side meta column ──────────────────────────────────
+// ── Inline custom-field rail at the top of each ticket row ─
 .ticketSide {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-8;
-  align-items: flex-start;
-  padding-top: $spacing-4;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: $spacing-16;
   font-size: $font-size-base;
   color: $color-gray-700;
 }
@@ -368,18 +378,11 @@
   background: #1976d2;
 }
 
-// ── Severity badge in row meta ─────────────────────────────
-.severityBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: $spacing-4;
-  height: 24px;
-  padding: 2px $spacing-8;
-  border-radius: $radius-sm;
-  font-size: 10px;
-  font-weight: 400;
-  // No text-transform — source already renders sentence case
-  // ("Medium severity", "High severity", "Low severity").
-  letter-spacing: 0.4px;
+// Severity now renders as a colored dot + plain text (matches the
+// Assigned/Unassigned treatment) instead of a filled badge.
+.severityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
 }

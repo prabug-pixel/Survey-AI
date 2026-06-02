@@ -56,6 +56,18 @@
   letter-spacing: -0.24px;
 }
 
+// Same type as `.label` but inline-flex so a trailing info icon can
+// sit next to the text (used by the Dropdown "Options" label tooltip).
+.optionsLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-gray-700;
+  letter-spacing: -0.24px;
+}
+
 // ── Dropdown options list ──────────────────────────────────
 .options {
   display: flex;
@@ -107,27 +119,21 @@
   &:hover { background: rgba(25, 118, 210, 0.08); }
 }
 
-// ── Toggle group ───────────────────────────────────────────
-.toggleGroup {
+// ── Checkbox group ─────────────────────────────────────────
+.checkboxGroup {
   display: flex;
   flex-direction: column;
+  gap: $spacing-4;
 }
 
-.toggleRow {
+.checkboxRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: $spacing-12;
-  padding: $spacing-8 0;
+  gap: $spacing-8;
+  padding: $spacing-4 0;
 }
 
-.toggleText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.toggleTitle {
+.checkboxTitle {
   display: inline-flex;
   align-items: center;
   gap: $spacing-4;

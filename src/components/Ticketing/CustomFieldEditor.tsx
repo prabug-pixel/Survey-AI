@@ -11,9 +11,9 @@ import Modal from '@birdeye/elemental/core/atoms/Modal';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
-import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import Button from '@birdeye/elemental/core/atoms/Button';
+import Checkbox from '../../shared/Checkbox/Checkbox';
 import { IconPlus, IconClose, IconInfo } from '../../shared/Icons/Icons';
 import { FIELD_TYPE_OPTIONS, MAX_CARD_VISIBLE_FIELDS, useCustomFields } from './CustomFieldsContext';
 import type { CustomField, CustomFieldType } from './CustomFieldsContext';
@@ -36,6 +36,7 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
   const [options, setOptions] = useState<string[]>(blankOptions());
   const [required, setRequired] = useState(false);
   const [filterable, setFilterable] = useState(false);
+  const [sortable, setSortable] = useState(false);
   const [visible, setVisible] = useState(false);
 
   // Count *other* fields currently marked visible so we can disable the
@@ -57,6 +58,7 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
       setOptions(initial.options ?? blankOptions());
       setRequired(initial.required);
       setFilterable(initial.filterable);
+      setSortable(initial.sortable);
       setVisible(initial.visible);
     } else {
       setName('');
@@ -65,6 +67,7 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
       setOptions(blankOptions());
       setRequired(false);
       setFilterable(false);
+      setSortable(false);
       setVisible(false);
     }
   }, [isOpen, initial]);
@@ -83,6 +86,7 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
       options: isDropdown ? options.map(o => o.trim()).filter(Boolean) : undefined,
       required,
       filterable,
+      sortable,
       visible,
     });
   };
@@ -142,7 +146,14 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
 
         {isDropdown && (
           <div className={styles.field}>
-            <label className={styles.label}>Options</label>
+            <label className={styles.optionsLabel}>
+              Options
+              <Tooltip text="The sort order will be based on the added options." position="top" hideOnScroll>
+                <span className={styles.infoIcon} aria-label="More info">
+                  <IconInfo size={14} color="#9e9e9e" />
+                </span>
+              </Tooltip>
+            </label>
             <div className={styles.options}>
               {options.map((opt, idx) => (
                 <div key={idx} className={styles.optionRow}>
@@ -195,64 +206,59 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
           />
         </div>
 
-        <div className={styles.toggleGroup}>
-          <div className={styles.toggleRow}>
-            <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>
-                Required<span className={styles.requiredStar} aria-hidden="true">*</span>
-              </span>
-            </div>
-            <Toggle
-              name="cfRequired"
-              checked={required}
-              roundedToggle
-              onChange={() => setRequired(v => !v)}
-            />
+        <div className={styles.checkboxGroup}>
+          <div className={styles.checkboxRow}>
+            <Checkbox name="cfRequired" checked={required} onChange={setRequired} />
+            <span className={styles.checkboxTitle}>
+              Required<span className={styles.requiredStar} aria-hidden="true">*</span>
+            </span>
           </div>
 
-          <div className={styles.toggleRow}>
-            <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>
-                Filterable &amp; sortable
-                <Tooltip text="Appears in list filters and sorting" position="top" hideOnScroll>
-                  <span className={styles.infoIcon} aria-label="More info">
-                    <IconInfo size={14} color="#9e9e9e" />
-                  </span>
-                </Tooltip>
-              </span>
-            </div>
-            <Toggle
-              name="cfFilterable"
-              checked={filterable}
-              roundedToggle
-              onChange={() => setFilterable(v => !v)}
-            />
+          <div className={styles.checkboxRow}>
+            <Checkbox name="cfFilterable" checked={filterable} onChange={setFilterable} />
+            <span className={styles.checkboxTitle}>
+              Filterable
+              <Tooltip text="Appears in list filters" position="top" hideOnScroll>
+                <span className={styles.infoIcon} aria-label="More info">
+                  <IconInfo size={14} color="#9e9e9e" />
+                </span>
+              </Tooltip>
+            </span>
           </div>
 
-          <div className={styles.toggleRow}>
-            <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>
-                Visible on ticket card
-                <Tooltip
-                  text={visibleAtCap
-                    ? `Limit reached — at most ${MAX_CARD_VISIBLE_FIELDS} fields can be shown on the list view ticket card. Hide one to enable this.`
-                    : `Show on the right rail of each ticket card in the list view (max ${MAX_CARD_VISIBLE_FIELDS}).`}
-                  position="top"
-                  hideOnScroll
-                >
-                  <span className={styles.infoIcon} aria-label="More info">
-                    <IconInfo size={14} color="#9e9e9e" />
-                  </span>
-                </Tooltip>
-              </span>
-            </div>
-            <Toggle
+          <div className={styles.checkboxRow}>
+            <Checkbox name="cfSortable" checked={sortable} onChange={setSortable} />
+            <span className={styles.checkboxTitle}>
+              Sortable
+              <Tooltip text="Lets users sort the list by this field" position="top" hideOnScroll>
+                <span className={styles.infoIcon} aria-label="More info">
+                  <IconInfo size={14} color="#9e9e9e" />
+                </span>
+              </Tooltip>
+            </span>
+          </div>
+
+          <div className={styles.checkboxRow}>
+            <Checkbox
               name="cfVisible"
               checked={visible}
-              roundedToggle
               disabled={visibleAtCap}
-              onChange={() => setVisible(v => !v)}
+              onChange={setVisible}
             />
+            <span className={styles.checkboxTitle}>
+              Visible on ticket card
+              <Tooltip
+                text={visibleAtCap
+                  ? `Limit reached — at most ${MAX_CARD_VISIBLE_FIELDS} fields can be shown on the list view ticket card. Hide one to enable this.`
+                  : `Show on the right rail of each ticket card in the list view (max ${MAX_CARD_VISIBLE_FIELDS}).`}
+                position="top"
+                hideOnScroll
+              >
+                <span className={styles.infoIcon} aria-label="More info">
+                  <IconInfo size={14} color="#9e9e9e" />
+                </span>
+              </Tooltip>
+            </span>
           </div>
         </div>
       </div>
