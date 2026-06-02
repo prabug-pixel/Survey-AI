@@ -23,6 +23,7 @@ import {
   IconCheck,
   IconSearch,
   IconStarFilled,
+  IconUsers,
 } from '../../shared/Icons/Icons';
 import { useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
@@ -241,6 +242,28 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
                 )}
               </div>
             </div>
+            <div className={styles.headTopMeta}>
+              <span className={styles.headMetaItem}>
+                <IconCalendar size={14} color="#9e9e9e" />
+                <span>{ticket.createdOn}</span>
+              </span>
+              <span className={styles.headMetaItem}>
+                <span className={`${styles.headStatusDot} ${styles.headStatusAssigned}`} aria-hidden />
+                <span>{ticket.status}</span>
+              </span>
+              {ticket.assigneeName && (
+                <span className={styles.headMetaItem}>
+                  <IconUsers size={14} color="#9e9e9e" />
+                  <span>{ticket.assigneeName}</span>
+                </span>
+              )}
+              {ticket.location && (
+                <span className={`${styles.headMetaItem} ${styles.headMetaLocation}`}>
+                  <IconLocation size={14} color="#9e9e9e" />
+                  <span>{ticket.location}</span>
+                </span>
+              )}
+            </div>
           </>
         ) : (
           <>
@@ -357,35 +380,6 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
               onChange={setAssigneeValue}
               placeholder="Select an assignee"
             />
-          </div>
-
-          <div className={styles.sideGroup}>
-            <h4 className={styles.sideGroupLabel}>Details</h4>
-
-            <div className={styles.sideField}>
-              <label className={styles.sideFieldLabel}>Location</label>
-              <div className={styles.readOnlyField}>
-                <IconLocation size={16} color="#555" />
-                <span className={styles.readOnlyFieldText}>{ticket.location}</span>
-              </div>
-            </div>
-
-            <div className={styles.sideField}>
-              <label className={styles.sideFieldLabel}>Channel</label>
-              <div className={styles.readOnlyField}>
-                <span className={styles.readOnlyFieldText}>{ticket.channel}</span>
-              </div>
-            </div>
-
-            {ticket.dueOn && (
-              <div className={styles.sideField}>
-                <label className={styles.sideFieldLabel}>Due date</label>
-                <div className={styles.staticField}>
-                  <IconCalendar size={14} color="#9e9e9e" />
-                  <span>{ticket.dueOn}</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {visibleCustomFields.length > 0 && (

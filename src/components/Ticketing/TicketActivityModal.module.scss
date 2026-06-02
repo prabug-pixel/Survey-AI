@@ -201,6 +201,50 @@
   gap: $spacing-4;
 }
 
+// Horizontal meta rail anchored to the right of the review-source
+// ticket head — mirrors the inline rail used on the list-view ticket
+// card so date/status/assignee/location read the same way in both
+// surfaces. The side rail below stays the authoritative editor.
+.headTopMeta {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-16;
+  font-size: $font-size-base;
+  color: $color-gray-700;
+  margin-left: auto;
+}
+
+.headMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-6;
+  white-space: nowrap;
+}
+
+.headMetaLocation {
+  max-width: 180px;
+
+  > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.headStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  background: $color-gray-400;
+  flex-shrink: 0;
+}
+
+.headStatusAssigned {
+  background: #1976d2;
+}
+
 .ticketBody {
   margin: 0;
   font-size: $font-size-md;
