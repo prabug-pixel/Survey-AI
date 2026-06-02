@@ -12,8 +12,9 @@ import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
+import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import Button from '@birdeye/elemental/core/atoms/Button';
-import { IconPlus, IconClose } from '../../shared/Icons/Icons';
+import { IconPlus, IconClose, IconInfo } from '../../shared/Icons/Icons';
 import { FIELD_TYPE_OPTIONS, MAX_CARD_VISIBLE_FIELDS, useCustomFields } from './CustomFieldsContext';
 import type { CustomField, CustomFieldType } from './CustomFieldsContext';
 import styles from './CustomFieldEditor.module.scss';
@@ -197,8 +198,9 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
         <div className={styles.toggleGroup}>
           <div className={styles.toggleRow}>
             <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>Required</span>
-              <span className={styles.toggleHint}>Must be filled before saving</span>
+              <span className={styles.toggleTitle}>
+                Required<span className={styles.requiredStar} aria-hidden="true">*</span>
+              </span>
             </div>
             <Toggle
               name="cfRequired"
@@ -210,8 +212,14 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
 
           <div className={styles.toggleRow}>
             <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>Filterable &amp; sortable</span>
-              <span className={styles.toggleHint}>Appears in list filters and sorting</span>
+              <span className={styles.toggleTitle}>
+                Filterable &amp; sortable
+                <Tooltip text="Appears in list filters and sorting" position="top" hideOnScroll>
+                  <span className={styles.infoIcon} aria-label="More info">
+                    <IconInfo size={14} color="#9e9e9e" />
+                  </span>
+                </Tooltip>
+              </span>
             </div>
             <Toggle
               name="cfFilterable"
@@ -223,26 +231,28 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
 
           <div className={styles.toggleRow}>
             <div className={styles.toggleText}>
-              <span className={styles.toggleTitle}>Visible on ticket card</span>
-              <span className={styles.toggleHint}>
-                {visibleAtCap
-                  ? `Limit reached — at most ${MAX_CARD_VISIBLE_FIELDS} fields can be shown on the list view ticket card. Hide one to enable this.`
-                  : `Show on the right rail of each ticket card in the list view (max ${MAX_CARD_VISIBLE_FIELDS}).`}
+              <span className={styles.toggleTitle}>
+                Visible on ticket card
+                <Tooltip
+                  text={visibleAtCap
+                    ? `Limit reached — at most ${MAX_CARD_VISIBLE_FIELDS} fields can be shown on the list view ticket card. Hide one to enable this.`
+                    : `Show on the right rail of each ticket card in the list view (max ${MAX_CARD_VISIBLE_FIELDS}).`}
+                  position="top"
+                  hideOnScroll
+                >
+                  <span className={styles.infoIcon} aria-label="More info">
+                    <IconInfo size={14} color="#9e9e9e" />
+                  </span>
+                </Tooltip>
               </span>
             </div>
-            <span
-              title={visibleAtCap
-                ? `At most ${MAX_CARD_VISIBLE_FIELDS} fields can be visible. Hide one first.`
-                : undefined}
-            >
-              <Toggle
-                name="cfVisible"
-                checked={visible}
-                roundedToggle
-                disabled={visibleAtCap}
-                onChange={() => setVisible(v => !v)}
-              />
-            </span>
+            <Toggle
+              name="cfVisible"
+              checked={visible}
+              roundedToggle
+              disabled={visibleAtCap}
+              onChange={() => setVisible(v => !v)}
+            />
           </div>
         </div>
       </div>

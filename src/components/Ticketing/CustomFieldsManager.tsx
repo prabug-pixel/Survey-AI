@@ -21,20 +21,22 @@ import type { CustomField } from './CustomFieldsContext';
 import CustomFieldEditor from './CustomFieldEditor';
 import styles from './CustomFieldsManager.module.scss';
 
-// Sample data renderers mirror the screenshot — give the user a hint
-// of what their field will look like once a real ticket fills it in.
-const sampleFor = (field: CustomField): string => {
-  switch (field.type) {
-    case 'text':     return 'e.g. Triaged by Prabu';
-    case 'longText': return 'e.g. Investigation notes…';
-    case 'dropdown': return field.options?.[0] ?? '—';
-    case 'number':   return '42';
-    case 'date':     return 'May 28, 2026';
-    case 'checkbox': return 'Yes';
-    case 'user':     return 'Prabu G';
-    default:         return '—';
-  }
-};
+// Backpocket: Sample data column was removed from the Fields table.
+// Uncomment `sampleFor` below and the matching column entry in `columns`
+// to restore it.
+//
+// const sampleFor = (field: CustomField): string => {
+//   switch (field.type) {
+//     case 'text':     return 'e.g. Triaged by Prabu';
+//     case 'longText': return 'e.g. Investigation notes…';
+//     case 'dropdown': return field.options?.[0] ?? '—';
+//     case 'number':   return '42';
+//     case 'date':     return 'May 28, 2026';
+//     case 'checkbox': return 'Yes';
+//     case 'user':     return 'Prabu G';
+//     default:         return '—';
+//   }
+// };
 
 const CustomFieldsManager: React.FC = () => {
   const { fields, addField, updateField, removeField } = useCustomFields();
@@ -80,7 +82,6 @@ const CustomFieldsManager: React.FC = () => {
         <span className={styles.fieldName}>
           {field.name}
           {isCustomField(field) && <span className={styles.customTag}>Custom</span>}
-          {!field.visible && <span className={styles.hiddenTag}>Hidden</span>}
         </span>
       ),
     },
@@ -96,17 +97,18 @@ const CustomFieldsManager: React.FC = () => {
       label: 'Description',
       render: field => field.description || '—',
     },
-    {
-      key: 'sample',
-      label: 'Sample data',
-      render: field => sampleFor(field),
-    },
+    // Backpocket: Sample data column — restore alongside the `sampleFor` helper above.
+    // {
+    //   key: 'sample',
+    //   label: 'Sample data',
+    //   render: field => sampleFor(field),
+    // },
   ], []);
 
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.crumbLink}>Contacts</span>
+        <span className={styles.crumbLink}>Ticketing</span>
         <span className={styles.crumbSep}>/</span>
         <span className={styles.crumbCurrent}>Manage custom fields</span>
       </div>
