@@ -354,7 +354,7 @@ const SurveyCampaigns: React.FC = () => {
               <div className={styles.fieldRow}>
                 <div className={styles.fieldLabelRow}>
                   <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Set amount of time</span>
-                  <Tooltip text="Only a maximum of 90 days allowed" position="right" hideOnScroll>
+                  <Tooltip text="You can only enter up to 90 days" position="right" hideOnScroll>
                     <button type="button" className={styles.infoIconBtn} aria-label="Set amount of time info">
                       <IconInfo size={14} />
                     </button>
