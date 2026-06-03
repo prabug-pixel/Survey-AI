@@ -16,6 +16,28 @@ export * from 'react-dom/index.js';
 // @ts-expect-error -- react-dom subpath isn't typed
 export { default } from 'react-dom/index.js';
 
+// `react-dom` is CommonJS, so when Vite's dep-optimizer (esbuild) bundles this
+// shim it cannot statically hoist `export *` into named bindings — it collapses
+// them into a runtime namespace object. The result: only the *explicit* named
+// exports above (`default`, plus `findDOMNode` below) are visible to static
+// `import { x } from 'react-dom'`, and everything else (e.g. createPortal) fails
+// with "does not provide an export named ...". Re-export the public named APIs
+// explicitly so each gets a real static binding through the alias.
+export {
+  createPortal,
+  flushSync,
+  preconnect,
+  prefetchDNS,
+  preinit,
+  preinitModule,
+  preload,
+  preloadModule,
+  requestFormReset,
+  unstable_batchedUpdates,
+  version,
+  // @ts-expect-error -- react-dom subpath isn't typed
+} from 'react-dom/index.js';
+
 // @ts-expect-error -- react-dom subpath isn't typed
 import * as ReactDOMModule from 'react-dom/index.js';
 

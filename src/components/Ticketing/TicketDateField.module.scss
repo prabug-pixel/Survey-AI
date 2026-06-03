@@ -1,0 +1,31 @@
+@use '../../styles/variables' as *;
+
+.field {
+  position: relative;
+  width: 100%;
+
+  // FormInput's readOnly state paints a gray "disabled" background. We use
+  // readOnly only to block typing (the value is picker-driven), so force the
+  // normal white-background input look here.
+  :global(input[readonly]) {
+    background-color: $color-white !important;
+    border-color: #ccc !important;
+    color: $color-gray-900 !important;
+    cursor: pointer !important;
+  }
+}
+
+// Rendered via portal so it escapes the Modal's scroll container and any
+// overflow:hidden ancestors. Positioned with inline fixed top/left set by
+// the component (flips above the trigger if there isn't enough room below).
+// z-index must sit above the Birdeye Modal overlay (z-index 9999) — otherwise
+// the portaled popup renders behind the modal overlay and is unclickable.
+.popup {
+  position: fixed;
+  z-index: 10000;
+  background: $color-white;
+  border-radius: $radius-md;
+  box-shadow: $shadow-dropdown;
+  padding: $spacing-12;
+  min-width: 320px;
+}

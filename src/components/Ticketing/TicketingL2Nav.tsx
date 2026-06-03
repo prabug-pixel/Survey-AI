@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IconChevronDown, IconChevronUp, IconPlusCircle } from '../../shared/Icons/Icons';
+import CreateTicketModal from './CreateTicketModal';
 import styles from './TicketingL2Nav.module.scss';
 
 type TicketingView = 'my' | 'all';
@@ -30,6 +31,7 @@ const TicketingL2Nav: React.FC = () => {
   const [reportsOpen, setReportsOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [activeView, setActiveView] = useState<TicketingView>('all');
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -59,10 +61,20 @@ const TicketingL2Nav: React.FC = () => {
       <div className={styles.productTitle}>Ticketing AI</div>
 
       <div className={styles.navItems}>
-        <button className={styles.createBtn} type="button">
+        <button
+          className={styles.createBtn}
+          type="button"
+          onClick={() => setCreateTicketOpen(true)}
+        >
           <span className={styles.navLabel}>Create ticket</span>
           <IconPlusCircle size={20} />
         </button>
+
+        <CreateTicketModal
+          isOpen={createTicketOpen}
+          onClose={() => setCreateTicketOpen(false)}
+          onSave={() => setCreateTicketOpen(false)}
+        />
 
         <button
           className={styles.sectionHeader}

@@ -27,6 +27,7 @@ import {
 } from '../../shared/Icons/Icons';
 import { useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
+import TicketDateField from './TicketDateField';
 import styles from './TicketActivityModal.module.scss';
 
 export interface TicketActivityEntry {
@@ -716,8 +717,19 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
           </label>
         </div>
       );
-    case 'number':
     case 'date':
+      return (
+        <div className={styles.sideField}>
+          {label}
+          <TicketDateField
+            name={`cf-${field.id}`}
+            value={typeof value === 'string' ? value : ''}
+            onChange={onChange}
+            placeholder="MM/DD/YYYY"
+          />
+        </div>
+      );
+    case 'number':
     case 'text':
     default:
       return (
@@ -725,7 +737,7 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
           {label}
           <FormInput
             name={`cf-${field.id}`}
-            type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+            type={field.type === 'number' ? 'number' : 'text'}
             value={typeof value === 'string' ? value : ''}
             placeholder={field.description ?? ''}
             onChange={(_e: unknown, v: string) => onChange(String(v ?? ''))}

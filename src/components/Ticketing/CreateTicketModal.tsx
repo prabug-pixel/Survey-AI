@@ -15,6 +15,7 @@ import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import { IconClose } from '../../shared/Icons/Icons';
+import TicketDateField from './TicketDateField';
 import {
   useCustomFields,
   FIELD_SECTION_LABELS,
@@ -288,22 +289,30 @@ const renderControl = (
           name={`new-${field.id}`}
           value={typeof value === 'string' ? value : ''}
           onChange={(_e: unknown, v: string) => onChange(String(v ?? ''))}
-          placeholder={field.description ?? ''}
+          placeholder="Text"
           rows={4}
           autoSize={false}
           noFloatingLabel
         />
       );
-    case 'number':
     case 'date':
+      return (
+        <TicketDateField
+          name={`new-${field.id}`}
+          value={typeof value === 'string' ? value : ''}
+          onChange={onChange}
+          placeholder="MM/DD/YYYY"
+        />
+      );
+    case 'number':
     case 'text':
     default:
       return (
         <FormInput
           name={`new-${field.id}`}
-          type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+          type={field.type === 'number' ? 'number' : 'text'}
           value={typeof value === 'string' ? value : ''}
-          placeholder={field.description ?? ''}
+          placeholder={field.type === 'number' ? 'Number' : 'Text'}
           onChange={(_e: unknown, v: string) => onChange(String(v ?? ''))}
         />
       );
