@@ -84,7 +84,6 @@ const SurveyDetails: React.FC = () => {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [actionsOpen, setActionsOpen] = useState(false);
 
   // Distribute accordion
   const [distributeExpanded, setDistributeExpanded] = useState({
@@ -98,12 +97,10 @@ const SurveyDetails: React.FC = () => {
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
 
   const rowMenuRef = useRef<HTMLDivElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (rowMenuRef.current && !rowMenuRef.current.contains(e.target as Node)) setOpenMenuId(null);
-      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) setActionsOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -134,17 +131,6 @@ const SurveyDetails: React.FC = () => {
     const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv));
     return sortDir === 'asc' ? cmp : -cmp;
   });
-
-  const handleEdit = () => {
-    setActionsOpen(false);
-    if (survey.surveyData) dispatch(surveyActions.loadSurvey(survey.surveyData));
-    navigate('/surveys/create');
-  };
-
-  const handleDelete = () => {
-    dispatch(surveyActions.deleteSavedSurvey(survey.id));
-    navigate('/surveys');
-  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(surveyUrl).catch(() => {});
@@ -216,28 +202,16 @@ const SurveyDetails: React.FC = () => {
         </div>
 
         <div className={styles.headerRight}>
-          <div className={styles.actionsContainer} ref={actionsRef}>
-            <button className={styles.actionsBtn} onClick={() => setActionsOpen(o => !o)}>
-              <span>Actions</span>
-              <IconChevronDown size={16} color="#424242" />
+          {isRunning && (
+            <button className={styles.actionsBtn} onClick={() => setCloseConfirmOpen(true)}>
+              Close now
             </button>
-            {actionsOpen && (
-              <div className={styles.actionsDropdown}>
-                <button className={styles.actionsItem} onClick={handleEdit}>Edit</button>
-                {isRunning && (
-                  <button className={`${styles.actionsItem} ${styles.warnItem}`} onClick={() => { setActionsOpen(false); setCloseConfirmOpen(true); }}>
-                    Close now
-                  </button>
-                )}
-                {isExpired && (
-                  <button className={styles.actionsItem} onClick={() => { setActionsOpen(false); setReopenDialogOpen(true); }}>
-                    Reopen
-                  </button>
-                )}
-                <button className={`${styles.actionsItem} ${styles.deleteItem}`} onClick={handleDelete}>Delete</button>
-              </div>
-            )}
-          </div>
+          )}
+          {isExpired && (
+            <button className={styles.actionsBtn} onClick={() => setReopenDialogOpen(true)}>
+              Reopen
+            </button>
+          )}
         </div>
       </div>
 

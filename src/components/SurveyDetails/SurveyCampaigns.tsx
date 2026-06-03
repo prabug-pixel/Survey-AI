@@ -4,6 +4,7 @@ import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
+import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { CampaignConfig } from '../../types/survey.types';
@@ -353,6 +354,11 @@ const SurveyCampaigns: React.FC = () => {
               <div className={styles.fieldRow}>
                 <div className={styles.fieldLabelRow}>
                   <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Set amount of time</span>
+                  <Tooltip text="Only a maximum of 90 days allowed" position="right" hideOnScroll>
+                    <button type="button" className={styles.infoIconBtn} aria-label="Set amount of time info">
+                      <IconInfo size={14} />
+                    </button>
+                  </Tooltip>
                 </div>
                 <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
                   <FormInput
