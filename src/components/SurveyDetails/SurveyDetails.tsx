@@ -169,7 +169,7 @@ const SurveyDetails: React.FC = () => {
     view: 'View',
     distribute: 'Distribute',
     responses: 'Responses',
-    edit: 'Edit settings',
+    edit: 'Settings',
     reports: 'Reports',
   };
   const sectionFromUrl = searchParams.get('section');
@@ -227,7 +227,7 @@ const SurveyDetails: React.FC = () => {
             {tab === 'reports' && (<>Reports<IconExternalLink size={14} color={activeTab === 'reports' ? '#1976d2' : '#9e9e9e'} /></>)}
             {tab === 'view' && 'View'}
             {tab === 'distribute' && 'Distribute'}
-            {tab === 'edit' && 'Edit settings'}
+            {tab === 'edit' && 'Settings'}
           </button>
         ))}
       </div>
