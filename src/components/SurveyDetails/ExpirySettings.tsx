@@ -397,7 +397,18 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
             <section className={styles.section}>
               <div className={styles.sectionTitleRow}>
                 <div className={styles.sectionTitleText}>
-                  <h3 className={styles.sectionTitle}>Email notifications</h3>
+                  <div className={styles.fieldLabelRow}>
+                    <h3 className={styles.sectionTitle}>Email notifications</h3>
+                    <Tooltip
+                      text="You'll be notified 72 hours, 24 hours before closing, and when the survey ends."
+                      position="right"
+                      hideOnScroll
+                    >
+                      <button type="button" className={styles.infoIconBtn} aria-label="Email notifications info">
+                        <IconInfo size={14} />
+                      </button>
+                    </Tooltip>
+                  </div>
                   <p className={styles.sectionDesc}>
                     Send notifications to the survey owner
                   </p>
@@ -410,25 +421,6 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 />
               </div>
 
-              {config.notifications.enabled && (
-                <div className={styles.checkIndent}>
-                  {([
-                    { name: 'notif72h', field: 'hours72' as const, label: '72 hours before the survey closes' },
-                    { name: 'notif24h', field: 'hours24' as const, label: '24 hours before the survey closes' },
-                    { name: 'notifAuto', field: 'onAutoClose' as const, label: 'When the survey closes' },
-                  ] as const).map(({ name, field, label }) => (
-                    <label key={name} className={styles.checkboxRow}>
-                      <FormInput
-                        name={name}
-                        type="checkbox"
-                        checked={config.notifications[field]}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => patchNotif(field, e.target.checked)}
-                      />
-                      <span>{label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
             </section>
 
         </div>
