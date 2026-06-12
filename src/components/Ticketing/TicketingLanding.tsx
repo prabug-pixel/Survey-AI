@@ -14,9 +14,11 @@ import {
   IconMail,
   IconPhone,
   IconInfo,
+  IconViewWeek,
 } from '../../shared/Icons/Icons';
 import TicketActivityModal, { type TicketRecord } from './TicketActivityModal';
 import TicketFiltersDrawer from './TicketFiltersDrawer';
+import TableCustomizerDrawer from './TableCustomizerDrawer';
 import TicketFiltersModal from './TicketFiltersModal';
 import CreateTicketModal from './CreateTicketModal';
 import { type FilterValues } from './TicketFilters';
@@ -449,22 +451,29 @@ const sortByRailOrder = (a: CustomField, b: CustomField): number => {
 };
 
 const TicketingLanding: React.FC = () => {
-  const { fields } = useCustomFields();
+  const { fields, tableColumnOrder } = useCustomFields();
   const [recentOpen, setRecentOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<TicketRecord | null>(null);
 
-  // Drives the right rail on each ticket card. Sorted into the design's
-  // priority order rather than the field-list order so Severity always
-  // anchors the top regardless of where it sits in Settings.
-  const visibleRailFields = useMemo(
-    () => fields.filter(f => f.visible).slice().sort(sortByRailOrder),
-    [fields],
-  );
+  // Drives the right rail on each ticket card. Respects the user's saved
+  // column order from the table customizer, falling back to the design's
+  // semantic priority order within the ordered set.
+  const visibleRailFields = useMemo(() => {
+    const fieldById = new Map(fields.map(f => [f.id, f]));
+    const ordered = tableColumnOrder
+      .map(id => fieldById.get(id))
+      .filter((f): f is CustomField => Boolean(f) && f.visible);
+    // Append any visible fields not covered by the saved order.
+    const inOrder = new Set(tableColumnOrder);
+    fields.forEach(f => { if (!inOrder.has(f.id) && f.visible) ordered.push(f); });
+    return ordered;
+  }, [fields, tableColumnOrder]);
 
   // Inline filter panel + the full "See all filters" popup.
   // The panel surfaces the location-axis fields; the modal adds
   // the ticket-axis fields on top of those.
   const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
+  const [customizerOpen, setCustomizerOpen] = useState(false);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -520,6 +529,16 @@ const TicketingLanding: React.FC = () => {
             >
               <IconFilter size={20} color="#1976d2" />
               <span className={styles.filterBadge}>1</span>
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.iconBtn} ${customizerOpen ? styles.iconBtnActive : ''}`}
+              aria-label="Customize table"
+              aria-pressed={customizerOpen}
+              onClick={() => setCustomizerOpen(o => !o)}
+            >
+              <IconViewWeek size={20} color={customizerOpen ? '#1976d2' : '#555'} />
             </button>
           </div>
         </div>
@@ -642,6 +661,11 @@ const TicketingLanding: React.FC = () => {
           setFiltersDrawerOpen(false);
           setFiltersModalOpen(true);
         }}
+      />
+
+      <TableCustomizerDrawer
+        isOpen={customizerOpen}
+        onClose={() => setCustomizerOpen(false)}
       />
     </div>
   );
