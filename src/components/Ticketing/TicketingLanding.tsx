@@ -14,11 +14,9 @@ import {
   IconMail,
   IconPhone,
   IconInfo,
-  IconViewWeek,
 } from '../../shared/Icons/Icons';
 import TicketActivityModal, { type TicketRecord } from './TicketActivityModal';
 import TicketFiltersDrawer from './TicketFiltersDrawer';
-import TableCustomizerDrawer from './TableCustomizerDrawer';
 import TicketFiltersModal from './TicketFiltersModal';
 import CreateTicketModal from './CreateTicketModal';
 import { type FilterValues } from './TicketFilters';
@@ -473,7 +471,7 @@ const TicketingLanding: React.FC = () => {
   // The panel surfaces the location-axis fields; the modal adds
   // the ticket-axis fields on top of those.
   const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
-  const [customizerOpen, setCustomizerOpen] = useState(false);
+
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -531,15 +529,6 @@ const TicketingLanding: React.FC = () => {
               <span className={styles.filterBadge}>1</span>
             </button>
 
-            <button
-              type="button"
-              className={`${styles.iconBtn} ${customizerOpen ? styles.iconBtnActive : ''}`}
-              aria-label="Customize table"
-              aria-pressed={customizerOpen}
-              onClick={() => setCustomizerOpen(o => !o)}
-            >
-              <IconViewWeek size={20} color={customizerOpen ? '#1976d2' : '#555'} />
-            </button>
           </div>
         </div>
 
@@ -661,11 +650,6 @@ const TicketingLanding: React.FC = () => {
           setFiltersDrawerOpen(false);
           setFiltersModalOpen(true);
         }}
-      />
-
-      <TableCustomizerDrawer
-        isOpen={customizerOpen}
-        onClose={() => setCustomizerOpen(false)}
       />
     </div>
   );
