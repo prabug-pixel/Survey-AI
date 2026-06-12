@@ -81,7 +81,7 @@
 .ticketHead {
   display: flex;
   gap: $spacing-12;
-  align-items: center;
+  align-items: flex-start;
   padding-bottom: $spacing-16;
   margin-bottom: $spacing-16;
   border-bottom: 1px solid $color-border-light;
@@ -161,10 +161,11 @@
 .featuredChip {
   display: inline-flex;
   align-items: center;
+  height: 26px;
   padding: 2px $spacing-8;
   background: $color-gray-100;
   color: $color-gray-700;
-  font-size: $font-size-xs;
+  font-size: $font-size-sm;
   font-weight: 500;
   border-radius: $radius-sm;
 }
@@ -326,8 +327,8 @@
   padding: $spacing-12 0 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0;
+  justify-content: flex-end;
+  gap: $spacing-20;
   background: $color-white;
   height: 100%;
 }

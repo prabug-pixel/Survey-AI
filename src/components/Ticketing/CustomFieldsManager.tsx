@@ -13,12 +13,14 @@ import {
   IconSearch,
   IconEdit,
   IconTrash,
+  IconViewWeek,
 } from '../../shared/Icons/Icons';
 import AeroTable from '../../shared/components/AeroTable';
 import type { AeroColumn } from '../../shared/components/AeroTable';
 import { FIELD_TYPE_LABELS, isCustomField, useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
 import CustomFieldEditor from './CustomFieldEditor';
+import TableCustomizerDrawer from './TableCustomizerDrawer';
 import styles from './CustomFieldsManager.module.scss';
 
 // Backpocket: Sample data column was removed from the Fields table.
@@ -39,19 +41,29 @@ import styles from './CustomFieldsManager.module.scss';
 // };
 
 const CustomFieldsManager: React.FC = () => {
-  const { fields, addField, updateField, removeField } = useCustomFields();
+  const { fields, addField, updateField, removeField, tableColumnOrder } = useCustomFields();
   const [search, setSearch] = useState('');
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CustomField | null>(null);
+  const [customizerOpen, setCustomizerOpen] = useState(false);
 
+  // Apply the user's saved column order then filter by search query.
   const filtered = useMemo(() => {
+    const fieldById = new Map(fields.map(f => [f.id, f]));
+    const ordered = tableColumnOrder
+      .map(id => fieldById.get(id))
+      .filter((f): f is CustomField => Boolean(f));
+    // Append any fields not yet in the saved order (e.g. newly added).
+    const inOrder = new Set(tableColumnOrder);
+    fields.forEach(f => { if (!inOrder.has(f.id)) ordered.push(f); });
+
     const q = search.trim().toLowerCase();
-    if (!q) return fields;
-    return fields.filter(f =>
+    if (!q) return ordered;
+    return ordered.filter(f =>
       f.name.toLowerCase().includes(q) ||
       (f.description ?? '').toLowerCase().includes(q),
     );
-  }, [fields, search]);
+  }, [fields, tableColumnOrder, search]);
 
   const openCreate = () => {
     setEditing(null);
@@ -106,74 +118,91 @@ const CustomFieldsManager: React.FC = () => {
   ], []);
 
   return (
-    <div className={styles.page}>
-      <div className={styles.breadcrumb}>
-        <span className={styles.crumbLink}>Ticketing</span>
-        <span className={styles.crumbSep}>/</span>
-        <span className={styles.crumbCurrent}>Manage custom fields</span>
-      </div>
-
-      <div className={styles.titleRow}>
-        <h1 className={styles.title}>Manage custom fields</h1>
-
-        <div className={styles.titleActions}>
-          <div className={styles.searchBox}>
-            <IconSearch size={16} color="#9e9e9e" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search fields"
-              aria-label="Search fields"
-            />
-          </div>
-          <button type="button" className={styles.createBtn} onClick={openCreate}>
-            Create custom field
-          </button>
+    <div className={styles.pageShell}>
+      <div className={styles.page}>
+        <div className={styles.breadcrumb}>
+          <span className={styles.crumbLink}>Ticketing</span>
+          <span className={styles.crumbSep}>/</span>
+          <span className={styles.crumbCurrent}>Manage custom fields</span>
         </div>
+
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>Manage custom fields</h1>
+
+          <div className={styles.titleActions}>
+            <div className={styles.searchBox}>
+              <IconSearch size={16} color="#9e9e9e" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search fields"
+                aria-label="Search fields"
+              />
+            </div>
+            <button
+              type="button"
+              className={`${styles.iconBtn} ${customizerOpen ? styles.iconBtnActive : ''}`}
+              aria-label="Customize table view"
+              aria-pressed={customizerOpen}
+              title="Customize table view"
+              onClick={() => setCustomizerOpen(o => !o)}
+            >
+              <IconViewWeek size={18} color={customizerOpen ? '#1976d2' : '#555'} />
+            </button>
+            <button type="button" className={styles.createBtn} onClick={openCreate}>
+              Create custom field
+            </button>
+          </div>
+        </div>
+
+        <AeroTable<CustomField>
+          ariaLabel="Custom fields"
+          columns={columns}
+          data={filtered}
+          getRowKey={f => f.id}
+          flush
+          resizable
+          emptyTitle="No custom fields yet"
+          emptyDescription={<>Click <strong>Create custom field</strong> to add one.</>}
+          rowAction={field => {
+            const isSystem = field.kind !== 'custom';
+            return (
+              <>
+                <button
+                  type="button"
+                  className={styles.rowIconBtn}
+                  aria-label={`Edit ${field.name}`}
+                  onClick={() => openEdit(field)}
+                >
+                  <IconEdit size={16} color="#555" />
+                </button>
+                <button
+                  type="button"
+                  className={styles.rowIconBtn}
+                  aria-label={`Remove ${field.name}`}
+                  disabled={isSystem}
+                  title={isSystem ? 'System fields cannot be removed' : undefined}
+                  onClick={() => removeField(field.id)}
+                >
+                  <IconTrash size={16} color="#555" />
+                </button>
+              </>
+            );
+          }}
+        />
+
+        <CustomFieldEditor
+          isOpen={editorOpen}
+          initial={editing}
+          onClose={() => setEditorOpen(false)}
+          onSave={handleSave}
+        />
       </div>
 
-      <AeroTable<CustomField>
-        ariaLabel="Custom fields"
-        columns={columns}
-        data={filtered}
-        getRowKey={f => f.id}
-        flush
-        resizable
-        emptyTitle="No custom fields yet"
-        emptyDescription={<>Click <strong>Create custom field</strong> to add one.</>}
-        rowAction={field => {
-          const isSystem = field.kind !== 'custom';
-          return (
-            <>
-              <button
-                type="button"
-                className={styles.rowIconBtn}
-                aria-label={`Edit ${field.name}`}
-                onClick={() => openEdit(field)}
-              >
-                <IconEdit size={16} color="#555" />
-              </button>
-              <button
-                type="button"
-                className={styles.rowIconBtn}
-                aria-label={`Remove ${field.name}`}
-                disabled={isSystem}
-                title={isSystem ? 'System fields cannot be removed' : undefined}
-                onClick={() => removeField(field.id)}
-              >
-                <IconTrash size={16} color="#555" />
-              </button>
-            </>
-          );
-        }}
-      />
-
-      <CustomFieldEditor
-        isOpen={editorOpen}
-        initial={editing}
-        onClose={() => setEditorOpen(false)}
-        onSave={handleSave}
+      <TableCustomizerDrawer
+        isOpen={customizerOpen}
+        onClose={() => setCustomizerOpen(false)}
       />
     </div>
   );

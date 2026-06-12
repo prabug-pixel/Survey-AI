@@ -5,12 +5,21 @@
 // in the AeroTable SCSS module so the Aero spec stays the source of
 // truth.
 
+// Outer shell — flex row so the customizer drawer slots in as a sibling,
+// matching the TicketingLanding pattern (no overlay, pushes content left).
+.pageShell {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  background: $color-white;
+  overflow: hidden;
+}
+
 .page {
+  flex: 1;
+  min-width: 0;
   padding: $spacing-24;
   background: $color-white;
-  // Parent (AppLayout > mainContent) is overflow: hidden, so this column
-  // owns its own vertical scroll. Without an explicit height the page can't
-  // overflow, leaving long field lists clipped at the viewport edge.
   height: 100%;
   overflow-y: auto;
 }
@@ -84,6 +93,26 @@
   }
 }
 
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: $color-gray-100; }
+}
+
+.iconBtnActive {
+  background: $color-primary-light;
+  border-color: #1976d2;
+}
+
 .createBtn {
   height: 36px;
   padding: 0 $spacing-16;
@@ -113,11 +142,10 @@
 .customTag {
   display: inline-block;
   padding: 2px $spacing-8;
-  background: #f3e8ff;
-  color: #6a1b9a;
+  background: #eaeaea;
+  color: #555555;
   font-size: $font-size-xs;
   border-radius: $radius-sm;
-  text-transform: uppercase;
   letter-spacing: 0.4px;
 }
 

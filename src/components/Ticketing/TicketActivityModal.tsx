@@ -143,20 +143,33 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
   // Custom fields configured under Settings > Fields. Values are kept
   // locally keyed by field id; a real implementation would persist per
   // ticket, but the structure is the same.
-  const { fields: customFields } = useCustomFields();
+  const { fields: customFields, tableColumnOrder } = useCustomFields();
   // The fixed rows above (Status, Assignee, Watchers, Location, Channel,
   // Created, Due date) already cover the customer/contact system kinds,
   // so the side rail's "Custom fields" section only surfaces ticket-axis
   // presets (severity/sentiment/root cause) plus anything user-added.
-  // The `visible` flag is intentionally ignored here — it now controls the
-  // list-view ticket card rail, not this modal.
-  const visibleCustomFields = customFields.filter(f =>
-    f.kind === 'severity' ||
-    f.kind === 'sentiment' ||
-    f.kind === 'rootCause' ||
-    f.kind === 'rootCauseComment' ||
-    f.kind === 'custom',
-  );
+  // `visible` is intentionally ignored — it controls the list-view rail.
+  // Order follows the user's saved tableColumnOrder from the customizer.
+  const visibleCustomFields = React.useMemo(() => {
+    const fieldById = new Map(customFields.map(f => [f.id, f]));
+    const ordered = tableColumnOrder
+      .map(id => fieldById.get(id))
+      .filter(f => f &&
+        (f.kind === 'severity' || f.kind === 'sentiment' ||
+         f.kind === 'rootCause' || f.kind === 'rootCauseComment' ||
+         f.kind === 'custom'));
+    // Append any matching fields not yet in the saved order.
+    const inOrder = new Set(tableColumnOrder);
+    customFields.forEach(f => {
+      if (!inOrder.has(f.id) &&
+          (f.kind === 'severity' || f.kind === 'sentiment' ||
+           f.kind === 'rootCause' || f.kind === 'rootCauseComment' ||
+           f.kind === 'custom')) {
+        ordered.push(f);
+      }
+    });
+    return ordered.filter(Boolean);
+  }, [customFields, tableColumnOrder]);
   const [customValues, setCustomValues] = useState<Record<string, string | boolean>>({});
   const setCustomValue = (id: string, v: string | boolean) =>
     setCustomValues(prev => ({ ...prev, [id]: v }));

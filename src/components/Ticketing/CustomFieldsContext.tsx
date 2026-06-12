@@ -141,6 +141,13 @@ interface CustomFieldsContextValue {
   updateField: (id: string, patch: Partial<CustomField>) => void;
   removeField: (id: string) => void;
 
+  // Table column order — ordered list of field IDs; controls display order in
+  // the field manager table, ticket list rail, and activity modal side rail.
+  tableColumnOrder: string[];
+  defaultTableColumnOrder: string[];
+  reorderTableColumns: (ids: string[]) => void;
+  resetTableColumnOrder: () => void;
+
   // Sources
   sources: TicketSource[];
   addSource: (s: Omit<TicketSource, 'id'>) => void;
@@ -766,11 +773,28 @@ const SEED_SLA: SlaRule[] = [
   },
 ];
 
+const DEFAULT_COLUMN_ORDER = SEED_FIELDS.map(f => f.id);
+const COLUMN_ORDER_STORAGE_KEY = 'ticketing-column-order';
+
+const loadStoredColumnOrder = (): string[] => {
+  try {
+    const stored = localStorage.getItem(COLUMN_ORDER_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as string[];
+      // Ensure any newly-added fields are appended at the end
+      const extra = DEFAULT_COLUMN_ORDER.filter(id => !parsed.includes(id));
+      return [...parsed, ...extra];
+    }
+  } catch {}
+  return DEFAULT_COLUMN_ORDER;
+};
+
 export const CustomFieldsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [fields, setFields] = useState<CustomField[]>(SEED_FIELDS);
   const [sources, setSources] = useState<TicketSource[]>(SEED_SOURCES);
   const [assignmentRules, setAssignmentRules] = useState<AssignmentRule[]>(SEED_ASSIGNMENT);
   const [slaRules, setSlaRules] = useState<SlaRule[]>(SEED_SLA);
+  const [tableColumnOrder, setTableColumnOrder] = useState<string[]>(loadStoredColumnOrder);
 
   // Fields — new entries added from Settings default to the 'ticket'
   // section so they slot in alongside Severity / Sentiment / Root cause
@@ -825,15 +849,27 @@ export const CustomFieldsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setSlaRules(prev => prev.filter(r => r.id !== id));
   }, []);
 
+  // Table column order
+  const reorderTableColumns = useCallback((ids: string[]) => {
+    setTableColumnOrder(ids);
+    try { localStorage.setItem(COLUMN_ORDER_STORAGE_KEY, JSON.stringify(ids)); } catch {}
+  }, []);
+  const resetTableColumnOrder = useCallback(() => {
+    setTableColumnOrder(DEFAULT_COLUMN_ORDER);
+    try { localStorage.removeItem(COLUMN_ORDER_STORAGE_KEY); } catch {}
+  }, []);
+
   const value = useMemo<CustomFieldsContextValue>(
     () => ({
       fields, addField, updateField, removeField,
+      tableColumnOrder, defaultTableColumnOrder: DEFAULT_COLUMN_ORDER, reorderTableColumns, resetTableColumnOrder,
       sources, addSource, updateSource, removeSource,
       assignmentRules, addAssignmentRule, updateAssignmentRule, removeAssignmentRule,
       slaRules, addSlaRule, updateSlaRule, removeSlaRule,
     }),
     [
       fields, addField, updateField, removeField,
+      tableColumnOrder, reorderTableColumns, resetTableColumnOrder,
       sources, addSource, updateSource, removeSource,
       assignmentRules, addAssignmentRule, updateAssignmentRule, removeAssignmentRule,
       slaRules, addSlaRule, updateSlaRule, removeSlaRule,
