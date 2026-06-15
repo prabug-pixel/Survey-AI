@@ -142,7 +142,7 @@
   display: flex;
   gap: $spacing-12;
   align-items: center;
-  padding-bottom: $spacing-16;
+  padding-bottom: 0;
 }
 
 .ticketIcon {
@@ -365,6 +365,7 @@
 .commentFooter {
   display: flex;
   justify-content: flex-end;
+  gap: $spacing-8;
 }
 
 // ── Side groups (used in accordion 2) ─────────────────────

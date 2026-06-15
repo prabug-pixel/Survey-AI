@@ -456,6 +456,13 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
                     noFloatingLabel
                   />
                   <div className={styles.commentFooter}>
+                    {comment.trim() && (
+                      <Button
+                        theme="secondary"
+                        label="Cancel"
+                        onClick={() => { setComment(''); }}
+                      />
+                    )}
                     <Button
                       theme="primary"
                       label="Comment"
