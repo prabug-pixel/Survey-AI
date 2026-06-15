@@ -1,15 +1,18 @@
 // ============================================================
-// TicketActivityModal — alternative layout where ticket meta
-// fields live in a right-side rail so the top stays clean even
-// as fields multiply (Status, Assignee, Watchers, Location,
-// Channel, Due date, Created, …).
+// TicketActivityModal — right-side drawer with two accordion
+// sections replacing the previous modal layout.
 //
-// Reuses existing elemental atoms (Modal, SingleSelect,
-// FormInput, TextArea, Button) and project tokens — no new
-// design primitives are introduced.
+// Accordion 1: Ticket details & activity (body, feed, comment).
+// Accordion 2: Assignment & fields (status, watchers, assignee,
+//              custom fields with inline drag-reorder via pencil).
+//
+// Reuses the createPortal drawer pattern from TableCustomizerDrawer,
+// the drag-drop logic from the same, and all existing elemental
+// atoms (SingleSelect, FormInput, TextArea, Button) — no new
+// design primitives introduced.
 // ============================================================
 import React, { useEffect, useRef, useState } from 'react';
-import Modal from '@birdeye/elemental/core/atoms/Modal';
+import { createPortal } from 'react-dom';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
@@ -20,10 +23,13 @@ import {
   IconLocation,
   IconBulb,
   IconChevronDown,
+  IconChevronUp,
   IconCheck,
   IconSearch,
   IconStarFilled,
   IconUsers,
+  IconEdit,
+  IconArrowLeft,
 } from '../../shared/Icons/Icons';
 import { useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
@@ -55,7 +61,7 @@ export interface TicketRecord {
   /** Pre-populated values for built-in custom fields (severity, sentiment, etc.). */
   customValues?: Record<string, string | boolean>;
   /** Review-only fields. Set on tickets that came in from a review source
-   *  (Google, Facebook, etc.) so the modal swaps the bulb/title treatment
+   *  (Google, Facebook, etc.) so the drawer swaps the bulb/title treatment
    *  for the red-avatar + star-row header. Leave undefined on other types. */
   rating?: 1 | 2 | 3 | 4 | 5;
   reviewerName?: string;
@@ -82,8 +88,6 @@ const ASSIGNEE_OPTIONS = [
   { value: 'prabu', label: 'Prabu G' },
 ];
 
-// Scope picker for the Watchers / Assign-to fields. The same roster gets
-// surfaced under three lenses — individual users, roles, or teams.
 type Scope = 'user' | 'roles' | 'teams';
 const SCOPE_ORDER: Scope[] = ['user', 'roles', 'teams'];
 const SCOPE_LABEL: Record<Scope, string> = {
@@ -107,8 +111,6 @@ const OPTIONS_BY_SCOPE: Record<Scope, { value: string; label: string }[]> = {
   teams: TEAM_OPTIONS,
 };
 
-// Inline star row used by the review-source ticket head. Kept inline so
-// the modal stays self-contained — the list view has its own copy.
 const ReviewStarRow: React.FC<{ count: 1 | 2 | 3 | 4 | 5 }> = ({ count }) => (
   <div className={styles.starRow} aria-label={`${count} of 5 stars`}>
     {[1, 2, 3, 4, 5].map(i => (
@@ -117,39 +119,40 @@ const ReviewStarRow: React.FC<{ count: 1 | 2 | 3 | 4 | 5 }> = ({ count }) => (
   </div>
 );
 
-// Render-side label normalizer for the Status select so saved tickets
-// using free-form casing ("Closed", "open") still light up the dropdown.
 const statusValueFromLabel = (label: string): string => {
   const match = STATUS_OPTIONS.find(o => o.label.toLowerCase() === label.toLowerCase());
   return match?.value ?? 'open';
 };
 
+// Inline drag handle for the reorder list.
+const DragHandle: React.FC = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className={styles.dragHandleIcon}>
+    <circle cx="9"  cy="5"  r="1.5" fill="#555555" />
+    <circle cx="15" cy="5"  r="1.5" fill="#555555" />
+    <circle cx="9"  cy="12" r="1.5" fill="#555555" />
+    <circle cx="15" cy="12" r="1.5" fill="#555555" />
+    <circle cx="9"  cy="19" r="1.5" fill="#555555" />
+    <circle cx="15" cy="19" r="1.5" fill="#555555" />
+  </svg>
+);
+
+const arraysEqual = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
+  return true;
+};
+
 const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
-  // Local controlled state for the right-side fields and comment box.
-  // The host page can wire these to a real store later — for now they
-  // demonstrate the layout works with existing form components.
   const [status, setStatus] = useState<string>(ticket ? statusValueFromLabel(ticket.status) : 'open');
   const [comment, setComment] = useState('');
 
-  // Watchers and Assign-to share the same scope-picker shape: pick a
-  // scope (User / Roles / Teams) which swaps the options shown in the
-  // dropdown below, then pick a value from that scoped list. Watchers
-  // is multi-select; Assign-to is single-select.
   const [watcherScope, setWatcherScope] = useState<Scope>('user');
   const [watcherValues, setWatcherValues] = useState<string[]>([]);
   const [assigneeScope, setAssigneeScope] = useState<Scope>('user');
   const [assigneeValue, setAssigneeValue] = useState<string>('abhinav');
 
-  // Custom fields configured under Settings > Fields. Values are kept
-  // locally keyed by field id; a real implementation would persist per
-  // ticket, but the structure is the same.
-  const { fields: customFields, tableColumnOrder } = useCustomFields();
-  // The fixed rows above (Status, Assignee, Watchers, Location, Channel,
-  // Created, Due date) already cover the customer/contact system kinds,
-  // so the side rail's "Custom fields" section only surfaces ticket-axis
-  // presets (severity/sentiment/root cause) plus anything user-added.
-  // `visible` is intentionally ignored — it controls the list-view rail.
-  // Order follows the user's saved tableColumnOrder from the customizer.
+  const { fields: customFields, tableColumnOrder, reorderTableColumns } = useCustomFields();
+
   const visibleCustomFields = React.useMemo(() => {
     const fieldById = new Map(customFields.map(f => [f.id, f]));
     const ordered = tableColumnOrder
@@ -158,7 +161,6 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
         (f.kind === 'severity' || f.kind === 'sentiment' ||
          f.kind === 'rootCause' || f.kind === 'rootCauseComment' ||
          f.kind === 'custom'));
-    // Append any matching fields not yet in the saved order.
     const inOrder = new Set(tableColumnOrder);
     customFields.forEach(f => {
       if (!inOrder.has(f.id) &&
@@ -170,13 +172,59 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
     });
     return ordered.filter(Boolean);
   }, [customFields, tableColumnOrder]);
+
   const [customValues, setCustomValues] = useState<Record<string, string | boolean>>({});
   const setCustomValue = (id: string, v: string | boolean) =>
     setCustomValues(prev => ({ ...prev, [id]: v }));
 
-  // Reset local controls when the active ticket changes. Pull in any
-  // pre-populated custom values from the ticket so built-in fields
-  // (severity, sentiment) reflect what was set at creation.
+  // Accordion open/close state — all open by default.
+  const [acc1Open, setAcc1Open] = useState(true);
+  const [assignmentOpen, setAssignmentOpen] = useState(true);
+  const [customFieldsOpen, setCustomFieldsOpen] = useState(true);
+
+  // Sub-panel navigation: 'main' is the default two-accordion view;
+  // 'allFields' lists every custom field; 'reorder' lets the user drag-reorder.
+  const [drawerView, setDrawerView] = useState<'main' | 'allFields' | 'reorder'>('main');
+
+  // Custom-field reorder state (used in 'reorder' view).
+  const [localOrder, setLocalOrder] = useState<string[]>([]);
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragIndexRef.current = index;
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndexRef.current;
+    if (fromIndex === null || fromIndex === dropIndex) { setDragOverIndex(null); return; }
+    const next = [...localOrder];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(dropIndex, 0, moved);
+    setLocalOrder(next);
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
+  const handleDragEnd = () => { dragIndexRef.current = null; setDragOverIndex(null); };
+
+  const enterReorderView = () => {
+    setLocalOrder(tableColumnOrder);
+    setDrawerView('reorder');
+  };
+  const cancelReorder = () => setDrawerView('main');
+  const saveReorder = () => {
+    if (!arraysEqual(localOrder, tableColumnOrder)) {
+      reorderTableColumns(localOrder);
+    }
+    setDrawerView('main');
+  };
+
   React.useEffect(() => {
     if (!ticket) return;
     setStatus(statusValueFromLabel(ticket.status));
@@ -186,219 +234,69 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
     setWatcherValues([]);
     setAssigneeScope('user');
     setAssigneeValue('abhinav');
+    setDrawerView('main');
+    setAcc1Open(true);
+    setAssignmentOpen(true);
+    setCustomFieldsOpen(true);
   }, [ticket]);
 
-  if (!ticket) return null;
+  if (!isOpen || !ticket) return null;
 
-  return (
-    <Modal
-      dialogOptions={{
-        isOpen,
-        title: '',
-        // Suppress elemental's floating X — the custom header has its own
-        // close button next to the kebab so the two icons line up.
-        showCloseIcon: false,
-        onCloseModal: onClose,
-        shouldCloseOnOverlayClick: true,
-        shouldCloseOnEsc: true,
-        // Cap the modal width and height and turn the content into a
-        // flex column so the body grid below can flex into the
-        // remaining space and scroll the two columns independently
-        // (the side rail in particular, per the design). The width
-        // cap narrows the elemental "large" preset (1050 px) so the
-        // two-column layout reads as a focused activity panel rather
-        // than a wide form.
-        dialogStyles: {
-          content: {
-            maxWidth: 850,
-            maxHeight: 600,
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        },
-      }}
-      size="large"
-    >
-      {/* ── Header bar ───────────────────────────────────── */}
-      <div className={styles.headerBar}>
-        <div className={styles.headerTitleGroup}>
-          <span className={styles.ticketId}>Ticket #{ticket.id}</span>
-        </div>
-        <div className={styles.headerActions}>
-          <button type="button" className={styles.iconBtn} aria-label="Close" onClick={onClose}>
-            <IconClose size={16} color="#555" />
-          </button>
-        </div>
-      </div>
+  // Build the ordered field list for reorder mode display.
+  const fieldById = new Map(customFields.map(f => [f.id, f]));
+  const reorderFields: CustomField[] = localOrder
+    .map(id => fieldById.get(id))
+    .filter((f): f is CustomField => Boolean(f) &&
+      (f.kind === 'severity' || f.kind === 'sentiment' ||
+       f.kind === 'rootCause' || f.kind === 'rootCauseComment' ||
+       f.kind === 'custom'));
 
-      {/* Ticket head sits above the two-column body so the main and side
-         rail both start at the same Y — keeps "ASSIGNMENT" aligned with
-         the body text rather than the icon. Review-source tickets swap
-         the bulb/title for a reviewer avatar + star row + name/date/
-         Featured chip, matching the list-view treatment. */}
-      <div className={styles.ticketHead}>
-        {ticket.rating !== undefined ? (
-          <>
-            <div className={styles.reviewerAvatar}>
-              {(ticket.reviewerName ?? '?').charAt(0).toUpperCase()}
-            </div>
-            <div className={styles.ticketHeadText}>
-              <ReviewStarRow count={ticket.rating} />
-              <div className={styles.ticketMeta}>
-                <span className={styles.reviewerName}>{ticket.reviewerName}</span>
-                <span className={styles.metaSep}>·</span>
-                <span>{ticket.createdOn}</span>
-                {ticket.featured && (
-                  <>
-                    <span className={styles.metaSep}>·</span>
-                    <span className={styles.featuredChip}>Featured</span>
-                  </>
-                )}
-              </div>
-            </div>
-            <div className={styles.headTopMeta}>
-              <span className={styles.headMetaItem}>
-                <IconCalendar size={14} color="#9e9e9e" />
-                <span>{ticket.createdOn}</span>
-              </span>
-              <span className={styles.headMetaItem}>
-                <span className={`${styles.headStatusDot} ${styles.headStatusAssigned}`} aria-hidden />
-                <span>{ticket.status}</span>
-              </span>
-              {ticket.assigneeName && (
-                <span className={styles.headMetaItem}>
-                  <IconUsers size={14} color="#9e9e9e" />
-                  <span>{ticket.assigneeName}</span>
-                </span>
-              )}
-              {ticket.location && (
-                <span className={`${styles.headMetaItem} ${styles.headMetaLocation}`}>
-                  <IconLocation size={14} color="#9e9e9e" />
-                  <span>{ticket.location}</span>
-                </span>
-              )}
-            </div>
-          </>
+  const SUB_VIEW_TITLES: Record<'allFields' | 'reorder', string> = {
+    allFields: 'Custom fields',
+    reorder: 'Reorder fields',
+  };
+
+  return createPortal(
+    <div className={styles.drawerRoot}>
+      <div className={styles.drawerBlanket} onClick={onClose} aria-hidden />
+
+      <aside className={styles.drawerPanel} aria-label={`Ticket #${ticket.id}`}>
+        {/* ── Header — changes by view ──────────────────── */}
+        {drawerView === 'main' ? (
+          <div className={styles.drawerHeader}>
+            <span className={styles.ticketId}>Ticket #{ticket.id}</span>
+            <button type="button" className={styles.iconBtn} aria-label="Close" onClick={onClose}>
+              <IconClose size={16} color="#555" />
+            </button>
+          </div>
         ) : (
-          <>
-            <div className={styles.ticketIcon}>
-              <IconBulb size={20} color="#fbc02d" />
-            </div>
-            <div className={styles.ticketHeadText}>
-              <h2 className={styles.ticketTitle}>{ticket.title}</h2>
-              <div className={styles.ticketMeta}>
-                <span>{ticket.createdOn}</span>
-                {ticket.dueOn && (
-                  <>
-                    <span className={styles.metaSep}>·</span>
-                    <span className={styles.metaDue}>
-                      <IconCalendar size={14} color="#9e9e9e" />
-                      Due {ticket.dueOn}
-                    </span>
-                  </>
-                )}
+          <div className={styles.drawerHeader}>
+            <button
+              type="button"
+              className={styles.iconBtn}
+              aria-label="Back"
+              onClick={() => setDrawerView('main')}
+            >
+              <IconArrowLeft size={18} color="#555" />
+            </button>
+            <span className={styles.subViewTitle}>{SUB_VIEW_TITLES[drawerView]}</span>
+            {drawerView === 'reorder' && (
+              <div className={styles.subViewActions}>
+                <button type="button" className={styles.reorderCancelBtn} onClick={cancelReorder}>
+                  Cancel
+                </button>
+                <button type="button" className={styles.reorderSaveBtn} onClick={saveReorder}>
+                  Save
+                </button>
               </div>
-            </div>
-          </>
+            )}
+          </div>
         )}
-      </div>
 
-      {/* ── Body: main + side rail ──────────────────────── */}
-      <div className={styles.body}>
-        {/* Main column ────────────────────────────── */}
-        <div className={styles.main}>
-          <p className={styles.ticketBody}>{ticket.body}</p>
-
-          <div className={styles.divider} />
-
-          <h3 className={styles.sectionLabel}>Activity</h3>
-          <ul className={styles.activityList}>
-            {ticket.activity.map(entry => (
-              <li key={entry.id} className={styles.activityItem}>
-                <div className={`${styles.activityAvatar} ${styles[`tone-${entry.actorTone}`]}`}>
-                  {entry.actorInitials}
-                </div>
-                <div className={styles.activityText}>
-                  <div className={styles.activityMessage}>{entry.message}</div>
-                  <div className={styles.activityTime}>{entry.timestamp}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <div className={styles.commentBlock}>
-            <TextArea
-              name="ticketComment"
-              value={comment}
-              onChange={(_event: unknown, value: string) => setComment(String(value ?? ''))}
-              placeholder="Add a comment..."
-              rows={3}
-              autoSize={false}
-              noFloatingLabel
-            />
-            <div className={styles.commentFooter}>
-              <Button
-                theme="primary"
-                label="Comment"
-                disabled={!comment.trim()}
-                onClick={() => {
-                  // Posting wires into a real store later; for now the
-                  // local state is reset so the field is reusable.
-                  setComment('');
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Side rail ──────────────────────────────── */}
-        <aside className={styles.side}>
-          <div className={styles.sideGroup}>
-            <h4 className={styles.sideGroupLabel}>Assignment</h4>
-
-            <div className={styles.sideField}>
-              <label className={styles.sideFieldLabel}>Status</label>
-              <SingleSelect
-                name="ticketStatus"
-                displayLabel="Status"
-                options={STATUS_OPTIONS}
-                selected={status}
-                onChange={(option) => setStatus(String(option.value))}
-                showSearch={false}
-                isAeroDesign
-              />
-            </div>
-
-            <ScopedSelect
-              multi
-              label="Add watchers"
-              scope={watcherScope}
-              onScopeChange={s => {
-                setWatcherScope(s);
-                setWatcherValues([]);
-              }}
-              value={watcherValues}
-              onChange={setWatcherValues}
-              placeholder="Select watchers"
-              multiCountLabel={n => `${n} watchers`}
-            />
-
-            <ScopedSelect
-              label="Assign to"
-              scope={assigneeScope}
-              onScopeChange={s => {
-                setAssigneeScope(s);
-                setAssigneeValue('');
-              }}
-              value={assigneeValue}
-              onChange={setAssigneeValue}
-              placeholder="Select an assignee"
-            />
-          </div>
-
-          {visibleCustomFields.length > 0 && (
-            <div className={styles.sideGroup}>
-              <h4 className={styles.sideGroupLabel}>Custom fields</h4>
+        {/* ── Body ─────────────────────────────────────── */}
+        {drawerView === 'allFields' && (
+          <div className={styles.drawerBody}>
+            <div className={styles.subViewBody}>
               {visibleCustomFields.map(field => (
                 <CustomFieldControl
                   key={field.id}
@@ -408,18 +306,285 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {drawerView === 'reorder' && (
+          <div className={styles.drawerBody}>
+            <div className={styles.subViewBody}>
+              <p className={styles.reorderHint}>Drag rows to set the display priority.</p>
+              <div className={styles.reorderList}>
+                {reorderFields.map((field, idx) => (
+                  <div
+                    key={field.id}
+                    className={`${styles.reorderRow} ${dragOverIndex === idx ? styles.reorderRowDragOver : ''}`}
+                    draggable
+                    onDragStart={e => handleDragStart(e, idx)}
+                    onDragOver={e => handleDragOver(e, idx)}
+                    onDrop={e => handleDrop(e, idx)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <span className={styles.reorderFieldName}>{field.name}</span>
+                    <span className={styles.dragHandle} aria-hidden>
+                      <DragHandle />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Main view (two accordions) ─────────────── */}
+        {drawerView === 'main' && (
+        <div className={styles.drawerBody}>
+
+          {/* ── Accordion 1: Ticket details & activity ── */}
+          <div className={styles.accordionItem}>
+            <button
+              type="button"
+              className={styles.accordionTrigger}
+              aria-expanded={acc1Open}
+              onClick={() => setAcc1Open(v => !v)}
+            >
+              <span className={styles.accordionTitle}>Ticket details &amp; activity</span>
+              {acc1Open
+                ? <IconChevronUp size={16} color="#555" />
+                : <IconChevronDown size={16} color="#555" />}
+            </button>
+
+            {acc1Open && (
+              <div className={styles.accordionContent}>
+                {/* Ticket head */}
+                <div className={styles.ticketHead}>
+                  {ticket.rating !== undefined ? (
+                    <>
+                      <div className={styles.reviewerAvatar}>
+                        {(ticket.reviewerName ?? '?').charAt(0).toUpperCase()}
+                      </div>
+                      <div className={styles.ticketHeadText}>
+                        {/* Stars + status + assignee + location all on one horizontal line */}
+                        <div className={styles.reviewMetaRow}>
+                          <ReviewStarRow count={ticket.rating} />
+                          <div className={styles.reviewMetaRight}>
+                            <span className={styles.headMetaItem}>
+                              <IconCalendar size={14} color="#9e9e9e" />
+                              <span>{ticket.createdOn}</span>
+                            </span>
+                            {ticket.assigneeName && (
+                              <span className={styles.headMetaItem}>
+                                <IconUsers size={14} color="#9e9e9e" />
+                                <span>{ticket.assigneeName}</span>
+                              </span>
+                            )}
+                            {ticket.location && (
+                              <span className={`${styles.headMetaItem} ${styles.headMetaLocation}`}>
+                                <IconLocation size={14} color="#9e9e9e" />
+                                <span>{ticket.location}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Reviewer name + date + featured on the second line */}
+                        <div className={styles.ticketMeta}>
+                          <span className={styles.reviewerName}>{ticket.reviewerName}</span>
+                          <span className={styles.metaSep}>·</span>
+                          <span>{ticket.createdOn}</span>
+                          {ticket.featured && (
+                            <>
+                              <span className={styles.metaSep}>·</span>
+                              <span className={styles.featuredChip}>Featured</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={styles.ticketIcon}>
+                        <IconBulb size={20} color="#fbc02d" />
+                      </div>
+                      <div className={styles.ticketHeadText}>
+                        <h2 className={styles.ticketTitle}>{ticket.title}</h2>
+                        <div className={styles.ticketMeta}>
+                          <span>{ticket.createdOn}</span>
+                          {ticket.dueOn && (
+                            <>
+                              <span className={styles.metaSep}>·</span>
+                              <span className={styles.metaDue}>
+                                <IconCalendar size={14} color="#9e9e9e" />
+                                Due {ticket.dueOn}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Body text */}
+                <p className={styles.ticketBody}>{ticket.body}</p>
+
+                <div className={styles.divider} />
+
+                {/* Activity feed */}
+                <h3 className={styles.sectionLabel}>Activity</h3>
+                <ul className={styles.activityList}>
+                  {ticket.activity.map(entry => (
+                    <li key={entry.id} className={styles.activityItem}>
+                      <div className={`${styles.activityAvatar} ${styles[`tone-${entry.actorTone}`]}`}>
+                        {entry.actorInitials}
+                      </div>
+                      <div className={styles.activityText}>
+                        <div className={styles.activityMessage}>{entry.message}</div>
+                        <div className={styles.activityTime}>{entry.timestamp}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Comment + CTA */}
+                <div className={styles.commentBlock}>
+                  <TextArea
+                    name="ticketComment"
+                    value={comment}
+                    onChange={(_event: unknown, value: string) => setComment(String(value ?? ''))}
+                    placeholder="Add a comment..."
+                    rows={3}
+                    autoSize={false}
+                    noFloatingLabel
+                  />
+                  <div className={styles.commentFooter}>
+                    <Button
+                      theme="primary"
+                      label="Comment"
+                      disabled={!comment.trim()}
+                      onClick={() => { setComment(''); }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.accordionDivider} />
+
+          {/* ── Accordion 2: Assignment ───────────────── */}
+          <div className={styles.accordionItem}>
+            <button
+              type="button"
+              className={styles.accordionTrigger}
+              aria-expanded={assignmentOpen}
+              onClick={() => setAssignmentOpen(v => !v)}
+            >
+              <span className={styles.accordionTitle}>Assignment</span>
+              {assignmentOpen
+                ? <IconChevronUp size={16} color="#555" />
+                : <IconChevronDown size={16} color="#555" />}
+            </button>
+
+            {assignmentOpen && (
+              <div className={styles.accordionContent}>
+                <div className={styles.sideField}>
+                  <label className={styles.sideFieldLabel}>Status</label>
+                  <SingleSelect
+                    name="ticketStatus"
+                    displayLabel="Status"
+                    options={STATUS_OPTIONS}
+                    selected={status}
+                    onChange={(option) => setStatus(String(option.value))}
+                    showSearch={false}
+                    isAeroDesign
+                  />
+                </div>
+
+                <ScopedSelect
+                  multi
+                  label="Add watchers"
+                  scope={watcherScope}
+                  onScopeChange={s => { setWatcherScope(s); setWatcherValues([]); }}
+                  value={watcherValues}
+                  onChange={setWatcherValues}
+                  placeholder="Select watchers"
+                  multiCountLabel={n => `${n} watchers`}
+                />
+
+                <ScopedSelect
+                  label="Assign to"
+                  scope={assigneeScope}
+                  onScopeChange={s => { setAssigneeScope(s); setAssigneeValue(''); }}
+                  value={assigneeValue}
+                  onChange={setAssigneeValue}
+                  placeholder="Select an assignee"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 3: Custom fields ────────────── */}
+          {visibleCustomFields.length > 0 && (
+            <>
+              <div className={styles.accordionDivider} />
+              <div className={styles.accordionItem}>
+                <button
+                  type="button"
+                  className={styles.accordionTrigger}
+                  aria-expanded={customFieldsOpen}
+                  onClick={() => setCustomFieldsOpen(v => !v)}
+                >
+                  <span className={styles.accordionTitle}>Custom fields</span>
+                  <div className={styles.accordionTriggerActions}>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className={styles.reorderTriggerBtn}
+                      aria-label="Reorder custom fields"
+                      onClick={e => { e.stopPropagation(); enterReorderView(); }}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); enterReorderView(); } }}
+                    >
+                      <IconEdit size={14} color="#555" />
+                    </span>
+                    {customFieldsOpen
+                      ? <IconChevronUp size={16} color="#555" />
+                      : <IconChevronDown size={16} color="#555" />}
+                  </div>
+                </button>
+
+                {customFieldsOpen && (
+                  <div className={styles.accordionContent}>
+                    {visibleCustomFields.slice(0, 3).map(field => (
+                      <CustomFieldControl
+                        key={field.id}
+                        field={field}
+                        value={customValues[field.id]}
+                        onChange={v => setCustomValue(field.id, v)}
+                      />
+                    ))}
+
+                    {visibleCustomFields.length > 3 && (
+                      <button
+                        type="button"
+                        className={styles.showAllBtn}
+                        onClick={() => setDrawerView('allFields')}
+                      >
+                        Show all
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
           )}
-        </aside>
-      </div>
-    </Modal>
+        </div>
+        )}
+      </aside>
+    </div>,
+    document.body
   );
 };
 
-// ScopedSelect — the "Add watchers" / "Assign to" pattern: a label row
-// with an inline scope picker (User / Roles / Teams) followed by a
-// field-shaped value picker whose options swap with the scope. Mirrors
-// the Birdeye design-system "Text field - Standard" treatment in Figma
-// (36px row, 1px #ccc border, chevron-down on the right).
+// ── ScopedSelect ────────────────────────────────────────────
 type ScopedSelectProps = {
   label: string;
   scope: Scope;
@@ -430,8 +595,6 @@ type ScopedSelectProps = {
   | { multi: true; value: string[]; onChange: (v: string[]) => void; multiCountLabel?: (n: number) => string }
 );
 
-// Header for the multi-select dropdown — singularize the scope label
-// ("Users" → "user") to match Figma copy ("Select user").
 const scopeNoun = (s: Scope): string => SCOPE_LABEL[s].toLowerCase().replace(/s$/, '');
 
 const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
@@ -442,9 +605,6 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
   const scopeRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<HTMLDivElement>(null);
 
-  // Multi mode stages picks in a local draft and only commits on Apply,
-  // so closing the dropdown without Apply discards the changes (matches
-  // the Figma "Apply" pattern).
   const [draft, setDraft] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   useEffect(() => {
@@ -479,7 +639,6 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, [scopeOpen, valueOpen]);
 
-  // Multi-mode dropdown bits (filtered options, select-all state, draft toggles).
   const filteredOptions = props.multi
     ? options.filter(o => o.label.toLowerCase().includes(search.trim().toLowerCase()))
     : options;
@@ -521,10 +680,7 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
                   role="option"
                   aria-selected={s === scope}
                   className={`${styles.scopedScopeOption} ${s === scope ? styles.scopedScopeOptionActive : ''}`}
-                  onClick={() => {
-                    onScopeChange(s);
-                    setScopeOpen(false);
-                  }}
+                  onClick={() => { onScopeChange(s); setScopeOpen(false); }}
                 >
                   <span>{SCOPE_LABEL[s]}</span>
                   {s === scope && <IconCheck size={14} color="#212121" />}
@@ -542,12 +698,10 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
           aria-expanded={valueOpen}
           onClick={() => setValueOpen(o => !o)}
         >
-          <span
-            className={`${styles.scopedFieldValue} ${displayLabel ? '' : styles.scopedFieldPlaceholder}`}
-          >
+          <span className={`${styles.scopedFieldValue} ${displayLabel ? '' : styles.scopedFieldPlaceholder}`}>
             {displayLabel || placeholder}
           </span>
-          <IconChevronDown size={16} color="#9e9e9e" />
+          <IconChevronDown size={16} color="#212121" />
         </button>
         {valueOpen && props.multi && (
           <div className={styles.msMenu} role="dialog" aria-label={`Select ${scopeNoun(scope)}`}>
@@ -564,10 +718,7 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
                 />
               </div>
               <label className={styles.msTile}>
-                <span
-                  className={`${styles.msCheckbox} ${allFilteredSelected ? styles.msCheckboxOn : ''}`}
-                  aria-hidden
-                >
+                <span className={`${styles.msCheckbox} ${allFilteredSelected ? styles.msCheckboxOn : ''}`} aria-hidden>
                   {allFilteredSelected && <IconCheck size={14} color="#ffffff" />}
                 </span>
                 <input
@@ -583,10 +734,7 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
                 const checked = draft.includes(o.value);
                 return (
                   <label key={o.value} className={styles.msTile}>
-                    <span
-                      className={`${styles.msCheckbox} ${checked ? styles.msCheckboxOn : ''}`}
-                      aria-hidden
-                    >
+                    <span className={`${styles.msCheckbox} ${checked ? styles.msCheckboxOn : ''}`} aria-hidden>
                       {checked && <IconCheck size={14} color="#ffffff" />}
                     </span>
                     <input
@@ -608,10 +756,7 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
               <button
                 type="button"
                 className={styles.msApply}
-                onClick={() => {
-                  props.onChange(draft);
-                  setValueOpen(false);
-                }}
+                onClick={() => { props.onChange(draft); setValueOpen(false); }}
               >
                 Apply
               </button>
@@ -629,10 +774,7 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
                   role="option"
                   aria-selected={selected}
                   className={styles.scopedValueOption}
-                  onClick={() => {
-                    props.onChange(o.value);
-                    setValueOpen(false);
-                  }}
+                  onClick={() => { props.onChange(o.value); setValueOpen(false); }}
                 >
                   <span>{o.label}</span>
                   {selected && <IconCheck size={14} color="#212121" />}
@@ -646,10 +788,7 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
   );
 };
 
-// Renders the right control inside the side rail for a single custom
-// field. Kept inline so the activity modal stays the only file the
-// host needs to import; the shape of the control comes from the
-// field's `type` (text, dropdown, number, etc.).
+// ── CustomFieldControl ──────────────────────────────────────
 interface CustomFieldControlProps {
   field: CustomField;
   value: string | boolean | undefined;
@@ -683,14 +822,13 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
       );
     }
     case 'user': {
-      const opts = ASSIGNEE_OPTIONS;
       return (
         <div className={styles.sideField}>
           {label}
           <SingleSelect
             name={`cf-${field.id}`}
             displayLabel={field.name}
-            options={opts}
+            options={ASSIGNEE_OPTIONS}
             selected={typeof value === 'string' ? value : ''}
             onChange={(option) => onChange(String(option.value))}
             showSearch={false}
