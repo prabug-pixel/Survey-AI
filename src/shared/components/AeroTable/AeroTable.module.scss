@@ -42,7 +42,12 @@ $aero-corner-xl:         16px;                    // Corner Radius/xl
 }
 
 // ── Header ────────────────────────────────────────────────────
-.thead { background: $aero-bg; }
+.thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: $aero-bg;
+}
 
 .tr { background: $aero-bg; }
 

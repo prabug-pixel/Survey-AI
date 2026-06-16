@@ -8,19 +8,19 @@
 // borders, type ramp, sort affordances) stays 1:1 with the Aero
 // Design System spec.
 // ============================================================
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   IconSearch,
   IconEdit,
   IconTrash,
-  IconViewWeek,
+  IconMoreVert,
 } from '../../shared/Icons/Icons';
 import AeroTable from '../../shared/components/AeroTable';
+import AeroBanner from '../../shared/components/AeroBanner';
 import type { AeroColumn } from '../../shared/components/AeroTable';
 import { FIELD_TYPE_LABELS, isCustomField, useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
 import CustomFieldEditor from './CustomFieldEditor';
-import TableCustomizerDrawer from './TableCustomizerDrawer';
 import styles from './CustomFieldsManager.module.scss';
 
 // Backpocket: Sample data column was removed from the Fields table.
@@ -40,12 +40,94 @@ import styles from './CustomFieldsManager.module.scss';
 //   }
 // };
 
+const DragHandle: React.FC = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className={styles.dragHandleIcon}>
+    <circle cx="9"  cy="5"  r="1.5" fill="#bbb" />
+    <circle cx="15" cy="5"  r="1.5" fill="#bbb" />
+    <circle cx="9"  cy="12" r="1.5" fill="#bbb" />
+    <circle cx="15" cy="12" r="1.5" fill="#bbb" />
+    <circle cx="9"  cy="19" r="1.5" fill="#bbb" />
+    <circle cx="15" cy="19" r="1.5" fill="#bbb" />
+  </svg>
+);
+
 const CustomFieldsManager: React.FC = () => {
-  const { fields, addField, updateField, removeField, tableColumnOrder } = useCustomFields();
+  const {
+    fields,
+    addField,
+    updateField,
+    removeField,
+    tableColumnOrder,
+    reorderTableColumns,
+  } = useCustomFields();
   const [search, setSearch] = useState('');
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CustomField | null>(null);
-  const [customizerOpen, setCustomizerOpen] = useState(false);
+
+  // ── "More" dropdown ───────────────────────────────────────
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+
+  // ── Rearrange mode ─────────────────────────────────────────
+  const [rearrangeMode, setRearrangeMode] = useState(false);
+  const [rearrangeOrder, setRearrangeOrder] = useState<CustomField[]>([]);
+  // Snapshot of the order at the moment rearrange was opened — used by Restore Defaults.
+  const savedOrderRef = useRef<CustomField[]>([]);
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const enterRearrange = () => {
+    const fieldById = new Map(fields.map(f => [f.id, f]));
+    const ordered = tableColumnOrder
+      .map(id => fieldById.get(id))
+      .filter((f): f is CustomField => Boolean(f));
+    const inOrder = new Set(tableColumnOrder);
+    fields.forEach(f => { if (!inOrder.has(f.id)) ordered.push(f); });
+    savedOrderRef.current = ordered;
+    setRearrangeOrder(ordered);
+    setRearrangeMode(true);
+    setMoreMenuOpen(false);
+  };
+
+  const saveRearrange = () => {
+    reorderTableColumns(rearrangeOrder.map(f => f.id));
+    setRearrangeMode(false);
+  };
+
+  const restoreDefaults = () => {
+    setRearrangeOrder([...savedOrderRef.current]);
+  };
+
+
+  const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    dragIndexRef.current = index;
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLTableRowElement>, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndexRef.current;
+    if (fromIndex === null || fromIndex === dropIndex) {
+      setDragOverIndex(null);
+      return;
+    }
+    const next = [...rearrangeOrder];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(dropIndex, 0, moved);
+    setRearrangeOrder(next);
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
 
   // Apply the user's saved column order then filter by search query.
   const filtered = useMemo(() => {
@@ -120,6 +202,7 @@ const CustomFieldsManager: React.FC = () => {
   return (
     <div className={styles.pageShell}>
       <div className={styles.page}>
+        <div className={styles.stickyHeader}>
         <div className={styles.breadcrumb}>
           <span className={styles.crumbLink}>Ticketing</span>
           <span className={styles.crumbSep}>/</span>
@@ -140,57 +223,124 @@ const CustomFieldsManager: React.FC = () => {
                 aria-label="Search fields"
               />
             </div>
-            <button
-              type="button"
-              className={`${styles.iconBtn} ${customizerOpen ? styles.iconBtnActive : ''}`}
-              aria-label="Customize table view"
-              aria-pressed={customizerOpen}
-              title="Customize table view"
-              onClick={() => setCustomizerOpen(o => !o)}
-            >
-              <IconViewWeek size={18} color={customizerOpen ? '#1976d2' : '#555'} />
-            </button>
+            <div className={styles.moreDropdown}>
+              <button
+                type="button"
+                className={`${styles.moreBtn} ${moreMenuOpen ? styles.moreBtnActive : ''}`}
+                aria-haspopup="true"
+                aria-expanded={moreMenuOpen}
+                onClick={() => setMoreMenuOpen(o => !o)}
+              >
+                <IconMoreVert size={16} color="#555" />
+              </button>
+              {moreMenuOpen && (
+                <div className={styles.moreMenu} role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={styles.moreMenuItem}
+                    onClick={enterRearrange}
+                  >
+                    Rearrange list rows
+                  </button>
+                </div>
+              )}
+            </div>
             <button type="button" className={styles.createBtn} onClick={openCreate}>
               Create custom field
             </button>
           </div>
         </div>
+        </div>{/* end stickyHeader */}
 
-        <AeroTable<CustomField>
-          ariaLabel="Custom fields"
-          columns={columns}
-          data={filtered}
-          getRowKey={f => f.id}
-          flush
-          resizable
-          emptyTitle="No custom fields yet"
-          emptyDescription={<>Click <strong>Create custom field</strong> to add one.</>}
-          rowAction={field => {
-            const isSystem = field.kind !== 'custom';
-            return (
-              <>
-                <button
-                  type="button"
-                  className={styles.rowIconBtn}
-                  aria-label={`Edit ${field.name}`}
-                  onClick={() => openEdit(field)}
-                >
-                  <IconEdit size={16} color="#555" />
-                </button>
-                <button
-                  type="button"
-                  className={styles.rowIconBtn}
-                  aria-label={`Remove ${field.name}`}
-                  disabled={isSystem}
-                  title={isSystem ? 'System fields cannot be removed' : undefined}
-                  onClick={() => removeField(field.id)}
-                >
-                  <IconTrash size={16} color="#555" />
-                </button>
-              </>
-            );
-          }}
-        />
+        {rearrangeMode && (
+          <div className={styles.bannerWrapper}>
+            <AeroBanner
+              variant="info"
+              message="Drag and reorder rows to set their priority. Changes will apply to activities across all tickets."
+              button1Label="Restore defaults"
+              onButton1={restoreDefaults}
+              button2Label="Save"
+              onButton2={saveRearrange}
+            />
+          </div>
+        )}
+
+        <div className={styles.scrollBody}>
+          {rearrangeMode ? (
+            <table className={styles.rearrangeTable} aria-label="Rearrange fields">
+              <thead className={styles.rearrangeThead}>
+                <tr>
+                  <th className={styles.rearrangeThHandle} />
+                  <th className={styles.rearrangeTh}>Contact field</th>
+                  <th className={styles.rearrangeTh}>Type</th>
+                  <th className={styles.rearrangeTh}>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rearrangeOrder.map((field, index) => (
+                  <tr
+                    key={field.id}
+                    className={`${styles.rearrangeRow} ${dragOverIndex === index ? styles.rearrangeRowOver : ''}`}
+                    draggable
+                    onDragStart={e => handleDragStart(e, index)}
+                    onDragOver={e => handleDragOver(e, index)}
+                    onDrop={e => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <td className={styles.rearrangeTdHandle}>
+                      <DragHandle />
+                    </td>
+                    <td className={styles.rearrangeTd}>
+                      <span className={styles.fieldName}>
+                        {field.name}
+                        {isCustomField(field) && <span className={styles.customTag}>Custom</span>}
+                      </span>
+                    </td>
+                    <td className={styles.rearrangeTd}>{FIELD_TYPE_LABELS[field.type]}</td>
+                    <td className={styles.rearrangeTd}>{field.description || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <AeroTable<CustomField>
+            ariaLabel="Custom fields"
+            columns={columns}
+            data={filtered}
+            getRowKey={f => f.id}
+            flush
+            resizable
+            emptyTitle="No custom fields yet"
+            emptyDescription={<>Click <strong>Create custom field</strong> to add one.</>}
+            rowAction={field => {
+              const isSystem = field.kind !== 'custom';
+              return (
+                <>
+                  <button
+                    type="button"
+                    className={styles.rowIconBtn}
+                    aria-label={`Edit ${field.name}`}
+                    onClick={() => openEdit(field)}
+                  >
+                    <IconEdit size={16} color="#555" />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.rowIconBtn}
+                    aria-label={`Remove ${field.name}`}
+                    disabled={isSystem}
+                    title={isSystem ? 'System fields cannot be removed' : undefined}
+                    onClick={() => removeField(field.id)}
+                  >
+                    <IconTrash size={16} color="#555" />
+                  </button>
+                </>
+              );
+            }}
+          />
+          )}
+        </div>{/* end scrollBody */}
 
         <CustomFieldEditor
           isOpen={editorOpen}
@@ -199,11 +349,6 @@ const CustomFieldsManager: React.FC = () => {
           onSave={handleSave}
         />
       </div>
-
-      <TableCustomizerDrawer
-        isOpen={customizerOpen}
-        onClose={() => setCustomizerOpen(false)}
-      />
     </div>
   );
 };

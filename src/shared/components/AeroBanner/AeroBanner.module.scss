@@ -1,0 +1,87 @@
+// ============================================================
+// AeroBanner styles — Aero Design System node 1306-2061.
+// Values are taken 1:1 from the Figma spec; do not override
+// from consumer files.
+// ============================================================
+@use '../../../styles/variables' as *;
+
+// Shared shell — matches Figma padding/gap/radius exactly.
+.banner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;             // var(--spacing/sm, 8px)
+  padding: $spacing-4 $spacing-8; // var(--spacing/xs, 4px) var(--spacing/sm, 8px)
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+// ── Semantic variants ──────────────────────────────────────
+.success { background: #f1faf0; }
+.error   { background: #feeceb; }
+.info    { background: #ecf5fd; }
+.warning { background: #fff9ea; }
+.ai      { background: #f9f7fd; }
+
+// ── Icon slot ──────────────────────────────────────────────
+// 36 × 36 px container with the 20 px icon centred via flex.
+.iconSlot {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ── Message text ───────────────────────────────────────────
+// 14 px / 20 px line-height Roboto Regular — per Figma spec.
+.message {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: $color-gray-900;       // var(--text/onlightsurface/primary, #212121)
+  word-break: break-word;
+}
+
+// ── Inline action buttons ──────────────────────────────────
+.actionBtn {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 $spacing-12;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #1976d2;               // var(--text/onlightsurface/action/primary)
+  cursor: pointer;
+  transition: background $transition-fast;
+  white-space: nowrap;
+
+  &:hover { background: rgba(25, 118, 210, 0.06); }
+}
+
+// ── Close button ───────────────────────────────────────────
+// 36 × 36 px slot matching the Figma close icon container.
+.closeBtn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  transition: background $transition-fast;
+
+  &:hover { background: rgba(0, 0, 0, 0.06); }
+}

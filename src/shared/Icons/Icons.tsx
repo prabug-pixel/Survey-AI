@@ -384,6 +384,15 @@ export const IconAlertCircle: React.FC<IconProps> = ({ size = 20, color = 'curre
 );
 
 // Aero warning triangle — outlined, used in slim warning banners.
+export const IconAiBadge: React.FC<IconProps> = ({ size = 20, color = '#7c3aed', className }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className}>
+    <path d="M7.5 14L9.5 8.5L11.5 14M8.4 12H10.6" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M13 7.5C13 7.5 13.5 7 14 7C14.5 7 15 7.5 15 7.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M14 7V10.5" stroke={color} strokeWidth="1.4" strokeLinecap="round" />
+    <circle cx="10" cy="10" r="8.5" stroke={color} strokeWidth="1" opacity="0.25" />
+  </svg>
+);
+
 export const IconWarning: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
     <path d="M12 3.5L21.25 19a1 1 0 01-.866 1.5H3.616A1 1 0 012.75 19L12 3.5z" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
