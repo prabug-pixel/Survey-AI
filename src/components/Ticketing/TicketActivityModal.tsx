@@ -210,14 +210,13 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
         // than a wide form.
         dialogStyles: {
           content: {
-            maxWidth: 850,
+            maxWidth: 950,
             maxHeight: 600,
             display: 'flex',
             flexDirection: 'column',
           },
         },
       }}
-      size="large"
     >
       {/* ── Header bar ───────────────────────────────────── */}
       <div className={styles.headerBar}>
