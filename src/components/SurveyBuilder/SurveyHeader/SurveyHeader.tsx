@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '../../../store';
 import { surveyActions } from '../../../store/surveySlice';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
-import { IconChevronLeft, IconEdit, IconCloud } from '../../../shared/Icons/Icons';
+import { IconArrowLeft, IconEdit, IconCloud } from '../../../shared/Icons/Icons';
 import styles from './SurveyHeader.module.scss';
 
 const SurveyHeader: React.FC = () => {
@@ -33,6 +33,11 @@ const SurveyHeader: React.FC = () => {
   };
 
   const handleBack = () => {
+    // Preserve in-progress work: if the user added questions but didn't
+    // publish, persist the survey as a Draft so it appears in All Surveys
+    // instead of being discarded. saveSurveyAsDraft is a no-op when there
+    // are no questions yet.
+    dispatch(surveyActions.saveSurveyAsDraft());
     navigate('/surveys');
   };
 
@@ -47,7 +52,7 @@ const SurveyHeader: React.FC = () => {
       <div className={styles.left}>
         <Tooltip text="Go back" position="bottom" hideOnScroll>
           <button className={styles.backBtn} aria-label="Go back" onClick={handleBack}>
-            <IconChevronLeft size={20} color="#424242" />
+            <IconArrowLeft size={20} color="#424242" />
           </button>
         </Tooltip>
 

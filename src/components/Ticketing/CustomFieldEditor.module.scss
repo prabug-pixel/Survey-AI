@@ -1,0 +1,166 @@
+@use '../../styles/variables' as *;
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: (-$spacing-12) (-$spacing-12) $spacing-16;
+  padding: 0 0 $spacing-12;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: 400;
+  color: $color-gray-900;
+  letter-spacing: -0.32px;
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: none;
+  background: $color-white;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: $color-gray-100; }
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+  padding-right: $spacing-4;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-gray-700;
+  letter-spacing: -0.24px;
+}
+
+// Same type as `.label` but inline-flex so a trailing info icon can
+// sit next to the text (used by the Dropdown "Options" label tooltip).
+.optionsLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-gray-700;
+  letter-spacing: -0.24px;
+}
+
+// ── Dropdown options list ──────────────────────────────────
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.optionInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.optionRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) { background: $color-gray-100; }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+}
+
+.addOption {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  align-self: flex-start;
+  padding: $spacing-4 $spacing-8;
+  border: 0;
+  background: transparent;
+  color: #1976d2;
+  font-size: $font-size-md;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: $radius-sm;
+
+  &:hover { background: rgba(25, 118, 210, 0.08); }
+}
+
+// ── Checkbox group ─────────────────────────────────────────
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-4 0;
+}
+
+.checkboxTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: $color-gray-900;
+}
+
+.requiredStar {
+  color: $color-error;
+  margin-left: 2px;
+}
+
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+  color: $color-gray-500;
+}
+
+// ── Footer ─────────────────────────────────────────────────
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-8;
+  margin-top: $spacing-16;
+  padding-top: $spacing-12;
+  border-top: 1px solid $color-border-light;
+  flex-shrink: 0;
+}

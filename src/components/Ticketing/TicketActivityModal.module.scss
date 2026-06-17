@@ -1,0 +1,837 @@
+@use '../../styles/variables' as *;
+
+// ── Drawer root (full-screen stacking context) ─────────────
+.drawerRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawerBlanket {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.drawerPanel {
+  position: relative;
+  z-index: 1;
+  width: 650px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: $color-white;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+// ── Drawer header ──────────────────────────────────────────
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 $spacing-24;
+  flex-shrink: 0;
+}
+
+.drawerBody {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Accordion ──────────────────────────────────────────────
+.accordionItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.accordionDivider {
+  height: 1px;
+  background: $color-border-light;
+  flex-shrink: 0;
+}
+
+.accordionTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: $spacing-16 $spacing-24;
+  border: 0;
+  background: $color-white;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+
+  &:hover { background: $color-gray-100; }
+}
+
+.accordionTitle {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: #555;
+}
+
+.accordionTriggerActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.accordionContent {
+  padding: $spacing-16 $spacing-24 $spacing-20;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+// ── Sub-view header elements ───────────────────────────────
+.subViewTitle {
+  flex: 1;
+  font-size: $font-size-lg;
+  font-weight: 400;
+  color: $color-gray-900;
+  margin-left: $spacing-4;
+}
+
+.subViewActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+// Sub-view scrollable body (padded content area).
+.subViewBody {
+  padding: $spacing-20 $spacing-24;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+// ── Header elements ────────────────────────────────────────
+.ticketId {
+  font-size: $font-size-lg;
+  font-weight: 500;
+  color: $color-gray-900;
+  letter-spacing: -0.28px;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: none;
+  background: $color-white;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: $color-gray-100; }
+}
+
+// ── Ticket head ────────────────────────────────────────────
+.ticketHead {
+  display: flex;
+  gap: $spacing-12;
+  align-items: center;
+  padding-bottom: 0;
+}
+
+.ticketIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  background: $color-gray-100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reviewerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  background: #d32f2f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: $color-white;
+  text-transform: uppercase;
+}
+
+.starRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: $spacing-4;
+}
+
+.reviewerName {
+  font-weight: 500;
+  color: $color-gray-900;
+}
+
+.featuredChip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 2px $spacing-8;
+  background: $color-gray-100;
+  color: $color-gray-700;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  border-radius: $radius-sm;
+}
+
+.ticketHeadText {
+  flex: 1;
+  min-width: 0;
+  font-size: $font-size-md;
+}
+
+.ticketTitle {
+  font-size: $font-size-lg;
+  font-weight: 400;
+  color: $color-gray-900;
+  letter-spacing: -0.32px;
+  line-height: 22px;
+  margin: 0 0 $spacing-4;
+}
+
+.ticketMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-base;
+  color: $color-gray-700;
+}
+
+.metaSep {
+  color: $color-gray-400;
+}
+
+.metaDue {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+// Stars + meta items on one horizontal line under the reviewer name row.
+.reviewMetaRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  margin-bottom: $spacing-4;
+  font-size: $font-size-base;
+  color: $color-gray-700;
+}
+
+.reviewMetaRight {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.headMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-6;
+  white-space: nowrap;
+}
+
+.headMetaLocation {
+  max-width: 140px;
+
+  > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.headStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  background: $color-gray-400;
+  flex-shrink: 0;
+}
+
+.headStatusAssigned {
+  background: #1976d2;
+}
+
+// ── Ticket body ────────────────────────────────────────────
+.ticketBody {
+  margin: 0;
+  font-size: $font-size-md;
+  color: $color-gray-800;
+  line-height: $line-height-relaxed;
+}
+
+.divider {
+  height: 1px;
+  background: $color-border-light;
+}
+
+// ── Activity feed ──────────────────────────────────────────
+.sectionLabel {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-gray-600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.activityItem {
+  display: flex;
+  gap: $spacing-12;
+  align-items: flex-start;
+}
+
+.activityAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-white;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.tone-green { background: #2e7d32; }
+.tone-red   { background: #d32f2f; }
+.tone-blue  { background: #1976d2; }
+.tone-gray  { background: $color-gray-500; }
+
+.activityText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.activityMessage {
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  line-height: $line-height-normal;
+}
+
+.activityTime {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+// ── Comment block ──────────────────────────────────────────
+.commentBlock {
+  border: 0;
+  border-radius: $radius-md;
+  padding: $spacing-4 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+  background: $color-white;
+}
+
+.commentFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-8;
+}
+
+// ── Side groups (used in accordion 2) ─────────────────────
+.sideGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.sideGroupLabel {
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: $color-gray-900;
+  margin: 0;
+}
+
+
+.sideField {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.sideFieldLabel {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-gray-700;
+  letter-spacing: -0.24px;
+}
+
+// ── Show all CTA ───────────────────────────────────────────
+.showAllBtn {
+  align-self: flex-start;
+  height: 32px;
+  padding: 0 $spacing-16;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+  color: $color-gray-700;
+  font-size: $font-size-md;
+  cursor: pointer;
+
+  &:hover { background: $color-gray-50; }
+}
+
+// ── Custom fields header with pencil ──────────────────────
+.customFieldsHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+}
+
+.reorderTriggerBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover { background: $color-gray-100; }
+}
+
+// ── Inline reorder pane ────────────────────────────────────
+.reorderPane {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.reorderHint {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+}
+
+.reorderList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.reorderRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  height: 38px;
+  padding: 0 $spacing-12;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+  cursor: default;
+  box-sizing: border-box;
+  transition: background 100ms, border-color 100ms;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.reorderRowDragOver {
+  border-color: #1976d2;
+  background: #e3f0ff;
+}
+
+.reorderFieldName {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: grab;
+  padding: 2px;
+
+  &:active { cursor: grabbing; }
+}
+
+.dragHandleIcon {
+  display: block;
+}
+
+.reorderFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-8;
+  padding-top: $spacing-4;
+}
+
+.reorderCancelBtn {
+  height: 32px;
+  padding: 0 $spacing-16;
+  border: none;
+  border-radius: $radius-sm;
+  background: $color-white;
+  color: $color-gray-700;
+  font-size: $font-size-md;
+  cursor: pointer;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.reorderSaveBtn {
+  height: 32px;
+  padding: 0 $spacing-16;
+  border: 0;
+  border-radius: $radius-sm;
+  background: #1976d2;
+  color: $color-white;
+  font-size: $font-size-md;
+  cursor: pointer;
+
+  &:hover { background: #1565c0; }
+}
+
+// ── Scoped select (Add watchers / Assign to) ───────────────
+.scopedSelect {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.scopedLabelRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  height: 18px;
+  font-size: $font-size-sm;
+  color: $color-gray-900;
+}
+
+.scopedLabel {
+  font-weight: 400;
+}
+
+.scopedScopeWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.scopedScopeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #1976d2;
+  font: inherit;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  letter-spacing: -0.24px;
+}
+
+.scopedScopeMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 140px;
+  z-index: 20;
+  background: $color-white;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10);
+  padding: $spacing-4 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scopedScopeOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.scopedScopeOptionActive {
+  background: $color-gray-100;
+}
+
+.scopedFieldWrap {
+  position: relative;
+}
+
+.scopedField {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  background: $color-white;
+  border: 1px solid #ccc;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+
+  &:hover { border-color: $color-gray-400; }
+  &[aria-expanded='true'] { border-color: #1976d2; }
+}
+
+.scopedFieldValue {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scopedFieldPlaceholder {
+  color: $color-gray-500;
+}
+
+.scopedValueMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 220px;
+  overflow-y: auto;
+  background: $color-white;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: $spacing-4 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scopedValueOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-12;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-size-sm;
+  color: $color-gray-900;
+
+  &:hover { background: $color-gray-50; }
+}
+
+// ── Multi-select dropdown ──────────────────────────────────
+.msMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: $color-white;
+  border-radius: $radius-sm;
+  box-shadow: 0 4px 8px rgba(33, 33, 33, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: $spacing-12;
+}
+
+.msHeader {
+  padding: $spacing-8 $spacing-24 $spacing-8 $spacing-16;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  letter-spacing: -0.24px;
+  color: #8f8f8f;
+}
+
+.msBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  padding: 0 $spacing-16;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.msSearch {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 36px;
+  padding: $spacing-8 $spacing-12;
+  border: 1px solid #e5e9f0;
+  border-radius: $radius-sm;
+  background: $color-white;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font: inherit;
+    font-size: $font-size-md;
+    color: $color-gray-900;
+    letter-spacing: -0.28px;
+
+    &::placeholder { color: #8f8f8f; }
+  }
+}
+
+.msTile {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-8 $spacing-8 $spacing-8 0;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  letter-spacing: -0.28px;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.msCheckbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid $color-gray-400;
+  border-radius: 2px;
+  background: $color-white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.msCheckboxOn {
+  background: #1976d2;
+  border-color: #1976d2;
+}
+
+.msCheckboxInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.msTileLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msEmpty {
+  padding: $spacing-12 $spacing-8;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+.msDivider {
+  height: 1px;
+  background: #eaeaea;
+  margin-top: $spacing-4;
+}
+
+.msFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: $spacing-20;
+}
+
+.msApply {
+  height: 36px;
+  padding: 0 $spacing-16;
+  border: 0;
+  border-radius: $radius-sm;
+  background: #1976d2;
+  color: $color-white;
+  font: inherit;
+  font-size: $font-size-md;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover { background: #1565c0; }
+}
+
+// ── Custom field misc ──────────────────────────────────────
+.requiredStar {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  cursor: pointer;
+
+  input { margin: 0; }
+}

@@ -3,6 +3,7 @@ import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux
 import {
   persistStore,
   persistReducer,
+  createMigrate,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -10,6 +11,7 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
+import type { PersistedState } from 'redux-persist';
 import surveyReducer from './surveySlice';
 import chatReducer from './chatSlice';
 
@@ -26,10 +28,27 @@ const localStorageAdapter = {
   },
 };
 
+// v1 → v2: rename SavedSurvey.status 'running' to 'published' so older
+// localStorage entries surface with the new label/badge after this change.
+const surveyMigrations = {
+  2: (state: PersistedState) => {
+    const s = state as PersistedState & { savedSurveys?: Array<{ status: string }> };
+    if (!s?.savedSurveys) return state;
+    return {
+      ...s,
+      savedSurveys: s.savedSurveys.map(sv =>
+        sv.status === 'running' ? { ...sv, status: 'published' } : sv
+      ),
+    } as PersistedState;
+  },
+};
+
 const surveyPersistConfig = {
   key: 'survey',
   storage: localStorageAdapter,
   whitelist: ['savedSurveys'],
+  version: 2,
+  migrate: createMigrate(surveyMigrations, { debug: false }),
 };
 
 const rootReducer = combineReducers({

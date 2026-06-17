@@ -566,17 +566,57 @@ const surveySlice = createSlice({
         const now = new Date();
         const formatted = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
         const surveySnapshot = { ...state.survey, status: 'published' as const };
+        const existing = state.savedSurveys.findIndex(s => s.id === state.survey!.id);
+        const prior = existing >= 0 ? state.savedSurveys[existing] : undefined;
         const saved: SavedSurvey = {
           id: state.survey.id,
           title: state.survey.title,
-          status: 'running',
-          sent: 0,
-          responses: 0,
+          status: 'published',
+          sent: prior?.sent ?? 0,
+          responses: prior?.responses ?? 0,
           lastUpdated: formatted,
-          owner: 'Prabu',
+          owner: prior?.owner ?? 'Prabu',
           surveyData: surveySnapshot,
+          expiration: prior?.expiration,
+          auditLog: prior?.auditLog,
+          campaign: prior?.campaign,
         };
-        const existing = state.savedSurveys.findIndex(s => s.id === saved.id);
+        if (existing >= 0) {
+          state.savedSurveys[existing] = saved;
+        } else {
+          state.savedSurveys.unshift(saved);
+        }
+      }
+      state.survey = null;
+      state.surveyGenerated = false;
+      state.editorPanel = { isOpen: false, questionId: null };
+    },
+
+    // Save the in-progress survey as a Draft. Used by the Back button so
+    // unpublished work is preserved in `All Surveys` instead of being
+    // discarded. If the survey was previously published, keep its current
+    // saved status (don't downgrade a Published survey to Draft).
+    saveSurveyAsDraft(state) {
+      if (state.survey && state.survey.pages.some(p => p.questions.length > 0)) {
+        const now = new Date();
+        const formatted = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+        const existing = state.savedSurveys.findIndex(s => s.id === state.survey!.id);
+        const prior = existing >= 0 ? state.savedSurveys[existing] : undefined;
+        const keepStatus = prior && prior.status !== 'draft' ? prior.status : 'draft';
+        const surveySnapshot = { ...state.survey, status: 'draft' as const };
+        const saved: SavedSurvey = {
+          id: state.survey.id,
+          title: state.survey.title,
+          status: keepStatus,
+          sent: prior?.sent ?? 0,
+          responses: prior?.responses ?? 0,
+          lastUpdated: formatted,
+          owner: prior?.owner ?? 'Prabu',
+          surveyData: surveySnapshot,
+          expiration: prior?.expiration,
+          auditLog: prior?.auditLog,
+          campaign: prior?.campaign,
+        };
         if (existing >= 0) {
           state.savedSurveys[existing] = saved;
         } else {
@@ -604,11 +644,11 @@ const surveySlice = createSlice({
         const now = Date.now();
         const end = new Date(action.payload.config.endDate).getTime();
         const hoursLeft = (end - now) / 3600000;
-        if (s.status === 'running' && hoursLeft <= 72 && hoursLeft > 0) {
+        if (s.status === 'published' && hoursLeft <= 72 && hoursLeft > 0) {
           s.status = 'expiring_soon';
         }
       } else if (!action.payload.config.enabled && s.status === 'expiring_soon') {
-        s.status = 'running';
+        s.status = 'published';
       }
       if (!s.auditLog) s.auditLog = [];
       const isNew = !prev?.enabled && action.payload.config.enabled;
@@ -643,13 +683,13 @@ const surveySlice = createSlice({
 
       if (action.payload.config.enabled && action.payload.config.endDate) {
         const hoursLeft = (new Date(action.payload.config.endDate).getTime() - Date.now()) / 3600000;
-        if (s.status === 'running' && hoursLeft <= 72 && hoursLeft > 0) {
+        if (s.status === 'published' && hoursLeft <= 72 && hoursLeft > 0) {
           s.status = 'expiring_soon';
         } else if (s.status === 'expiring_soon' && hoursLeft > 72) {
-          s.status = 'running';
+          s.status = 'published';
         }
       } else if (!action.payload.config.enabled && s.status === 'expiring_soon') {
-        s.status = 'running';
+        s.status = 'published';
       }
 
       const prevEnabled = !!prev?.enabled;
@@ -690,7 +730,7 @@ const surveySlice = createSlice({
     ) {
       const s = state.savedSurveys.find(sv => sv.id === action.payload.surveyId);
       if (!s) return;
-      s.status = 'running';
+      s.status = 'published';
       if (s.expiration) {
         s.expiration.enabled = false;
         if (action.payload.newEndDate) {

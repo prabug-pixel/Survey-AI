@@ -1,0 +1,224 @@
+@use '../../styles/variables' as *;
+
+// ── Root (full-screen stacking context) ────────────────────
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// ── Blanket ─────────────────────────────────────────────────
+.blanket {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+// ── Drawer panel ────────────────────────────────────────────
+.panel {
+  position: relative;
+  width: 650px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: $color-white;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+// ── Header ──────────────────────────────────────────────────
+.header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 64px;
+  padding: 0 $spacing-24;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+
+  &:hover { background: $color-gray-100; }
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: $color-gray-900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-20;
+  flex-shrink: 0;
+}
+
+.restoreBtn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1976d2;
+  font-size: $font-size-md;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; }
+
+  &:disabled {
+    color: $color-gray-400;
+    cursor: not-allowed;
+
+    &:hover { text-decoration: none; }
+  }
+}
+
+.saveBtn {
+  height: 36px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: #1976d2;
+  color: $color-white;
+  font-size: $font-size-md;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover { background: #1565c0; }
+
+  &:disabled {
+    background: $color-gray-200;
+    color: $color-gray-500;
+    cursor: not-allowed;
+
+    &:hover { background: $color-gray-200; }
+  }
+}
+
+// ── Hint text ───────────────────────────────────────────────
+.hint {
+  margin: $spacing-16 $spacing-24 0;
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  flex-shrink: 0;
+}
+
+// ── Search ──────────────────────────────────────────────────
+.searchWrap {
+  padding: $spacing-12 $spacing-24 0;
+  flex-shrink: 0;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  height: 40px;
+  padding: 0 $spacing-12;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+
+  input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: $font-size-sm;
+    color: $color-gray-900;
+
+    &::placeholder { color: $color-gray-400; }
+  }
+}
+
+// ── Field list ──────────────────────────────────────────────
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-16 $spacing-24;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  flex-shrink: 0;
+  padding: 0 $spacing-16;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+  cursor: default;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: background 100ms, border-color 100ms;
+
+  &:hover {
+    background: $color-gray-50;
+  }
+}
+
+
+.rowDragOver {
+  border-color: #1976d2;
+  background: #e3f0ff;
+}
+
+// ── Row label ───────────────────────────────────────────────
+.rowLabel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  min-width: 0;
+}
+
+// ── Field name ──────────────────────────────────────────────
+.fieldName {
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+// ── Drag handle ─────────────────────────────────────────────
+.dragHandle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: grab;
+  padding: 2px;
+
+  &:active { cursor: grabbing; }
+}
+
+.dragHandleIcon {
+  display: block;
+}

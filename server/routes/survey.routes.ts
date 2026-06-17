@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { chat, generateSurvey, modifySurvey } from '../services/claude.service';
+import { chat, generateSurvey, modifySurvey } from '../services/claude.service.js';
 
 export const surveyRouter = Router();
 

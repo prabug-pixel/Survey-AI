@@ -1,22 +1,22 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import OverviewIcon from '../../../assets/Icons/Overview.svg';
-import InboxIcon from '../../../assets/Icons/Inbox.svg';
-import ListingsIcon from '../../../assets/Icons/Listings.svg';
-import ReviewsIcon from '../../../assets/Icons/Reviews.svg';
-import ReferralsIcon from '../../../assets/Icons/Referrals.svg';
-import PaymentsIcon from '../../../assets/Icons/Payments.svg';
-import AppointmentsIcon from '../../../assets/Icons/Appointments.svg';
-import SocialIcon from '../../../assets/Icons/Social.svg';
-import SurveysIcon from '../../../assets/Icons/Surveys.svg';
-import TicketingIcon from '../../../assets/Icons/Ticketing.svg';
-import ContactsIcon from '../../../assets/Icons/Contacts.svg';
-import CampaignsIcon from '../../../assets/Icons/Campaigns.svg';
-import MarketingAutomationIcon from '../../../assets/Icons/Marketing Automation.svg';
-import ReportsIcon from '../../../assets/Icons/Reports.svg';
-import InsightsIcon from '../../../assets/Icons/Insights.svg';
-import CompetitorsIcon from '../../../assets/Icons/Competitors.svg';
-import SettingsIcon from '../../../assets/Icons/Settings.svg';
+import OverviewIcon from '../../../assets/icons/Overview.svg';
+import InboxIcon from '../../../assets/icons/Inbox.svg';
+import ListingsIcon from '../../../assets/icons/Listings.svg';
+import ReviewsIcon from '../../../assets/icons/Reviews.svg';
+import ReferralsIcon from '../../../assets/icons/Referrals.svg';
+import PaymentsIcon from '../../../assets/icons/Payments.svg';
+import AppointmentsIcon from '../../../assets/icons/Appointments.svg';
+import SocialIcon from '../../../assets/icons/Social.svg';
+import SurveysIcon from '../../../assets/icons/Surveys.svg';
+import TicketingIcon from '../../../assets/icons/Ticketing.svg';
+import ContactsIcon from '../../../assets/icons/Contacts.svg';
+import CampaignsIcon from '../../../assets/icons/Campaigns.svg';
+import MarketingAutomationIcon from '../../../assets/icons/Marketing Automation.svg';
+import ReportsIcon from '../../../assets/icons/Reports.svg';
+import InsightsIcon from '../../../assets/icons/Insights.svg';
+import CompetitorsIcon from '../../../assets/icons/Competitors.svg';
+import SettingsIcon from '../../../assets/icons/Settings.svg';
 import styles from './Sidebar.module.scss';
 
 interface NavItem {
@@ -36,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'appointments', icon: AppointmentsIcon,         label: 'Appointments' },
   { id: 'social',       icon: SocialIcon,               label: 'Social' },
   { id: 'surveys',      icon: SurveysIcon,              label: 'Surveys',    path: '/surveys' },
-  { id: 'ticketing',    icon: TicketingIcon,            label: 'Ticketing' },
+  { id: 'ticketing',    icon: TicketingIcon,            label: 'Ticketing',  path: '/ticketing' },
   { id: 'contacts',     icon: ContactsIcon,             label: 'Contacts' },
   { id: 'campaigns',    icon: CampaignsIcon,            label: 'Campaigns' },
   { id: 'automation',   icon: MarketingAutomationIcon,  label: 'Marketing Automation' },
@@ -61,6 +61,7 @@ const Sidebar: React.FC = () => {
     // so highlight the automation icon while the user is in that flow.
     if (/^\/surveys\/[^/]+\/campaigns(\/|$)/.test(location.pathname)) return 'automation';
     if (location.pathname.startsWith('/surveys')) return 'surveys';
+    if (location.pathname.startsWith('/ticketing')) return 'ticketing';
     return null;
   };
 

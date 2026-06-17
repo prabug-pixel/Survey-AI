@@ -9,10 +9,10 @@ import AllSurveys from '../components/AllSurveys/AllSurveys';
 import type { SavedSurvey } from '../types/survey.types';
 
 const DEMO_SURVEYS: SavedSurvey[] = [
-  { id: uuid(), title: 'Feedback survey', status: 'running', sent: 5, responses: 1, lastUpdated: 'Mar 05, 2026', owner: 'Prabu' },
+  { id: uuid(), title: 'Feedback survey', status: 'published', sent: 5, responses: 1, lastUpdated: 'Mar 05, 2026', owner: 'Prabu' },
   { id: uuid(), title: 'Product Sentiment Analysis', status: 'draft', sent: 0, responses: 0, lastUpdated: 'Mar 04, 2026', owner: 'Rupa' },
-  { id: uuid(), title: 'Competitive Market Analysis', status: 'running', sent: 23, responses: 21, lastUpdated: 'Mar 04, 2026', owner: 'Raynil' },
-  { id: uuid(), title: 'Workplace Satisfaction Survey', status: 'running', sent: 12, responses: 1, lastUpdated: 'Mar 03, 2026', owner: 'Balaji' },
+  { id: uuid(), title: 'Competitive Market Analysis', status: 'published', sent: 23, responses: 21, lastUpdated: 'Mar 04, 2026', owner: 'Raynil' },
+  { id: uuid(), title: 'Workplace Satisfaction Survey', status: 'published', sent: 12, responses: 1, lastUpdated: 'Mar 03, 2026', owner: 'Balaji' },
 ];
 
 const makeStore = (savedSurveys: SavedSurvey[] = []) =>

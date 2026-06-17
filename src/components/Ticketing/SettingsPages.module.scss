@@ -1,0 +1,322 @@
+// Shared chrome for every Ticketing > Settings (and Reports) page.
+// Mirrors the look of CustomFieldsManager so the section feels cohesive.
+@use '../../styles/variables' as *;
+
+.page {
+  padding: $spacing-24;
+  background: $color-white;
+  min-height: 100%;
+}
+
+// ── Breadcrumb + title row ─────────────────────────────────
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-md;
+  color: $color-gray-700;
+  margin-bottom: $spacing-12;
+}
+
+.crumbLink {
+  color: #1976d2;
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.crumbSep { color: $color-gray-400; }
+
+.crumbCurrent {
+  color: $color-gray-900;
+  font-weight: 500;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-16;
+  margin-bottom: $spacing-20;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: $color-gray-900;
+  letter-spacing: -0.4px;
+  margin: 0 0 $spacing-4;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: $font-size-md;
+  color: $color-gray-600;
+  max-width: 560px;
+}
+
+.createBtn {
+  height: 36px;
+  padding: 0 $spacing-16;
+  border: 0;
+  border-radius: $radius-sm;
+  background: #1976d2;
+  color: $color-white;
+  font-size: $font-size-md;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover { background: #1565c0; }
+}
+
+// ── Cell content helpers ───────────────────────────────────
+// Table chrome lives in AeroTable. These are the inline content
+// helpers each page still owns (badge pills, muted cells, action
+// buttons, etc.).
+
+.fieldName { font-weight: 500; }
+
+.mutedCell { color: $color-gray-500; }
+
+.rowIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: $color-gray-100; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// ── Inline pills / chips ───────────────────────────────────
+.emailPill {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: 2px $spacing-8;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-gray-50;
+  font-size: $font-size-base;
+  color: $color-gray-800;
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: $font-size-sm;
+  }
+}
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.poolTag {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  margin-right: $spacing-4;
+  padding: 2px $spacing-8;
+  border-radius: 999px;
+  background: $color-gray-100;
+  color: $color-gray-800;
+  font-size: $font-size-sm;
+}
+
+.poolTagDot {
+  width: 6px;
+  height: 6px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+
+// Severity-aware pill — colors injected inline by callers.
+.severityCell {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+  padding: 2px $spacing-8;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.severityDot {
+  width: 6px;
+  height: 6px;
+  border-radius: $radius-full;
+}
+
+// ── Modal chrome ───────────────────────────────────────────
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: (-$spacing-12) (-$spacing-12) $spacing-16;
+  padding: 0 0 $spacing-12;
+  border-bottom: 1px solid $color-border-light;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $color-gray-900;
+  margin: 0;
+}
+
+.modalClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  cursor: pointer;
+
+  &:hover { background: $color-gray-100; }
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-gray-700;
+  letter-spacing: -0.24px;
+  text-transform: uppercase;
+}
+
+.helpText {
+  margin: $spacing-4 0 0;
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-12;
+  padding: $spacing-12;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-md;
+  background: $color-gray-50;
+}
+
+.toggleText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toggleTitle {
+  font-size: $font-size-md;
+  font-weight: 500;
+  color: $color-gray-900;
+}
+
+.toggleHint {
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-8;
+  margin-top: $spacing-16;
+  padding-top: $spacing-12;
+  border-top: 1px solid $color-border-light;
+}
+
+// ── Multi-select chip pickers (assignment pool, SLA sources) ──
+.chipPicker {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+  padding: $spacing-8;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-md;
+  background: $color-white;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.checkRow {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+  cursor: pointer;
+
+  input { margin: 0; }
+}
+
+.poolGroupTitle {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-gray-600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: $spacing-4 0;
+  margin-top: $spacing-8;
+
+  &:first-child { margin-top: 0; }
+}
+
+// ── Reports specifics ─────────────────────────────────────
+.reportToolbar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  margin-bottom: $spacing-16;
+  padding: $spacing-12;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-md;
+  background: $color-gray-50;
+}
+
+.reportToolbarLabel {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-gray-600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.reportSelect {
+  height: 32px;
+  padding: 0 $spacing-12;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-sm;
+  background: $color-white;
+  font-size: $font-size-md;
+  color: $color-gray-900;
+}
+
+.totalCol { font-weight: 600; }

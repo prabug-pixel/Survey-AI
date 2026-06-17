@@ -91,7 +91,11 @@
   background: $color-white;
   border: 1px solid $color-border;
   border-radius: $radius-xl;
-  overflow: hidden;
+  // overflow: visible so the Advanced Options date/time popups can
+  // escape this card and float over the launch banner without being
+  // clipped. The card has no overflowing children of its own, so the
+  // rounded corners still read correctly.
+  overflow: visible;
 }
 
 // ── Section row ───────────────────────────────────────────────
@@ -298,17 +302,6 @@
   align-items: end;
 }
 
-// TimePeriod (Aero "Date picker with preset") renders its trigger with
-// `height: 100%; width: 100%`. Without an explicit-height wrapper the
-// trigger collapses to 0px and the click target disappears, so give the
-// wrapper the same 40px height as the other Aero dropdowns. Cap to 320px
-// to match the rest of the campaign form fields.
-.timePeriodWrap {
-  width: 320px;
-  height: 40px;
-  position: relative;
-}
-
 // Date picker = FormInput trigger + DatePicker popup. Reuses the
 // same `profile-datepicker` anchor pattern as ExpirySettings.
 .datePickerField {
@@ -334,9 +327,13 @@
   }
 }
 
+// Advanced Options sit at the bottom of the form right above the fixed
+// "Get ready to launch" banner, so the date/time popups would clip if
+// they opened downward. Flip them to open upward (drop-up) so the menu
+// pops out above the trigger and stays inside the visible scroll area.
 .datePickerPopup {
   position: absolute;
-  top: calc(100% + $spacing-4);
+  bottom: calc(100% + $spacing-4);
   left: 0;
   z-index: $z-dropdown;
   background: $color-white;
@@ -362,12 +359,18 @@
 
 .helperNote {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: $spacing-8;
   font-size: $font-size-sm;
   color: $color-gray-600;
   line-height: $line-height-normal;
   padding: $spacing-4 0 0;
+
+  > svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .reminderRow {
@@ -378,18 +381,15 @@
 }
 
 // ── Collapsible section header ────────────────────────────────
-// Used by Advanced Options — full-width button row containing the
-// section title and a chevron / lock chip on the right.
+// Used by Advanced Options — full-width row containing the
+// section title and the enable toggle (plus a lock chip when the
+// campaign is live).
 .collapsibleHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $spacing-16;
   width: 100%;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
   text-align: left;
   color: inherit;
 }

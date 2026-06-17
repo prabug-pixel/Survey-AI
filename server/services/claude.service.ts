@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { SURVEY_SYSTEM_PROMPT, CHAT_SYSTEM_PROMPT } from '../prompts/surveySystem';
+import { SURVEY_SYSTEM_PROMPT, CHAT_SYSTEM_PROMPT } from '../prompts/surveySystem.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,

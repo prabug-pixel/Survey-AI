@@ -1,66 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
-import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
-import TimePeriod from '@birdeye/elemental/core/atoms/TimePeriod';
-import TimePicker from '@birdeye/elemental/core/components/TimePicker';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { CampaignConfig } from '../../types/survey.types';
 import { DEFAULT_CAMPAIGN_CONFIG, DEFAULT_LINK_EXPIRY } from '../../types/survey.types';
-import { IconChevronLeft, IconChevronDown, IconChevronUp, IconCheck, IconEdit, IconInfo } from '../../shared/Icons/Icons';
+import { IconCheck, IconEdit, IconInfo } from '../../shared/Icons/Icons';
+import Breadcrumb, { type BreadcrumbItem } from '../shared/Breadcrumb/Breadcrumb';
 import styles from './SurveyCampaigns.module.scss';
-
-// Default expiration window — today through 60 days from today,
-// both anchored at 12:00 AM (midnight).
-const DEFAULT_EXPIRY_DAYS = 60;
-const todayAtMidnight = (from: Date = new Date()): Date => {
-  const d = new Date(from);
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-const sixtyDaysFromNow = (from: Date = new Date()): Date => {
-  const d = todayAtMidnight(from);
-  d.setDate(d.getDate() + DEFAULT_EXPIRY_DAYS);
-  return d;
-};
-
-const fmtTimeOnly = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
-    : '';
-
-interface TimeParts {
-  hours: number;          // 1..12
-  minutes: number;        // 0..59
-  meridiem: 'am' | 'pm';
-}
-
-// 12:00 AM = midnight. In 12-hour format midnight is represented as hour 12 / AM.
-const DEFAULT_TIME: TimeParts = { hours: 12, minutes: 0, meridiem: 'am' };
-
-const isoToTimeParts = (iso?: string): TimeParts => {
-  if (!iso) return DEFAULT_TIME;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return DEFAULT_TIME;
-  const h24 = d.getHours();
-  const meridiem: 'am' | 'pm' = h24 >= 12 ? 'pm' : 'am';
-  const hours = h24 % 12 === 0 ? 12 : h24 % 12;
-  return { hours, minutes: d.getMinutes(), meridiem };
-};
-
-const mergeDateAndTime = (dateIso: string, time: TimeParts): string => {
-  const d = new Date(dateIso);
-  const h24 =
-    time.meridiem === 'am'
-      ? (time.hours === 12 ? 0 : time.hours)
-      : (time.hours === 12 ? 12 : time.hours + 12);
-  d.setHours(h24, time.minutes, 0, 0);
-  return d.toISOString();
-};
 
 const CHANNEL_OPTIONS = [
   { value: 'email_text', label: 'Email and text' },
@@ -96,7 +46,6 @@ const StatusDot: React.FC<{ done: boolean }> = ({ done }) => (
 
 const SurveyCampaigns: React.FC = () => {
   const { surveyId } = useParams<{ surveyId: string }>();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const savedSurveys = useAppSelector(s => s.survey.savedSurveys);
   const survey = savedSurveys.find(s => s.id === surveyId);
@@ -132,26 +81,11 @@ const SurveyCampaigns: React.FC = () => {
     [survey.campaign]
   );
 
-  // Expiry edits are blocked once the campaign was launched OR the survey
-  // is already running / expiring (the workflow is in flight either way).
-  const isLive = config.status === 'live'
-    || survey.status === 'running'
-    || survey.status === 'expiring_soon';
-
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [expiryTimeOpen, setExpiryTimeOpen] = useState(false);
-  const expiryTimeRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!expiryTimeOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (expiryTimeRef.current && !expiryTimeRef.current.contains(e.target as Node)) {
-        setExpiryTimeOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [expiryTimeOpen]);
+  // Expiry edits are blocked only once *this* campaign has been launched
+  // (its workflow is in flight). A survey may already be in 'published' /
+  // 'expiring_soon' from a prior campaign — that shouldn't lock a fresh
+  // draft campaign's expiry configuration.
+  const isLive = config.status === 'live';
 
   const commit = (next: CampaignConfig) => {
     dispatch(surveyActions.patchCampaign({ surveyId: survey.id, config: next }));
@@ -172,23 +106,9 @@ const SurveyCampaigns: React.FC = () => {
     });
   };
 
-  // Seed the default range on first mount when the user hasn't set one:
-  // today → today + 60 days, both at 12:00 AM. Skipped when the campaign
-  // is already live or a persisted value exists, so we never overwrite.
-  useEffect(() => {
-    if (isLive) return;
-    if (config.options.linkExpiry.startDate && config.options.linkExpiry.endDate) return;
-    const now = new Date();
-    const start = todayAtMidnight(now);
-    const end = sixtyDaysFromNow(now);
-    patchExpiry({
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      presetKey: 'last_60_days',
-      customDate: end.toISOString(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [survey.id]);
+  // No mount-time seeding required — DEFAULT_LINK_EXPIRY already encodes
+  // "60 days from send" (mode: 'days', value: 60), so the form opens to
+  // the spec default without overwriting any persisted choice.
 
   const channelDone = !!config.channel;
   const recipientsDone = !!config.recipientSource;
@@ -196,36 +116,28 @@ const SurveyCampaigns: React.FC = () => {
   const surveyDone = !!survey.id;
   const scheduleDone = !!config.schedule;
   const reminderDone = true;
-  // Link expiration is set when the user has picked a date range
-  // (start + end) via the TimePeriod preset picker.
-  const optionsDone = !!(
-    config.options.linkExpiry.startDate && config.options.linkExpiry.endDate
-  );
+  // Link expiry counts as done when the toggle is off (nothing to configure)
+  // or when it's on with a positive number of days entered.
+  const linkExpiry = config.options.linkExpiry;
+  const optionsDone = !linkExpiry.enabled || (linkExpiry.value ?? 0) > 0;
 
   const handleLaunch = () => {
     commit({ ...config, status: 'live' });
   };
 
+  const crumbs: BreadcrumbItem[] = [
+    { label: 'Surveys AI', to: '/surveys' },
+    { label: survey.title, to: `/surveys/${survey.id}` },
+    { label: 'Distribute', to: `/surveys/${survey.id}?tab=distribute` },
+    { label: 'Survey campaign' },
+  ];
+
   return (
     <div className={styles.campaign}>
+      <Breadcrumb items={crumbs} />
       <div className={styles.scrollArea}>
       <div className={styles.pageHeaderWrap}>
         <div className={styles.pageTitleRow}>
-          <button
-            type="button"
-            className={styles.backBtn}
-            aria-label="Back to survey"
-            onClick={() => {
-              // history.back() restores the previous URL (including ?tab=...),
-              // which puts SurveyDetails on whatever tab the user was on.
-              // If the user deep-linked directly to this page (no history),
-              // fall back to the Distribute tab.
-              if (window.history.length > 1) navigate(-1);
-              else navigate(`/surveys/${survey.id}?tab=distribute`);
-            }}
-          >
-            <IconChevronLeft size={20} color="#424242" />
-          </button>
           <h1 className={styles.pageTitle}>Survey campaign</h1>
           <button type="button" className={styles.editTitleBtn} aria-label="Rename campaign">
             <IconEdit size={14} color="#757575" />
@@ -372,14 +284,14 @@ const SurveyCampaigns: React.FC = () => {
                   patch('overrideRestrictions', e.target.checked)
                 }
               />
-              <span>Override any communication restriction for sending this campaign</span>
+              <span>Override communication restrictions for this campaign</span>
             </label>
 
             <div className={styles.helperNote}>
-              <IconInfo size={14} color="#9e9e9e" />
+              <IconInfo size={16} color="#9e9e9e" />
               <span>
-                To minimize disruption, text messages are only sent to contacts between 8am–8pm.
-                Your business location that provides their service determines the time zone setting.
+                Text messages are sent between 8am and 8pm to minimize disruption.
+                The contact's location determines the time zone.
               </span>
             </div>
           </div>
@@ -403,142 +315,63 @@ const SurveyCampaigns: React.FC = () => {
           </div>
         </section>
 
-        {/* ── Advanced Options (collapsible) ───────────────── */}
+        {/* ── Advanced Options ────────────────────────────── */}
+        {/* Section is gated by the link-expiry toggle. Toggle on → expand
+           and show the Days-only input. Toggle off → collapse. */}
         <section className={styles.section}>
           <div className={styles.statusCol}><StatusDot done={optionsDone} /></div>
           <div className={styles.body}>
-            <button
-              type="button"
-              className={styles.collapsibleHeader}
-              onClick={() => setAdvancedOpen(o => !o)}
-              aria-expanded={advancedOpen}
-            >
-              <h3 className={styles.sectionTitle}>Advanced Options</h3>
+            <div className={styles.collapsibleHeader}>
+              <h3 className={styles.sectionTitle}>Advanced options</h3>
               <div className={styles.collapsibleHeaderRight}>
                 {isLive && (
                   <span className={styles.lockedNotice}>
-                    Locked — campaign is live
+                    Locked: campaign is live
                   </span>
                 )}
-                {advancedOpen
-                  ? <IconChevronUp size={18} color="#555" />
-                  : <IconChevronDown size={18} color="#555" />}
+                <Toggle
+                  name="linkExpiryEnabled"
+                  checked={linkExpiry.enabled}
+                  onChange={(_: unknown, e: { target: { checked: boolean } }) => {
+                    const next = e.target.checked;
+                    patchExpiry({
+                      enabled: next,
+                      option: 'set_amount',
+                      mode: 'days',
+                      // Clear the value when turning off so re-enabling
+                      // starts with an empty field.
+                      value: next ? linkExpiry.value : undefined,
+                    });
+                  }}
+                  disabled={isLive}
+                  roundedToggle
+                />
               </div>
-            </button>
+            </div>
 
-            {advancedOpen && (
-              <>
-                {/* Expire Date — Aero "Date picker with preset" (TimePeriod
-                   atom). Owns its own trigger, dual-month calendar, preset
-                   list (Today, Last 7/30/60/… days), and Cancel/Apply.
-                   Default range is 60 days from today (seeded on mount). */}
+            {linkExpiry.enabled && (
+              <div className={styles.fieldRow}>
+                <div className={styles.fieldLabelRow}>
+                  <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Set amount of time</span>
+                </div>
                 <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
-                  <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Expire Date</span>
-                    <Tooltip text="When the survey link is valid — pick a preset or a custom range." position="right" hideOnScroll>
-                      <button type="button" className={styles.infoIconBtn} aria-label="Expire Date info">
-                        <IconInfo size={14} />
-                      </button>
-                    </Tooltip>
-                  </div>
-                  <div className={styles.timePeriodWrap}>
-                    <TimePeriod
-                      enableFutureDates
-                      hideAllTime
-                      disable={isLive}
-                      initLabel="Select date"
-                      selectedDateRange={
-                        config.options.linkExpiry.startDate && config.options.linkExpiry.endDate
-                          ? {
-                              startDate: new Date(config.options.linkExpiry.startDate),
-                              endDate: new Date(config.options.linkExpiry.endDate),
-                              key: config.options.linkExpiry.presetKey ?? 'CUSTOM',
-                            }
-                          : undefined
+                  <FormInput
+                    name="expiryValue"
+                    type="number"
+                    value={linkExpiry.value !== undefined ? String(linkExpiry.value) : ''}
+                    placeholder="Enter number of days"
+                    onChange={(_event: unknown, value: string) => {
+                      if (value === '' || value === null || value === undefined) {
+                        patchExpiry({ value: undefined });
+                        return;
                       }
-                      onChangeSelectedDateRange={(range) => {
-                        if (!range?.startDate || !range?.endDate) return;
-                        const start = range.startDate instanceof Date
-                          ? range.startDate
-                          : new Date(range.startDate);
-                        const end = range.endDate instanceof Date
-                          ? range.endDate
-                          : new Date(range.endDate);
-                        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
-                        // Preserve the user-picked time when only the range
-                        // changes — TimePeriod doesn't manage time-of-day.
-                        const time = isoToTimeParts(config.options.linkExpiry.endDate);
-                        const endIso = mergeDateAndTime(end.toISOString(), time);
-                        patchExpiry({
-                          startDate: start.toISOString(),
-                          endDate: endIso,
-                          presetKey: range.key,
-                          customDate: endIso,
-                        });
-                      }}
-                    />
-                  </div>
+                      const n = Math.max(0, Number(value) || 0);
+                      patchExpiry({ value: n });
+                    }}
+                    disabled={isLive}
+                  />
                 </div>
-
-                {/* Time — FormInput trigger + TimePicker popup, mirrors the
-                   pattern used in ExpirySettings. The picked time merges
-                   back into the range's endDate ISO. */}
-                <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
-                  <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Time</span>
-                    <Tooltip text="Time of day the link expires" position="right" hideOnScroll>
-                      <button type="button" className={styles.infoIconBtn} aria-label="Time info">
-                        <IconInfo size={14} />
-                      </button>
-                    </Tooltip>
-                  </div>
-                  <div className={styles.datePickerField} ref={expiryTimeRef}>
-                    <div
-                      className={styles.datePickerTrigger}
-                      onClick={() => !isLive && setExpiryTimeOpen(true)}
-                      role="button"
-                      tabIndex={isLive ? -1 : 0}
-                      onKeyDown={(e) => {
-                        if (isLive) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setExpiryTimeOpen(true);
-                        }
-                      }}
-                    >
-                      <FormInput
-                        name="expiryTime"
-                        type="text"
-                        value={fmtTimeOnly(config.options.linkExpiry.endDate)}
-                        placeholder="Select time"
-                        showLeftIcon
-                        customIconClass="icon_phoenix-clock"
-                        readOnly
-                        disabled={isLive}
-                      />
-                    </div>
-                    {expiryTimeOpen && (
-                      <div
-                        className={styles.datePickerPopup}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <TimePicker
-                          timeObject={isoToTimeParts(config.options.linkExpiry.endDate)}
-                          changeTime={(option, field) => {
-                            const baseIso = config.options.linkExpiry.endDate ?? new Date().toISOString();
-                            const next: TimeParts = { ...isoToTimeParts(config.options.linkExpiry.endDate) };
-                            if (field === 'hours') next.hours = Number(option.value);
-                            else if (field === 'minutes') next.minutes = Number(option.value);
-                            else next.meridiem = String(option.value).toLowerCase() === 'pm' ? 'pm' : 'am';
-                            const endIso = mergeDateAndTime(baseIso, next);
-                            patchExpiry({ endDate: endIso, customDate: endIso });
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </>
+              </div>
             )}
           </div>
         </section>
@@ -549,10 +382,10 @@ const SurveyCampaigns: React.FC = () => {
       {/* ── Launch banner (fixed footer outside scroll) ──── */}
       <div className={styles.launchBanner}>
         <div className={styles.launchLeft}>
-          <h3 className={styles.launchTitle}>Get ready to launch your survey</h3>
+          <h3 className={styles.launchTitle}>Ready to launch your survey</h3>
           <p className={styles.launchDesc}>
-            Your business is responsible for obtaining permission from customers or contacts
-            before initiating text message communication. <a href="#" onClick={(e) => e.preventDefault()}>See usage terms</a>
+            You're responsible for getting permission from contacts before sending text messages.
+            {' '}<a href="#" onClick={(e) => e.preventDefault()}>See usage terms</a>
           </p>
         </div>
         <div className={styles.launchRight}>

@@ -4,16 +4,17 @@
 // Left: editable settings (492px fixed). Right: live closed-page preview.
 .expiryTab {
   flex: 1;
+  padding-top: 20px;
   overflow: hidden;
   display: flex;
   gap: 0;
 }
 
 .expiryLeft {
-  width: 492px;
-  flex-shrink: 0;
+  flex: 1 1 0;
+  min-width: 0;
   overflow-y: auto;
-  padding: $spacing-24;
+  padding: 0 $spacing-24 $spacing-24;
   border-right: 1px solid $color-border;
   border-right-width: 0;
   display: flex;
@@ -23,7 +24,8 @@
 }
 
 .expiryRight {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   overflow-y: auto;
   padding: $spacing-24;
   background: $color-bg-page;
@@ -62,52 +64,50 @@
   padding: $spacing-24;
 }
 
-// ── Banners ───────────────────────────────────────────────────
+// ── Banners (Aero design-system slim alert pattern) ──────────
+// Spec: Alerts/Banner (Figma node 1306:2053). The banner is a
+// single-line strip with a 20px leading icon in a 36px wrapper,
+// 4px radius, 8px horizontal / 4px vertical padding, 8px gap,
+// and a 14px / 20px-line-height body.
 .banner {
   display: flex;
-  align-items: flex-start;
-  gap: $spacing-12;
-  padding: $spacing-16;
-  border-radius: $radius-lg;
+  align-items: center;
+  gap: $spacing-8;
+  height: fit-content;
+  padding: $spacing-8;
+  border-radius: 4px;
   font-size: $font-size-md;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #212121;
   flex-shrink: 0;
 }
 
 .bannerInfo {
-  background: #e3f2fd;
-  border: 1px solid #90caf9;
-  color: #0d47a1;
+  background: #eff6ff;
 }
 
 .bannerWarn {
-  background: #fff8e1;
-  border: 1px solid #ffcc80;
-  color: #bf360c;
+  background: #fff9ea;
 }
 
-.bannerContent {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-4;
+.bannerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.bannerMessage {
+  flex: 1;
+  margin: 0;
   min-width: 0;
 }
 
-.bannerHead {
-  display: flex;
-  align-items: center;
-  gap: $spacing-8;
-}
-
-.bannerEffective {
-  font-size: $font-size-sm;
+.bannerMessage strong {
   font-weight: 500;
-  letter-spacing: -0.24px;
-}
-
-.bannerBody {
-  display: block;
-  font-size: $font-size-sm;
-  line-height: $line-height-normal;
 }
 
 // ── Main card ─────────────────────────────────────────────────
@@ -124,8 +124,12 @@
   align-items: center;
   justify-content: space-between;
   gap: $spacing-16;
-  padding: $spacing-20 $spacing-24;
+  padding: $spacing-20 $spacing-24 0;
   border-bottom: 0;
+}
+
+.cardHeaderExpanded {
+  padding-bottom: 0;
 }
 
 .cardHeaderText {
@@ -153,6 +157,18 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-32;
+}
+
+.formFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-12;
+  padding: $spacing-16 $spacing-24;
+  border-top: 1px solid $color-gray-200;
+  background: $color-white;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
 }
 
 // ── Sections ──────────────────────────────────────────────────
@@ -401,21 +417,16 @@
   margin: 0;
 }
 
-.previewCta {
-  display: inline-flex;
-  align-items: center;
-  padding: $spacing-10 $spacing-24;
-  background: rgba(25, 118, 210, 1);
-  color: rgba(255, 255, 255, 1);
-  border-radius: $radius-sm;
-  font-size: $font-size-md;
-  font-weight: 400;
-  text-decoration: none;
-  margin-top: $spacing-8;
-  transition: background $transition-fast;
+.previewRedirect {
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+  margin: $spacing-8 0 0;
+  max-width: 480px;
+  line-height: $line-height-relaxed;
 
-  &:hover {
-    background: $color-primary-hover;
+  strong {
+    color: $color-gray-700;
+    word-break: break-all;
   }
 }
 

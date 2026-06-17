@@ -212,7 +212,12 @@ $col-actions: 92px;
   white-space: nowrap;
 }
 
-.running {
+.published {
+  background: #f1faf0;
+  color: #377e2c;
+}
+
+.expiring_soon {
   background: #f1faf0;
   color: #377e2c;
 }
@@ -220,11 +225,6 @@ $col-actions: 92px;
 .draft {
   background: #eaeaea;
   color: #555;
-}
-
-.expiring_soon {
-  background: #fff8e1;
-  color: #e65100;
 }
 
 .expired {

@@ -184,19 +184,14 @@ export const TIMEZONES = [
   'UTC',
 ] as const;
 
-// 1–24 are shown as hours; 48+ are shown as days (the 24h slot already
-// represents "1 day", so we skip a separate "1 day" entry to avoid two
-// options with the same hour value).
 export const GRACE_PERIOD_OPTIONS: { value: number; label: string }[] = [
-  ...Array.from({ length: 24 }, (_, i) => {
-    const hours = i + 1;
-    return { value: hours, label: hours === 1 ? '1 hour' : `${hours} hours` };
-  }),
+  { value: 24, label: '1 day' },
   { value: 48, label: '2 days' },
   { value: 72, label: '3 days' },
   { value: 96, label: '4 days' },
   { value: 120, label: '5 days' },
   { value: 144, label: '6 days' },
+  { value: 168, label: '7 days' },
 ];
 
 export interface AuditLogEntry {
@@ -213,24 +208,40 @@ export interface AuditLogEntry {
 
 export type CampaignChannel = 'email' | 'text' | 'email_text';
 export type CampaignSchedule = 'immediately' | 'scheduled';
-export type LinkExpiryMode = 'days' | 'hours' | 'custom';
+// Link expiry has two top-level options ("Link Expiry Options"):
+//   • set_amount  → relative count + unit (days/hours/minutes), resolved
+//                   to an absolute timestamp at send time.
+//   • calendar_date → explicit calendar date + time-of-day.
+export type LinkExpiryOption = 'set_amount' | 'calendar_date';
+export type LinkExpiryUnit = 'days' | 'hours' | 'minutes';
+// `mode` collapses both axes for storage compatibility:
+//   set_amount + unit  → mode = 'days' | 'hours' | 'minutes'
+//   calendar_date      → mode = 'custom'
+//   set_amount, no unit picked yet → mode = undefined
+export type LinkExpiryMode = LinkExpiryUnit | 'custom';
 
 export interface LinkExpiryConfig {
-  mode: LinkExpiryMode;
-  // Used when mode === 'days' or 'hours'. Default 60 days from sent.
-  value: number;
-  // Single-date legacy field (kept for back-compat with earlier UI).
+  // Top-level toggle. When false, no expiry is applied. When true, the
+  // Days-only input below is the only field surfaced.
+  enabled: boolean;
+  // The first dropdown's selection. Kept on the type for legacy compatibility
+  // with older saved campaigns; the UI now only writes 'set_amount'.
+  option: LinkExpiryOption;
+  // Always 'days' in the current UI. Kept on the type for legacy compatibility.
+  mode?: LinkExpiryMode;
+  // Number of days until the link expires.
+  value?: number;
+  // Legacy fields, retained so older saved campaigns still load.
   customDate?: string;
-  // Aero "Date picker with preset" stores a range — start + end ISO dates
-  // plus the preset key (e.g. 'LAST_60_DAYS', 'CUSTOM') that produced it.
   startDate?: string;
   endDate?: string;
   presetKey?: string;
 }
 
 export const DEFAULT_LINK_EXPIRY: LinkExpiryConfig = {
+  enabled: false,
+  option: 'set_amount',
   mode: 'days',
-  value: 60,
 };
 
 export interface CampaignConfig {
@@ -270,7 +281,6 @@ export interface ExpirationConfig {
   closedMessage: {
     title: string;
     body: string;
-    ctaText?: string;
     ctaUrl?: string;
   };
   notifications: {
@@ -284,7 +294,7 @@ export interface ExpirationConfig {
 export interface SavedSurvey {
   id: string;
   title: string;
-  status: 'draft' | 'running' | 'expiring_soon' | 'expired';
+  status: 'draft' | 'published' | 'expiring_soon' | 'expired';
   sent: number;
   responses: number;
   lastUpdated: string;

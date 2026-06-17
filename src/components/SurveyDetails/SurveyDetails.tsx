@@ -3,33 +3,27 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SurveyResponse } from '../../types/survey.types';
-import Button from '@birdeye/elemental/core/atoms/Button';
-import Modal from '@birdeye/elemental/core/atoms/Modal';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
-import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
-import DatePicker from '@birdeye/elemental/core/components/DatePicker';
+import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
 import {
-  IconChevronLeft,
+  IconArrowLeft,
   IconChevronDown,
   IconChevronUp,
   IconExternalLink,
   IconMoreVert,
-  IconFilter,
   IconLink,
   IconCode,
   IconSend,
   IconCopy,
   IconBarChart,
-  IconAlertCircle,
   IconClock,
-  IconUsers,
-  IconInfo,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
-import ExpirySettings from './ExpirySettings';
+import EditSettings from './EditSettings';
+import Breadcrumb, { type BreadcrumbItem } from '../shared/Breadcrumb/Breadcrumb';
 import styles from './SurveyDetails.module.scss';
 
-type DetailTab = 'view' | 'distribute' | 'responses' | 'expiry' | 'reports';
+type DetailTab = 'view' | 'distribute' | 'responses' | 'edit' | 'reports';
 type SortKey = keyof Pick<SurveyResponse, 'score' | 'contactName' | 'location' | 'respondedOn'>;
 type SortDir = 'asc' | 'desc';
 
@@ -40,16 +34,16 @@ const MOCK_RESPONSES: SurveyResponse[] = [
 ];
 
 const STATUS_LABEL: Record<string, string> = {
-  running: 'Running',
+  published: 'Published',
   draft: 'Draft',
-  expiring_soon: 'Expiring Soon',
+  expiring_soon: 'Published',
   expired: 'Expired',
 };
 
 const STATUS_CLASS: Record<string, string> = {
-  running: styles.running,
+  published: styles.published,
   draft: styles.draft,
-  expiring_soon: styles.expiringSoon,
+  expiring_soon: styles.published,
   expired: styles.expired,
 };
 
@@ -63,7 +57,7 @@ const SortIcon: React.FC<{ col: SortKey; sortKey: SortKey; sortDir: SortDir }> =
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
-const VALID_TABS: DetailTab[] = ['view', 'distribute', 'responses', 'expiry', 'reports'];
+const VALID_TABS: DetailTab[] = ['view', 'distribute', 'responses', 'edit', 'reports'];
 
 const SurveyDetails: React.FC = () => {
   const { surveyId } = useParams<{ surveyId: string }>();
@@ -81,6 +75,9 @@ const SurveyDetails: React.FC = () => {
     const next = new URLSearchParams(searchParams);
     if (tab === 'view') next.delete('tab');
     else next.set('tab', tab);
+    // Clear any sub-section param so switching tabs always lands on the
+    // top of that tab (e.g. Edit settings' landing page, not a deep view).
+    next.delete('section');
     setSearchParams(next, { replace: false });
   };
   const [sortKey, setSortKey] = useState<SortKey>('score');
@@ -99,7 +96,6 @@ const SurveyDetails: React.FC = () => {
   const [auditDrawerOpen, setAuditDrawerOpen] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
-  const [reopenEndDate, setReopenEndDate] = useState('');
 
   const rowMenuRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -117,7 +113,7 @@ const SurveyDetails: React.FC = () => {
     return (
       <div className={styles.notFound}>
         <p>Survey not found.</p>
-        <button className={styles.notFoundBtn} onClick={() => navigate('/surveys')}>Back to All Surveys</button>
+        <button className={styles.notFoundBtn} onClick={() => navigate('/surveys')}>Back to all surveys</button>
       </div>
     );
   }
@@ -126,7 +122,7 @@ const SurveyDetails: React.FC = () => {
   const allQuestions = survey.surveyData?.pages.flatMap(p => p.questions) ?? [];
   const responseRate = survey.sent > 0 ? Math.round((survey.responses / survey.sent) * 100) : 0;
   const isExpired = survey.status === 'expired';
-  const isRunning = survey.status === 'running' || survey.status === 'expiring_soon';
+  const isRunning = survey.status === 'published' || survey.status === 'expiring_soon';
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
@@ -167,11 +163,9 @@ const SurveyDetails: React.FC = () => {
   const handleReopen = () => {
     dispatch(surveyActions.reopenSurvey({
       surveyId: survey.id,
-      newEndDate: reopenEndDate || undefined,
       actor: survey.owner,
     }));
     setReopenDialogOpen(false);
-    setReopenEndDate('');
   };
 
   // Seed audit log entries for surveys without any
@@ -182,14 +176,39 @@ const SurveyDetails: React.FC = () => {
         { id: 'seed-2', action: 'Published survey', actor: survey.owner, timestamp: new Date(Date.now() - 86400000 * 5).toISOString(), details: `Survey published and set to ${survey.status}` },
       ];
 
+  // Breadcrumb trail — root → survey title → tab → sub-section.
+  // Every segment except the last is clickable so users can hop back
+  // up the path without relying on browser history.
+  const TAB_LABEL: Record<DetailTab, string> = {
+    view: 'View',
+    distribute: 'Distribute',
+    responses: 'Responses',
+    edit: 'Edit settings',
+    reports: 'Reports',
+  };
+  const sectionFromUrl = searchParams.get('section');
+  const SECTION_LABEL: Record<string, string> = { expiry: 'Expiry settings' };
+  const surveyPath = `/surveys/${survey.id}`;
+  const tabHref = (tab: DetailTab) => (tab === 'view' ? surveyPath : `${surveyPath}?tab=${tab}`);
+  const crumbs: BreadcrumbItem[] = [
+    { label: 'Surveys AI', to: '/surveys' },
+    { label: survey.title, to: tabHref('view') },
+  ];
+  if (activeTab !== 'view') {
+    crumbs.push({ label: TAB_LABEL[activeTab], to: tabHref(activeTab) });
+  }
+  if (activeTab === 'edit' && sectionFromUrl && SECTION_LABEL[sectionFromUrl]) {
+    crumbs.push({ label: SECTION_LABEL[sectionFromUrl] });
+  }
+
   return (
     <div className={styles.page}>
+      {/* ── Breadcrumb (replaces the page-level back arrow) ─ */}
+      <Breadcrumb items={crumbs} />
+
       {/* ── Page header ─────────────────────────────────── */}
       <div className={styles.pageHeader}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} aria-label="Go back" onClick={() => navigate('/surveys')}>
-            <IconChevronLeft size={20} color="#424242" />
-          </button>
           <h1 className={styles.title}>{survey.title}</h1>
           <span className={`${styles.statusBadge} ${STATUS_CLASS[survey.status] ?? styles.draft}`}>
             {STATUS_LABEL[survey.status] ?? survey.status}
@@ -205,8 +224,6 @@ const SurveyDetails: React.FC = () => {
             {actionsOpen && (
               <div className={styles.actionsDropdown}>
                 <button className={styles.actionsItem} onClick={handleEdit}>Edit</button>
-                <button className={styles.actionsItem} onClick={() => { setActionsOpen(false); setActiveTab('distribute'); }}>Distribute</button>
-                <button className={styles.actionsItem}>Duplicate</button>
                 {isRunning && (
                   <button className={`${styles.actionsItem} ${styles.warnItem}`} onClick={() => { setActionsOpen(false); setCloseConfirmOpen(true); }}>
                     Close now
@@ -221,15 +238,12 @@ const SurveyDetails: React.FC = () => {
               </div>
             )}
           </div>
-          <button className={styles.filterBtn} aria-label="Filter">
-            <IconFilter size={20} color="#555" />
-          </button>
         </div>
       </div>
 
       {/* ── Tab bar ──────────────────────────────────────── */}
       <div className={styles.tabBar}>
-        {(['view', 'distribute', 'responses', 'expiry', 'reports'] as DetailTab[]).map(tab => (
+        {(['view', 'distribute', 'responses', 'edit', 'reports'] as DetailTab[]).map(tab => (
           <button
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
@@ -239,7 +253,7 @@ const SurveyDetails: React.FC = () => {
             {tab === 'reports' && (<>Reports<IconExternalLink size={14} color={activeTab === 'reports' ? '#1976d2' : '#9e9e9e'} /></>)}
             {tab === 'view' && 'View'}
             {tab === 'distribute' && 'Distribute'}
-            {tab === 'expiry' && 'Expiry Settings'}
+            {tab === 'edit' && 'Edit settings'}
           </button>
         ))}
       </div>
@@ -392,11 +406,10 @@ const SurveyDetails: React.FC = () => {
         </div>
       )}
 
-      {/* ── Expiry Settings tab ───────────────────────────── */}
-      {activeTab === 'expiry' && (
-        <ExpirySettings
+      {/* ── Edit Settings tab — landing page + sub-flows ──── */}
+      {activeTab === 'edit' && (
+        <EditSettings
           survey={survey}
-          onOpenAuditLog={() => setAuditDrawerOpen(true)}
         />
       )}
 
@@ -438,129 +451,80 @@ const SurveyDetails: React.FC = () => {
         </div>
       )}
 
-      {/* ── Audit Log Drawer ──────────────────────────────── */}
+      {/* ── Audit Log Drawer ──────────────────────────────────
+         Elemental's CommonDrawer header is replaced with a custom one
+         inside `children` so we can place the Aero back-arrow icon to
+         the left of the title (matches the Figma "Change log" pattern). */}
       <CommonDrawer
         isOpen={auditDrawerOpen}
-        title="Audit Log"
+        title=""
         onClose={() => setAuditDrawerOpen(false)}
-        width="400px"
+        width="650px"
         shouldScroll={true}
-        headerRightContent={
+        buttonPosition="right"
+      >
+        <div className={styles.auditHeader}>
           <button
             type="button"
-            className={styles.drawerCloseBtn}
+            className={styles.auditBackBtn}
             onClick={() => setAuditDrawerOpen(false)}
-            aria-label="Close audit log"
+            aria-label="Back"
           >
-            <IconChevronLeft size={20} color="#212121" />
+            <IconArrowLeft size={20} color="#1C1B1F" />
           </button>
-        }
-      >
-        <p className={styles.drawerDesc}>Track all changes to survey expiration settings</p>
+          <div className={styles.auditHeaderText}>
+            <h2 className={styles.auditTitle}>Audit Log</h2>
+            <p className={styles.drawerDesc}>Track all changes to survey expiration settings</p>
+          </div>
+        </div>
         <div className={styles.auditContent}>
-          {auditLog.map((entry, idx) => (
+          {auditLog.map((entry) => (
             <div key={entry.id} className={styles.auditItem}>
               <div className={styles.auditLeft}>
-                <div className={styles.auditDot}><IconClock size={12} color="#1976d2" /></div>
-                {idx < auditLog.length - 1 && <div className={styles.auditLine} />}
+                <div className={styles.auditDot}><IconClock size={16} color="#555555" /></div>
               </div>
               <div className={styles.auditBody}>
-                <div className={styles.auditRow}>
-                  <span className={styles.auditAction}>{entry.action}</span>
-                  <time className={styles.auditTime}>{fmtDate(entry.timestamp)}</time>
-                </div>
-                <div className={styles.auditActor}>
-                  <IconUsers size={12} color="#9e9e9e" />
-                  <span>{entry.actor}</span>
-                </div>
-                <p className={styles.auditDetails}>{entry.details}</p>
+                <span className={styles.auditAction}>
+                  <span className={styles.auditActor}>{entry.actor}</span>
+                  {` ${entry.action}`}
+                </span>
+                <time className={styles.auditTime}>{fmtDate(entry.timestamp)}</time>
               </div>
             </div>
           ))}
         </div>
       </CommonDrawer>
 
-      {/* ── Close Confirm Modal ───────────────────────────── */}
-      <Modal
-        dialogOptions={{
-          isOpen: closeConfirmOpen,
-          title: 'Close Survey Now?',
-          showCloseIcon: true,
-          customIcon: <IconAlertCircle size={20} color="#e65100" />,
-          onCloseModal: () => setCloseConfirmOpen(false),
-          shouldCloseOnOverlayClick: true,
-        }}
-        size="small"
+      {/* ── Close Confirm Dialog (Aero popup pattern) ─────── */}
+      <ConfirmDialog
+        isOpen={closeConfirmOpen}
+        title="Close this survey?"
+        onClose={() => setCloseConfirmOpen(false)}
+        primaryLabel="Close survey"
+        primaryTheme="primary"
+        onPrimary={handleCloseNow}
       >
-        <div className={styles.modalBody}>
-          <p>You are about to manually close <strong>{survey.title}</strong>.</p>
-          <div className={styles.modalWarning}>
-            <strong>Warning:</strong> All in-progress sessions will be terminated immediately.
-            Manual closure does not honor the grace period.
-            All previously-issued survey links will show the closed-survey page.
-          </div>
-          <p>You can reopen this survey later from the Actions menu. This action will be logged in the audit history.</p>
-        </div>
-        <div className={styles.modalFooter}>
-          <Button theme="secondary" label="Cancel" onClick={() => setCloseConfirmOpen(false)} />
-          <Button theme="danger" label="Close Survey" onClick={handleCloseNow} />
-        </div>
-      </Modal>
+        <p>
+          You're closing {survey.title}. All in-progress sessions will end.
+          You can reopen it later.
+        </p>
+      </ConfirmDialog>
 
-      {/* ── Reopen Dialog ────────────────────────────────── */}
-      <Modal
-        dialogOptions={{
-          isOpen: reopenDialogOpen,
-          title: 'Reopen Survey',
-          showCloseIcon: true,
-          onCloseModal: () => setReopenDialogOpen(false),
-          shouldCloseOnOverlayClick: true,
-        }}
-        size="small"
+      {/* ── Reopen Dialog (Aero popup pattern) ───────────── */}
+      <ConfirmDialog
+        isOpen={reopenDialogOpen}
+        title="Reopen this survey?"
+        onClose={() => setReopenDialogOpen(false)}
+        primaryLabel="Reopen survey"
+        onPrimary={handleReopen}
       >
-        <div className={styles.modalBody}>
-          <p>Set a new end date to reopen this survey, or leave blank to reopen with no expiration.</p>
-          {survey.expiration?.endDate && (
-            <p className={styles.modalMeta}>Previously expired: <strong>{fmtDate(survey.expiration.endDate)}</strong></p>
-          )}
-          <div className={styles.modalField}>
-            <div className={styles.modalLabelRow}>
-              <span className={styles.modalLabel}>New End Date</span>
-              <Tooltip text="Leave empty to reopen without setting a new expiration" position="right" hideOnScroll>
-                <button type="button" className={styles.modalInfoBtn} aria-label="New End Date info">
-                  <IconInfo size={14} />
-                </button>
-              </Tooltip>
-            </div>
-            <DatePicker
-              name="reopenEndDate"
-              startDt={reopenEndDate || undefined}
-              range={false}
-              showTimePicker
-              disablePastDates
-              enableFutureDates
-              showApplyButtons={false}
-              inlineApplyButtonTrigger
-              sendDateTime={(startDt) => {
-                if (!startDt) {
-                  setReopenEndDate('');
-                  return;
-                }
-                const parsed = new Date(startDt);
-                setReopenEndDate(Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString());
-              }}
-            />
-          </div>
-          <div className={styles.modalNote}>
-            All previously-issued distribution links will resume working immediately.
-            This action will be logged in the audit history.
-          </div>
-        </div>
-        <div className={styles.modalFooter}>
-          <Button theme="secondary" label="Cancel" onClick={() => setReopenDialogOpen(false)} />
-          <Button theme="primary" label="Reopen Survey" onClick={handleReopen} />
-        </div>
-      </Modal>
+        {survey.expiration?.endDate && (
+          <p className={styles.modalMeta}>Previously expired: <strong>{fmtDate(survey.expiration.endDate)}</strong></p>
+        )}
+        <p className={styles.modalMeta}>
+          Previously-issued links resume immediately. We'll log this change.
+        </p>
+      </ConfirmDialog>
 
     </div>
   );

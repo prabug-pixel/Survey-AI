@@ -36,6 +36,14 @@ export const IconStar: React.FC<IconProps> = ({ size = 20, color = 'currentColor
   </svg>
 );
 
+// Solid star — used for review ratings where the gold star reads as a
+// fill, not an outline. Mirrors Material's `star` icon (24×24 grid).
+export const IconStarFilled: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className={className}>
+    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
+  </svg>
+);
+
 export const IconCalendar: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
     <rect x="3" y="4" width="18" height="17" rx="2" stroke={color} strokeWidth="1.5" />
@@ -83,6 +91,20 @@ export const IconSettings: React.FC<IconProps> = ({ size = 20, color = 'currentC
 export const IconChevronLeft: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
     <path d="M15 18l-6-6 6-6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const IconChevronRight: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M9 6l6 6-6 6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// Aero back-navigation arrow — solid arrow with horizontal line.
+// Use this for any "go back to the previous screen" affordance.
+export const IconArrowLeft: React.FC<IconProps> = ({ size = 20, color = '#1C1B1F', className }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+    <path d="M5.98854 10.6248L8.73215 13.3684C8.85608 13.4923 8.91724 13.6373 8.91565 13.8035C8.91403 13.9696 8.85287 14.1173 8.73215 14.2466C8.60288 14.3758 8.45438 14.4426 8.28665 14.4469C8.11892 14.4512 7.97042 14.3887 7.84115 14.2594L4.10877 10.527C3.95813 10.3764 3.88281 10.2006 3.88281 9.99978C3.88281 9.79893 3.95813 9.62318 4.10877 9.47255L7.84115 5.74017C7.96508 5.61624 8.11224 5.55507 8.28265 5.55667C8.45305 5.55828 8.60288 5.62372 8.73215 5.75298C8.85287 5.88226 8.91537 6.02863 8.91965 6.19209C8.92392 6.35555 8.86142 6.50191 8.73215 6.63117L5.98854 9.3748H15.7931C15.9704 9.3748 16.1189 9.43462 16.2386 9.55428C16.3582 9.67393 16.418 9.82243 16.418 9.99978C16.418 10.1771 16.3582 10.3256 16.2386 10.4453C16.1189 10.5649 15.9704 10.6248 15.7931 10.6248H5.98854Z" fill={color} />
   </svg>
 );
 
@@ -165,10 +187,11 @@ export const IconEye: React.FC<IconProps> = ({ size = 20, color = 'currentColor'
   </svg>
 );
 
+// Aero "Campaigns" glyph — speaker/megaphone with sound waves.
+// Used for the Survey campaigns row in the Distribute tab.
 export const IconSend: React.FC<IconProps> = ({ size = 18, color = 'currentColor', className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M22 2L11 13" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M22 2l-7 20-4-9-9-4 20-7z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className}>
+    <path d="M17.1066 10.5425H15.514C15.3608 10.5425 15.2313 10.4911 15.1256 10.3882C15.0198 10.2854 14.9669 10.1577 14.9669 10.0052C14.9669 9.85274 15.0186 9.72361 15.1219 9.61785C15.2253 9.51208 15.3535 9.4592 15.5068 9.4592H17.0993C17.2525 9.4592 17.382 9.51062 17.4878 9.61345C17.5935 9.7163 17.6464 9.84397 17.6464 9.99645C17.6464 10.149 17.5947 10.2781 17.4914 10.3838C17.3881 10.4896 17.2598 10.5425 17.1066 10.5425ZM13.8884 14.0954C13.9814 13.9768 14.1005 13.9028 14.2458 13.8735C14.3911 13.8441 14.523 13.8689 14.6416 13.948L15.9445 14.8489C16.0759 14.9342 16.1563 15.0564 16.1857 15.2156C16.215 15.3748 16.1833 15.5137 16.0903 15.6322C15.9974 15.7508 15.8783 15.8248 15.733 15.8542C15.5877 15.8836 15.4557 15.8587 15.3371 15.7797L14.0342 14.8787C13.9028 14.7935 13.8224 14.6712 13.7931 14.5121C13.7637 14.3529 13.7955 14.214 13.8884 14.0954ZM15.9108 5.09058L14.5887 6.02168C14.4701 6.10074 14.3347 6.12211 14.1825 6.08579C14.0302 6.04945 13.9146 5.97199 13.8355 5.85341C13.7565 5.73483 13.7316 5.59942 13.761 5.44718C13.7904 5.29495 13.8644 5.17929 13.983 5.10022L15.3051 4.18997C15.4237 4.11092 15.5591 4.08608 15.7113 4.11545C15.8635 4.14483 15.9792 4.21881 16.0582 4.33741C16.1373 4.456 16.1621 4.5914 16.1328 4.74364C16.1034 4.89588 16.0294 5.01152 15.9108 5.09058ZM4.20733 11.6483H3.69129C3.32154 11.6483 3.00581 11.5174 2.7441 11.2557C2.48241 10.994 2.35156 10.6783 2.35156 10.3085V9.69316C2.35156 9.32341 2.48241 9.00768 2.7441 8.74597C3.00581 8.48428 3.32154 8.35343 3.69129 8.35343H6.47494L9.6496 6.49127C9.8729 6.35452 10.0948 6.34624 10.3155 6.46643C10.5361 6.58663 10.6464 6.77653 10.6464 7.03614V12.9447C10.6464 13.2043 10.5326 13.3942 10.305 13.5144C10.0775 13.6346 9.85206 13.6263 9.62877 13.4896L6.59994 11.6483H5.79062V14.7692C5.79062 14.9931 5.71483 15.1822 5.56323 15.3366C5.41163 15.4909 5.22355 15.5681 4.99898 15.5681C4.77441 15.5681 4.58633 15.4923 4.43473 15.3407C4.28313 15.1891 4.20733 15.001 4.20733 14.7765V11.6483ZM9.56308 12.1755V7.78449L6.77942 9.43674H3.69129C3.62719 9.43674 3.56843 9.46345 3.515 9.51687C3.46158 9.5703 3.43488 9.62906 3.43488 9.69316V10.3085C3.43488 10.3726 3.46158 10.4314 3.515 10.4848C3.56843 10.5382 3.62719 10.565 3.69129 10.565H6.92525L9.56308 12.1755ZM11.9669 12.246V7.75566C12.2383 8.02383 12.4461 8.35849 12.5903 8.75966C12.7345 9.16084 12.8067 9.57457 12.8067 10.0008C12.8067 10.4271 12.7345 10.8409 12.5903 11.242C12.4461 11.6432 12.2383 11.9779 11.9669 12.246Z" fill={color} />
   </svg>
 );
 
@@ -178,10 +201,11 @@ export const IconAttach: React.FC<IconProps> = ({ size = 18, color = 'currentCol
   </svg>
 );
 
+// Aero "Code blocks" glyph — code brackets inside a card.
+// Used for the Embed on website row in the Distribute tab.
 export const IconCode: React.FC<IconProps> = ({ size = 18, color = 'currentColor', className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <polyline points="16,18 22,12 16,6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <polyline points="8,6 2,12 8,18" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className}>
+    <path d="M7.95318 12.6404L8.70755 11.8818L6.82505 9.99935L8.69089 8.13352L7.9313 7.37497L5.31214 9.99935L7.95318 12.6404ZM12.0546 12.6404L14.6905 9.99935L12.0546 7.35831L11.2951 8.11685L13.1776 9.99935L11.2951 11.8818L12.0546 12.6404ZM4.22151 17.0827C3.86332 17.0827 3.55651 16.955 3.30109 16.6996C3.04568 16.4441 2.91797 16.1373 2.91797 15.7791V4.21956C2.91797 3.86136 3.04568 3.55456 3.30109 3.29914C3.55651 3.04372 3.86332 2.91602 4.22151 2.91602H15.7811C16.1393 2.91602 16.4461 3.04372 16.7015 3.29914C16.9569 3.55456 17.0846 3.86136 17.0846 4.21956V15.7791C17.0846 16.1373 16.9569 16.4441 16.7015 16.6996C16.4461 16.955 16.1393 17.0827 15.7811 17.0827H4.22151ZM4.22151 16.0356H15.7811C15.8453 16.0356 15.9041 16.0089 15.9576 15.9556C16.0109 15.9021 16.0376 15.8433 16.0376 15.7791V4.21956C16.0376 4.15539 16.0109 4.09657 15.9576 4.0431C15.9041 3.98977 15.8453 3.9631 15.7811 3.9631H4.22151C4.15734 3.9631 4.09852 3.98977 4.04505 4.0431C3.99172 4.09657 3.96505 4.15539 3.96505 4.21956V15.7791C3.96505 15.8433 3.99172 15.9021 4.04505 15.9556C4.09852 16.0089 4.15734 16.0356 4.22151 16.0356Z" fill={color} />
   </svg>
 );
 
@@ -318,14 +342,21 @@ export const IconPlusCircle: React.FC<IconProps> = ({ size = 20, color = '#1976d
 
 export const IconFilter: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M3 7h18M6 12h12M9 17h6"
+      stroke={color}
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
+// Aero "Link" glyph — chain link with a connector bar.
+// Used for the Survey link row in the Distribute tab.
 export const IconLink: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className}>
+    <path d="M6.03334 13.6155C5.03309 13.6155 4.18047 13.2626 3.47547 12.5567C2.77047 11.8509 2.41797 10.9973 2.41797 9.99587C2.41797 8.99444 2.77047 8.14223 3.47547 7.43924C4.18047 6.73626 5.03309 6.38477 6.03334 6.38477H8.29937C8.45284 6.38477 8.58148 6.43628 8.68528 6.53931C8.7891 6.64233 8.84101 6.77 8.84101 6.92231C8.84101 7.07461 8.7891 7.20365 8.68528 7.30941C8.58148 7.41518 8.45284 7.46806 8.29937 7.46806H6.03239C5.33323 7.46806 4.73659 7.71512 4.24247 8.20925C3.74834 8.70337 3.50128 9.30033 3.50128 10.0001C3.50128 10.6999 3.74834 11.2969 4.24247 11.791C4.73659 12.2851 5.33323 12.5322 6.03239 12.5322H8.29937C8.45284 12.5322 8.58148 12.5837 8.68528 12.6867C8.7891 12.7898 8.84101 12.9174 8.84101 13.0697C8.84101 13.222 8.7891 13.3511 8.68528 13.4568C8.58148 13.5626 8.45284 13.6155 8.29937 13.6155H6.03334ZM7.75718 10.5418C7.60394 10.5418 7.47438 10.4903 7.36849 10.3872C7.26259 10.2842 7.20964 10.1565 7.20964 10.0042C7.20964 9.85192 7.26146 9.72288 7.36511 9.61712C7.46877 9.51136 7.59721 9.45847 7.75045 9.45847H12.2454C12.3986 9.45847 12.5282 9.50999 12.6341 9.61302C12.74 9.71604 12.7929 9.84371 12.7929 9.99602C12.7929 10.1483 12.7411 10.2774 12.6374 10.3831C12.5338 10.4889 12.4054 10.5418 12.2521 10.5418H7.75718ZM11.7032 13.6155C11.5497 13.6155 11.4211 13.564 11.3173 13.4609C11.2135 13.3579 11.1616 13.2302 11.1616 13.0779C11.1616 12.9256 11.2135 12.7966 11.3173 12.6908C11.4211 12.5851 11.5497 12.5322 11.7032 12.5322H13.9702C14.6693 12.5322 15.266 12.2851 15.7601 11.791C16.2542 11.2969 16.5013 10.6999 16.5013 10.0001C16.5013 9.30033 16.2542 8.70337 15.7601 8.20925C15.266 7.71512 14.6693 7.46806 13.9702 7.46806H11.7032C11.5497 7.46806 11.4211 7.41654 11.3173 7.31352C11.2135 7.21049 11.1616 7.08282 11.1616 6.93052C11.1616 6.77821 11.2135 6.64918 11.3173 6.54341C11.4211 6.43765 11.5497 6.38477 11.7032 6.38477H13.9692C14.9695 6.38477 15.8221 6.73767 16.5271 7.44349C17.2321 8.14933 17.5846 9.00295 17.5846 10.0044C17.5846 11.0058 17.2321 11.858 16.5271 12.561C15.8221 13.264 14.9695 13.6155 13.9692 13.6155H11.7032Z" fill={color} />
   </svg>
 );
 
@@ -352,12 +383,61 @@ export const IconAlertCircle: React.FC<IconProps> = ({ size = 20, color = 'curre
   </svg>
 );
 
+// Aero warning triangle — outlined, used in slim warning banners.
+export const IconWarning: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 3.5L21.25 19a1 1 0 01-.866 1.5H3.616A1 1 0 012.75 19L12 3.5z" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+    <line x1="12" y1="10" x2="12" y2="14" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="12" cy="17" r="1" fill={color} />
+  </svg>
+);
+
 export const IconBarChart: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
     <line x1="18" y1="20" x2="18" y2="10" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
     <line x1="12" y1="20" x2="12" y2="4" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
     <line x1="6" y1="20" x2="6" y2="14" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
     <line x1="2" y1="20" x2="22" y2="20" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+export const IconMail: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="3" y="5" width="18" height="14" rx="2" stroke={color} strokeWidth="1.5" />
+    <path d="M3 7l9 6 9-6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const IconPhone: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// Customize / filter-list icon — used in chart widget headers
+// (matches the Aero "Customize" glyph supplied via Figma export).
+export const IconCustomize: React.FC<IconProps> = ({ size = 16, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+    <path d="M2 11.3333V12.6667H6V11.3333H2ZM2 3.33333V4.66667H8.66667V3.33333H2ZM8.66667 14V12.6667H14V11.3333H8.66667V10H7.33333V14H8.66667ZM4.66667 6V7.33333H2V8.66667H4.66667V10H6V6H4.66667ZM14 8.66667V7.33333H7.33333V8.66667H14ZM10 6H11.3333V4.66667H14V3.33333H11.3333V2H10V6Z" fill={color} />
+  </svg>
+);
+
+// Vertical 3-dot "more" / overflow menu icon — used alongside
+// IconCustomize in chart widget headers.
+export const IconMoreVertical: React.FC<IconProps> = ({ size = 16, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true">
+    <path fillRule="evenodd" clipRule="evenodd" d="M6.75781 3.61816C6.75781 4.30371 7.32031 4.87207 8 4.87207C8.69727 4.87207 9.24219 4.32129 9.24219 3.61816C9.24219 2.92676 8.68555 2.37012 8 2.37012C7.32031 2.37012 6.75781 2.92676 6.75781 3.61816ZM6.75781 7.99512C6.75781 8.6748 7.32031 9.23145 8 9.23145C8.69727 9.23145 9.24219 8.68652 9.24219 7.99512C9.24219 7.30957 8.68555 6.75293 8 6.75293C7.32031 6.75293 6.75781 7.30957 6.75781 7.99512ZM8 13.6201C7.32031 13.6201 6.75781 13.0518 6.75781 12.3721C6.75781 11.6748 7.32031 11.1182 8 11.1182C8.68555 11.1182 9.24219 11.6748 9.24219 12.3721C9.24219 13.0693 8.69727 13.6201 8 13.6201Z" fill={color} />
+  </svg>
+);
+
+export const IconViewWeek: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <mask id="mask0_vw" style={{maskType:'alpha'}} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <rect width="24" height="24" fill="#D9D9D9"/>
+    </mask>
+    <g mask="url(#mask0_vw)">
+      <path d="M4.6155 18H8.673V6H4.6155C4.436 6 4.2885 6.05767 4.173 6.173C4.05767 6.2885 4 6.436 4 6.6155V17.3845C4 17.564 4.05767 17.7115 4.173 17.827C4.2885 17.9423 4.436 18 4.6155 18ZM9.673 18H14.327V6H9.673V18ZM15.327 18H19.3845C19.564 18 19.7115 17.9423 19.827 17.827C19.9423 17.7115 20 17.564 20 17.3845V6.6155C20 6.436 19.9423 6.2885 19.827 6.173C19.7115 6.05767 19.564 6 19.3845 6H15.327V18ZM4.6155 19C4.15517 19 3.77083 18.8458 3.4625 18.5375C3.15417 18.2292 3 17.8448 3 17.3845V6.6155C3 6.15517 3.15417 5.77083 3.4625 5.4625C3.77083 5.15417 4.15517 5 4.6155 5H19.3845C19.8448 5 20.2292 5.15417 20.5375 5.4625C20.8458 5.77083 21 6.15517 21 6.6155V17.3845C21 17.8448 20.8458 18.2292 20.5375 18.5375C20.2292 18.8458 19.8448 19 19.3845 19H4.6155Z" fill={color}/>
+    </g>
   </svg>
 );
 

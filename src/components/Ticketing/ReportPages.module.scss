@@ -1,0 +1,195 @@
+// ============================================================
+// Shared chrome for Ticketing > Reports report pages
+// (Ticket Resolution Time + Ticket Count). Card spacing, range
+// chip, headline metric, and table-total row all follow the
+// Aero Design System chart frames.
+// ============================================================
+@use '../../styles/variables' as *;
+
+$aero-bg-soft:   #f5f6f8;
+$aero-card-bg:   $color-white;
+$aero-border:    #eaeaea;
+
+// The Ticketing area mounts inside <main> which gives us a height-
+// constrained, overflow:hidden parent. To get a scrollable report
+// stack we need flex:1 + min-height:0 + overflow-y:auto here.
+.page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $spacing-24;
+  background: $aero-bg-soft;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $spacing-4 $spacing-8;
+  flex-shrink: 0;
+}
+
+// Figma frame title — 14px semibold per Aero spec.
+.pageTitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: #212121;
+  margin: 0;
+  letter-spacing: -0.28px;
+}
+
+// ── Report card ────────────────────────────────────────────
+// Card sizing mirrors the Figma chart frame (1156 × 582). The
+// outer page enforces a fixed min-height per card so the bar
+// chart inside has room to breathe at the Figma proportions.
+.reportCard {
+  background: $aero-card-bg;
+  border: 1px solid $aero-border;
+  border-radius: $radius-lg;
+  padding: $spacing-20 $spacing-24;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+  flex-shrink: 0;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-12;
+}
+
+// Figma: card "Title" = 14 px, Inter SemiBold / #212121.
+.cardTitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: #212121;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  letter-spacing: -0.28px;
+  line-height: 1.4;
+}
+
+.cardBadge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: $color-gray-600;
+  background: $color-gray-100;
+  padding: 2px 6px;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+}
+
+.rangeChip {
+  height: 28px;
+  padding: 0 $spacing-12;
+  border: 1px solid $aero-border;
+  border-radius: $radius-sm;
+  background: $color-white;
+  font-size: 11px;
+  color: #212121;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-4;
+
+  &:hover { background: $color-gray-50; }
+}
+
+// ── Chart widget header actions ─────────────────────────────
+// Aero spec: range chip + a customize button + an overflow ("more")
+// button, all 28 × 28 with a 4 px corner radius and a 1 px border.
+// Buttons sit right of the range chip with an 8 px gap.
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-8;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $aero-border;
+  border-radius: $radius-sm;
+  background: $color-white;
+  color: #212121;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 120ms ease, border-color 120ms ease;
+
+  &:hover { background: $color-gray-50; }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary, #1976d2);
+    outline-offset: 1px;
+  }
+}
+
+// ── Headline metric row ─────────────────────────────────────
+// Figma headline metric: value "100" 16 px Bold, label 11 px Regular
+// stacked underneath, then horizontal items separated by 24 px.
+.headlineRow {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: $spacing-24;
+}
+
+.headlineItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.headlineValue {
+  font-size: 18px;
+  font-weight: 400;
+  color: #212121;
+  letter-spacing: -0.32px;
+  line-height: 1.2;
+}
+
+.headlineLabel {
+  font-size: 12px;
+  font-weight: 400;
+  color: #555;
+  letter-spacing: -0.22px;
+  line-height: 1.3;
+}
+
+// ── Chart area ──────────────────────────────────────────────
+// Bars render at natural pixel width (no aspect-ratio scaling).
+// Cards that exceed the viewport width scroll horizontally within
+// the card instead of squishing the bars.
+.chartArea {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-thumb {
+    background: $color-gray-300;
+    border-radius: $radius-full;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
+}
+
+.dateCell {
+  color: #212121;
+  font-weight: 400;
+}

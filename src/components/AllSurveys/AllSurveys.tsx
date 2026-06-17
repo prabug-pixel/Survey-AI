@@ -78,6 +78,11 @@ const AllSurveys: React.FC = () => {
     setOpenMenuId(null);
   };
 
+  const handleReopen = (survey: SavedSurvey) => {
+    setOpenMenuId(null);
+    dispatch(surveyActions.reopenSurvey({ surveyId: survey.id, actor: survey.owner }));
+  };
+
   const SortIcon: React.FC<{ col: SortKey }> = ({ col }) => {
     if (sortKey !== col) return <IconChevronDown size={16} color="#9e9e9e" />;
     return sortDir === 'asc'
@@ -136,7 +141,7 @@ const AllSurveys: React.FC = () => {
               {/* Status */}
               <div className={`${styles.cell} ${styles.statusCol}`}>
                 <span className={`${styles.badge} ${styles[survey.status]}`}>
-                  {{ running: 'Running', draft: 'Draft', expiring_soon: 'Expiring Soon', expired: 'Expired' }[survey.status] ?? survey.status}
+                  {{ published: 'Published', draft: 'Draft', expiring_soon: 'Published', expired: 'Expired' }[survey.status] ?? survey.status}
                 </span>
               </div>
 
@@ -174,6 +179,11 @@ const AllSurveys: React.FC = () => {
                         <button className={styles.dropdownItem} onClick={() => handleEdit(survey)}>Edit</button>
                         <button className={styles.dropdownItem}>Distribute</button>
                         <button className={styles.dropdownItem}>Duplicate</button>
+                        {survey.status === 'expired' && (
+                          <button className={styles.dropdownItem} onClick={() => handleReopen(survey)}>
+                            Reopen
+                          </button>
+                        )}
                         <button className={styles.dropdownItem}>
                           View reports
                           <IconExternalLink size={16} color="#555" />
@@ -194,7 +204,7 @@ const AllSurveys: React.FC = () => {
 
           {sorted.length === 0 && (
             <div className={styles.emptyState}>
-              No surveys yet. Click <strong>Create survey</strong> to get started.
+              No surveys yet. Select <strong>Create survey</strong> to start.
             </div>
           )}
         </div>
