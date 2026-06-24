@@ -7,9 +7,10 @@ import styles from './ReadOnlyQuestion.module.scss';
 
 interface Props {
   question: Question;
+  answer?: string | number | string[];
 }
 
-const ReadOnlyQuestion: React.FC<Props> = ({ question }) => {
+const ReadOnlyQuestion: React.FC<Props> = ({ question, answer }) => {
   if (question.type === 'page_break') {
     return <hr className={styles.pageBreak} />;
   }
@@ -70,6 +71,7 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question }) => {
             lowLabel={question.ratingConfig.highLabel}
             highLabel={question.ratingConfig.lowLabel}
             startFromZero
+            selectedValue={typeof answer === 'number' ? answer : null}
             disabled
           />
         </div>
@@ -81,6 +83,7 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question }) => {
             scale={question.ratingConfig.scale}
             lowLabel={question.ratingConfig.lowLabel}
             highLabel={question.ratingConfig.highLabel}
+            selectedValue={typeof answer === 'number' ? answer : null}
             disabled
           />
         </div>
@@ -94,6 +97,7 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question }) => {
               label={choice.label}
               name={`ro-${question.id}`}
               value={choice.id}
+              checked={answer === choice.id}
               disabled
             />
           ))}

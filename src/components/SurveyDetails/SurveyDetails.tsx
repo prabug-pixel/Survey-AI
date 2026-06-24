@@ -9,6 +9,8 @@ import {
   IconArrowLeft,
   IconChevronDown,
   IconChevronUp,
+  IconChevronLeft,
+  IconChevronRight,
   IconExternalLink,
   IconMoreVert,
   IconLink,
@@ -28,9 +30,24 @@ type SortKey = keyof Pick<SurveyResponse, 'score' | 'contactName' | 'location' |
 type SortDir = 'asc' | 'desc';
 
 const MOCK_RESPONSES: SurveyResponse[] = [
-  { id: '1', score: 9.0, contactName: 'Prabu', location: 'Central style, California', respondedOn: 'Mar 10, 2026' },
-  { id: '2', score: 8.0, contactName: 'Rupa', location: '120, Kenal Road, California', respondedOn: 'Mar 10, 2026' },
-  { id: '3', score: 2.0, contactName: 'Raynil kumar', location: '30, Christed Alford, California', respondedOn: 'Mar 10, 2026' },
+  {
+    id: '1', score: 9.0, contactName: 'Prabu', location: 'Central style, California', respondedOn: 'Mar 10, 2026',
+    contactEmail: 'prabu@example.com', contactPhone: '+1 (555) 123-4567', surveySentOn: 'Mar 9, 2026',
+    completionStatus: 'Fully completed', assistedBy: '-',
+    answers: [{ questionId: 'q1', value: 9 }, { questionId: 'q2', value: 'choice-1' }],
+  },
+  {
+    id: '2', score: 8.0, contactName: 'Rupa', location: '120, Kenal Road, California', respondedOn: 'Mar 10, 2026',
+    contactEmail: '-', contactPhone: '-', surveySentOn: 'Mar 9, 2026',
+    completionStatus: 'Fully completed', assistedBy: '-',
+    answers: [{ questionId: 'q1', value: 8 }, { questionId: 'q2', value: 'choice-0' }],
+  },
+  {
+    id: '3', score: 2.0, contactName: 'Raynil kumar', location: '30, Christed Alford, California', respondedOn: 'Mar 10, 2026',
+    contactEmail: '-', contactPhone: '-', surveySentOn: 'Mar 9, 2026',
+    completionStatus: 'Partially completed', assistedBy: '-',
+    answers: [{ questionId: 'q1', value: 2 }],
+  },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -84,6 +101,9 @@ const SurveyDetails: React.FC = () => {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [selectedResponseId, setSelectedResponseId] = useState<string | null>(null);
+  const [detailMenuOpen, setDetailMenuOpen] = useState(false);
+  const [generatedAnswers, setGeneratedAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
 
   // Distribute accordion
   const [distributeExpanded, setDistributeExpanded] = useState({
@@ -97,10 +117,12 @@ const SurveyDetails: React.FC = () => {
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
 
   const rowMenuRef = useRef<HTMLDivElement>(null);
+  const detailMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (rowMenuRef.current && !rowMenuRef.current.contains(e.target as Node)) setOpenMenuId(null);
+      if (detailMenuRef.current && !detailMenuRef.current.contains(e.target as Node)) setDetailMenuOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -124,6 +146,31 @@ const SurveyDetails: React.FC = () => {
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
     else { setSortKey(key); setSortDir(key === 'score' ? 'desc' : 'asc'); }
+  };
+
+  const openResponseDetail = (id: string) => {
+    const answers = allQuestions
+      .filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text', 'contact_info', 'location'].includes(q.type))
+      .map(q => {
+        let value: string | number | string[];
+        if (q.type === 'nps' && q.ratingConfig) {
+          value = Math.floor(Math.random() * 11); // 0–10
+        } else if (q.type === 'rating' && q.ratingConfig) {
+          value = Math.floor(Math.random() * q.ratingConfig.scale) + 1;
+        } else if ((q.type === 'multiple_choice' || q.type === 'dropdown') && q.choices?.length) {
+          value = q.choices[Math.floor(Math.random() * q.choices.length)].id;
+        } else if (q.type === 'checkboxes' && q.choices?.length) {
+          const shuffled = [...q.choices].sort(() => Math.random() - 0.5);
+          value = shuffled.slice(0, Math.floor(Math.random() * 2) + 1).map(c => c.id);
+        } else if (q.type === 'review_collector') {
+          value = Math.floor(Math.random() * 5) + 1;
+        } else {
+          value = '';
+        }
+        return { questionId: q.id, value };
+      });
+    setGeneratedAnswers(answers);
+    setSelectedResponseId(id);
   };
 
   const sorted = [...MOCK_RESPONSES].sort((a, b) => {
@@ -176,15 +223,25 @@ const SurveyDetails: React.FC = () => {
   const SECTION_LABEL: Record<string, string> = { expiry: 'Expiry settings' };
   const surveyPath = `/surveys/${survey.id}`;
   const tabHref = (tab: DetailTab) => (tab === 'view' ? surveyPath : `${surveyPath}?tab=${tab}`);
+  const selectedResponse = MOCK_RESPONSES.find(r => r.id === selectedResponseId) ?? null;
+
   const crumbs: BreadcrumbItem[] = [
     { label: 'Surveys AI', to: '/surveys' },
     { label: survey.title, to: tabHref('view') },
   ];
   if (activeTab !== 'view') {
-    crumbs.push({ label: TAB_LABEL[activeTab], to: tabHref(activeTab) });
+    const isResponseDetail = activeTab === 'responses' && !!selectedResponseId;
+    crumbs.push(
+      isResponseDetail
+        ? { label: TAB_LABEL[activeTab], onClick: () => setSelectedResponseId(null) }
+        : { label: TAB_LABEL[activeTab], to: tabHref(activeTab) }
+    );
   }
   if (activeTab === 'edit' && sectionFromUrl && SECTION_LABEL[sectionFromUrl]) {
     crumbs.push({ label: SECTION_LABEL[sectionFromUrl] });
+  }
+  if (activeTab === 'responses' && selectedResponse) {
+    crumbs.push({ label: selectedResponse.contactName });
   }
 
   return (
@@ -216,7 +273,7 @@ const SurveyDetails: React.FC = () => {
       </div>
 
       {/* ── Tab bar ──────────────────────────────────────── */}
-      <div className={styles.tabBar}>
+      {!(activeTab === 'responses' && selectedResponseId) && <div className={styles.tabBar}>
         {(['view', 'distribute', 'responses', 'edit', 'reports'] as DetailTab[]).map(tab => (
           <button
             key={tab}
@@ -230,7 +287,7 @@ const SurveyDetails: React.FC = () => {
             {tab === 'edit' && 'Settings'}
           </button>
         ))}
-      </div>
+      </div>}
 
       {/* ── View tab ─────────────────────────────────────── */}
       {activeTab === 'view' && (
@@ -324,7 +381,7 @@ const SurveyDetails: React.FC = () => {
       )}
 
       {/* ── Responses tab ────────────────────────────────── */}
-      {activeTab === 'responses' && (
+      {activeTab === 'responses' && !selectedResponseId && (
         <div className={styles.tableWrapper}>
           <div className={styles.table}>
             <div className={styles.headerRow}>
@@ -349,6 +406,8 @@ const SurveyDetails: React.FC = () => {
               <div
                 key={response.id}
                 className={`${styles.row} ${hoveredId === response.id ? styles.rowHover : ''}`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => openResponseDetail(response.id)}
                 onMouseEnter={() => setHoveredId(response.id)}
                 onMouseLeave={() => { setHoveredId(null); if (openMenuId === response.id) setOpenMenuId(null); }}
               >
@@ -359,15 +418,18 @@ const SurveyDetails: React.FC = () => {
                 <div className={`${styles.cell} ${styles.actionsCol}`}>
                   {hoveredId === response.id && (
                     <div className={styles.moreContainer} ref={openMenuId === response.id ? rowMenuRef : undefined}>
-                      <button className={styles.moreBtn} onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === response.id ? null : response.id); }}>
+                      <button
+                        className={styles.moreBtn}
+                        onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === response.id ? null : response.id); }}
+                      >
                         <IconMoreVert size={16} color="#555" />
                       </button>
                       {openMenuId === response.id && (
                         <div className={styles.dropdown}>
-                          <button className={styles.dropdownItem}>View survey response</button>
-                          <button className={styles.dropdownItem}>Message contact</button>
-                          <button className={styles.dropdownItem}>Create ticket</button>
-                          <button className={`${styles.dropdownItem} ${styles.deleteItem}`}>Delete</button>
+                          <button className={styles.dropdownItem} onClick={e => { e.stopPropagation(); openResponseDetail(response.id); setOpenMenuId(null); }}>View survey response</button>
+                          <button className={styles.dropdownItem} onClick={e => e.stopPropagation()}>Message contact</button>
+                          <button className={styles.dropdownItem} onClick={e => e.stopPropagation()}>Create ticket</button>
+                          <button className={`${styles.dropdownItem} ${styles.deleteItem}`} onClick={e => e.stopPropagation()}>Delete</button>
                         </div>
                       )}
                     </div>
@@ -379,6 +441,99 @@ const SurveyDetails: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ── Response detail view ─────────────────────────── */}
+      {activeTab === 'responses' && selectedResponse && (() => {
+        const currentIdx = sorted.findIndex(r => r.id === selectedResponse.id);
+        const prevResponse = currentIdx > 0 ? sorted[currentIdx - 1] : null;
+        const nextResponse = currentIdx < sorted.length - 1 ? sorted[currentIdx + 1] : null;
+
+        return (
+          <div className={styles.responseDetail}>
+            {/* Detail header */}
+            <div className={styles.responseDetailHeader}>
+              <div className={styles.responseDetailLeft}>
+                <span className={styles.responseDetailName}>{selectedResponse.contactName}</span>
+                <span className={`${styles.responseDetailScore} ${selectedResponse.score >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
+                  Overall score:&nbsp;{selectedResponse.score.toFixed(1)}
+                </span>
+              </div>
+              <div className={styles.responseDetailRight}>
+                <div className={styles.moreContainer} ref={detailMenuRef}>
+                  <button className={styles.moreBtn} onClick={() => setDetailMenuOpen(o => !o)}>
+                    <IconMoreVert size={16} color="#555" />
+                  </button>
+                  {detailMenuOpen && (
+                    <div className={styles.dropdown}>
+                      <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
+                      <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
+                    </div>
+                  )}
+                </div>
+                <button className={styles.actionsBtn}>Ticket response</button>
+                <button
+                  className={styles.moreBtn}
+                  disabled={!prevResponse}
+                  onClick={() => prevResponse && openResponseDetail(prevResponse.id)}
+                  title="Previous response"
+                >
+                  <IconChevronLeft size={16} color={prevResponse ? '#555' : '#ccc'} />
+                </button>
+                <button
+                  className={styles.moreBtn}
+                  disabled={!nextResponse}
+                  onClick={() => nextResponse && openResponseDetail(nextResponse.id)}
+                  title="Next response"
+                >
+                  <IconChevronRight size={16} color={nextResponse ? '#555' : '#ccc'} />
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable body */}
+            <div className={styles.responseDetailBody}>
+              {/* Contact information card */}
+              <p className={styles.responseSection}>CONTACT INFORMATION</p>
+              <div className={styles.responseContactCard}>
+                {[
+                  { label: 'Contact email', value: selectedResponse.contactEmail ?? '-' },
+                  { label: 'Contact phone', value: selectedResponse.contactPhone ?? '-' },
+                  { label: 'Survey sent on', value: selectedResponse.surveySentOn ?? '-' },
+                  { label: 'Location', value: selectedResponse.location },
+                  { label: 'Completion Status', value: selectedResponse.completionStatus ?? '-' },
+                  { label: 'Responded on', value: selectedResponse.respondedOn },
+                  { label: 'Assisted by', value: selectedResponse.assistedBy ?? '-' },
+                ].map(({ label, value }) => (
+                  <div key={label} className={styles.responseContactField}>
+                    <span className={styles.responseContactLabel}>{label}</span>
+                    <span className={styles.responseContactValue}>{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Survey responses */}
+              <p className={styles.responseSection}>SURVEY RESPONSE</p>
+              <div className={styles.responseQuestions}>
+                {allQuestions
+                  .filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text'].includes(q.type))
+                  .map(q => {
+                    const ans = generatedAnswers.find(a => a.questionId === q.id);
+                    return (
+                      <ReadOnlyQuestion
+                        key={q.id}
+                        question={q}
+                        answer={ans?.value}
+                      />
+                    );
+                  })}
+                {allQuestions.filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text'].includes(q.type)).length === 0 && (
+                  <p className={styles.emptyState}>No questions in this survey.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Edit Settings tab — landing page + sub-flows ──── */}
       {activeTab === 'edit' && (
