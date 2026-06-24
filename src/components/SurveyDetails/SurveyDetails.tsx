@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SurveyResponse } from '../../types/survey.types';
+import type { EditedResponseEntry } from '../../store/surveySlice';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
 import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
 import {
@@ -104,6 +105,10 @@ const SurveyDetails: React.FC = () => {
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(null);
   const [detailMenuOpen, setDetailMenuOpen] = useState(false);
   const [generatedAnswers, setGeneratedAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+
+  const editedResponses = useAppSelector(s => s.survey.editedResponses);
 
   // Distribute accordion
   const [distributeExpanded, setDistributeExpanded] = useState({
@@ -148,13 +153,35 @@ const SurveyDetails: React.FC = () => {
     else { setSortKey(key); setSortDir(key === 'score' ? 'desc' : 'asc'); }
   };
 
+  const computeScore = (answers: Array<{ questionId: string; value: string | number | string[] }>): number => {
+    const numeric: number[] = [];
+    for (const a of answers) {
+      const q = allQuestions.find(q => q.id === a.questionId);
+      if (!q || typeof a.value !== 'number') continue;
+      if (q.type === 'nps') {
+        numeric.push(a.value); // already 0–10
+      } else if (q.type === 'rating' && q.ratingConfig) {
+        numeric.push((a.value / q.ratingConfig.scale) * 10);
+      }
+    }
+    if (!numeric.length) return 0;
+    return Math.round((numeric.reduce((s, v) => s + v, 0) / numeric.length) * 10) / 10;
+  };
+
   const openResponseDetail = (id: string) => {
+    setIsEditing(false);
+    const savedKey = `${survey.id}_${id}`;
+    if (editedResponses[savedKey]) {
+      setGeneratedAnswers(editedResponses[savedKey].answers);
+      setSelectedResponseId(id);
+      return;
+    }
     const answers = allQuestions
       .filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text', 'contact_info', 'location'].includes(q.type))
       .map(q => {
         let value: string | number | string[];
         if (q.type === 'nps' && q.ratingConfig) {
-          value = Math.floor(Math.random() * 11); // 0–10
+          value = Math.floor(Math.random() * 11);
         } else if (q.type === 'rating' && q.ratingConfig) {
           value = Math.floor(Math.random() * q.ratingConfig.scale) + 1;
         } else if ((q.type === 'multiple_choice' || q.type === 'dropdown') && q.choices?.length) {
@@ -171,6 +198,29 @@ const SurveyDetails: React.FC = () => {
       });
     setGeneratedAnswers(answers);
     setSelectedResponseId(id);
+  };
+
+  const handleStartEdit = () => {
+    setEditAnswers([...generatedAnswers]);
+    setIsEditing(true);
+    setDetailMenuOpen(false);
+  };
+
+  const handleEditAnswerChange = (questionId: string, value: string | number | string[]) => {
+    setEditAnswers(prev => prev.map(a => a.questionId === questionId ? { ...a, value } : a));
+  };
+
+  const handleSaveEdit = () => {
+    const newScore = computeScore(editAnswers);
+    const key = `${survey.id}_${selectedResponseId}`;
+    const entry: EditedResponseEntry = { answers: editAnswers, score: newScore };
+    dispatch(surveyActions.saveEditedResponse({ key, entry }));
+    setGeneratedAnswers(editAnswers);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
 
   const sorted = [...MOCK_RESPONSES].sort((a, b) => {
@@ -447,6 +497,13 @@ const SurveyDetails: React.FC = () => {
         const currentIdx = sorted.findIndex(r => r.id === selectedResponse.id);
         const prevResponse = currentIdx > 0 ? sorted[currentIdx - 1] : null;
         const nextResponse = currentIdx < sorted.length - 1 ? sorted[currentIdx + 1] : null;
+        const savedKey = `${survey.id}_${selectedResponse.id}`;
+        const isEdited = !!editedResponses[savedKey];
+        const displayScore = isEdited ? editedResponses[savedKey].score : selectedResponse.score;
+        const activeAnswers = isEditing ? editAnswers : generatedAnswers;
+        const filteredQs = allQuestions.filter(q =>
+          !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text'].includes(q.type)
+        );
 
         return (
           <div className={styles.responseDetail}>
@@ -454,39 +511,50 @@ const SurveyDetails: React.FC = () => {
             <div className={styles.responseDetailHeader}>
               <div className={styles.responseDetailLeft}>
                 <span className={styles.responseDetailName}>{selectedResponse.contactName}</span>
-                <span className={`${styles.responseDetailScore} ${selectedResponse.score >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
-                  Overall score:&nbsp;{selectedResponse.score.toFixed(1)}
+                <span className={`${styles.responseDetailScore} ${displayScore >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
+                  Overall score:&nbsp;{displayScore.toFixed(1)}
                 </span>
+                {isEdited && <span className={styles.editedTag}>Edited</span>}
               </div>
               <div className={styles.responseDetailRight}>
-                <div className={styles.moreContainer} ref={detailMenuRef}>
-                  <button className={styles.moreBtn} onClick={() => setDetailMenuOpen(o => !o)}>
-                    <IconMoreVert size={16} color="#555" />
-                  </button>
-                  {detailMenuOpen && (
-                    <div className={styles.dropdown}>
-                      <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
-                      <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
+                {isEditing ? (
+                  <>
+                    <button className={styles.actionsBtn} onClick={handleCancelEdit}>Cancel</button>
+                    <button className={`${styles.actionsBtn} ${styles.actionsBtnPrimary}`} onClick={handleSaveEdit}>Save</button>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.moreContainer} ref={detailMenuRef}>
+                      <button className={styles.moreBtn} onClick={() => setDetailMenuOpen(o => !o)}>
+                        <IconMoreVert size={16} color="#555" />
+                      </button>
+                      {detailMenuOpen && (
+                        <div className={styles.dropdown}>
+                          <button className={styles.dropdownItem} onClick={handleStartEdit}>Edit responses</button>
+                          <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
+                          <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <button className={styles.actionsBtn}>Ticket response</button>
-                <button
-                  className={styles.moreBtn}
-                  disabled={!prevResponse}
-                  onClick={() => prevResponse && openResponseDetail(prevResponse.id)}
-                  title="Previous response"
-                >
-                  <IconChevronLeft size={16} color={prevResponse ? '#555' : '#ccc'} />
-                </button>
-                <button
-                  className={styles.moreBtn}
-                  disabled={!nextResponse}
-                  onClick={() => nextResponse && openResponseDetail(nextResponse.id)}
-                  title="Next response"
-                >
-                  <IconChevronRight size={16} color={nextResponse ? '#555' : '#ccc'} />
-                </button>
+                    <button className={styles.actionsBtn}>Ticket response</button>
+                    <button
+                      className={styles.moreBtn}
+                      disabled={!prevResponse}
+                      onClick={() => prevResponse && openResponseDetail(prevResponse.id)}
+                      title="Previous response"
+                    >
+                      <IconChevronLeft size={16} color={prevResponse ? '#555' : '#ccc'} />
+                    </button>
+                    <button
+                      className={styles.moreBtn}
+                      disabled={!nextResponse}
+                      onClick={() => nextResponse && openResponseDetail(nextResponse.id)}
+                      title="Next response"
+                    >
+                      <IconChevronRight size={16} color={nextResponse ? '#555' : '#ccc'} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -514,19 +582,19 @@ const SurveyDetails: React.FC = () => {
               {/* Survey responses */}
               <p className={styles.responseSection}>SURVEY RESPONSE</p>
               <div className={styles.responseQuestions}>
-                {allQuestions
-                  .filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text'].includes(q.type))
-                  .map(q => {
-                    const ans = generatedAnswers.find(a => a.questionId === q.id);
-                    return (
-                      <ReadOnlyQuestion
-                        key={q.id}
-                        question={q}
-                        answer={ans?.value}
-                      />
-                    );
-                  })}
-                {allQuestions.filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text'].includes(q.type)).length === 0 && (
+                {filteredQs.map(q => {
+                  const ans = activeAnswers.find(a => a.questionId === q.id);
+                  return (
+                    <ReadOnlyQuestion
+                      key={q.id}
+                      question={q}
+                      answer={ans?.value}
+                      editing={isEditing}
+                      onAnswerChange={isEditing ? (v) => handleEditAnswerChange(q.id, v) : undefined}
+                    />
+                  );
+                })}
+                {filteredQs.length === 0 && (
                   <p className={styles.emptyState}>No questions in this survey.</p>
                 )}
               </div>

@@ -18,6 +18,11 @@ import type {
 import { SAMPLE_SURVEY } from '../constants/sampleSurvey';
 
 
+export interface EditedResponseEntry {
+  answers: Array<{ questionId: string; value: string | number | string[] }>;
+  score: number;
+}
+
 interface SurveyState {
   survey: Survey | null;
   previewMode: PreviewMode;
@@ -25,6 +30,7 @@ interface SurveyState {
   activeTab: 'ai' | 'manual';
   surveyGenerated: boolean;
   savedSurveys: SavedSurvey[];
+  editedResponses: Record<string, EditedResponseEntry>;
 }
 
 const initialState: SurveyState = {
@@ -34,6 +40,7 @@ const initialState: SurveyState = {
   activeTab: 'ai',
   surveyGenerated: false,
   savedSurveys: [],
+  editedResponses: {},
 };
 
 const surveySlice = createSlice({
@@ -776,6 +783,13 @@ const surveySlice = createSlice({
         next.options = { ...next.options, linkExpiry: prev.options.linkExpiry };
       }
       s.campaign = next;
+    },
+
+    saveEditedResponse(
+      state,
+      action: PayloadAction<{ key: string; entry: EditedResponseEntry }>
+    ) {
+      state.editedResponses[action.payload.key] = action.payload.entry;
     },
   },
 });

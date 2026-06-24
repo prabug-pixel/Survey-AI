@@ -46,7 +46,7 @@ const surveyMigrations = {
 const surveyPersistConfig = {
   key: 'survey',
   storage: localStorageAdapter,
-  whitelist: ['savedSurveys'],
+  whitelist: ['savedSurveys', 'editedResponses'],
   version: 2,
   migrate: createMigrate(surveyMigrations, { debug: false }),
 };

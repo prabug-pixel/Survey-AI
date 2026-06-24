@@ -8,9 +8,11 @@ import styles from './ReadOnlyQuestion.module.scss';
 interface Props {
   question: Question;
   answer?: string | number | string[];
+  editing?: boolean;
+  onAnswerChange?: (value: string | number | string[]) => void;
 }
 
-const ReadOnlyQuestion: React.FC<Props> = ({ question, answer }) => {
+const ReadOnlyQuestion: React.FC<Props> = ({ question, answer, editing = false, onAnswerChange }) => {
   if (question.type === 'page_break') {
     return <hr className={styles.pageBreak} />;
   }
@@ -72,7 +74,8 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer }) => {
             highLabel={question.ratingConfig.lowLabel}
             startFromZero
             selectedValue={typeof answer === 'number' ? answer : null}
-            disabled
+            onSelect={editing ? (v) => onAnswerChange?.(v) : undefined}
+            disabled={!editing}
           />
         </div>
       )}
@@ -84,7 +87,8 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer }) => {
             lowLabel={question.ratingConfig.lowLabel}
             highLabel={question.ratingConfig.highLabel}
             selectedValue={typeof answer === 'number' ? answer : null}
-            disabled
+            onSelect={editing ? (v) => onAnswerChange?.(v) : undefined}
+            disabled={!editing}
           />
         </div>
       )}
@@ -98,7 +102,8 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer }) => {
               name={`ro-${question.id}`}
               value={choice.id}
               checked={answer === choice.id}
-              disabled
+              onChange={editing ? () => onAnswerChange?.(choice.id) : undefined}
+              disabled={!editing}
             />
           ))}
         </div>
@@ -106,15 +111,27 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer }) => {
 
       {question.type === 'checkboxes' && question.choices && (
         <div className={styles.body}>
-          {question.choices.map(choice => (
-            <Checkbox
-              key={choice.id}
-              label={choice.label}
-              checked={false}
-              onChange={() => {}}
-              name={`ro-${question.id}`}
-            />
-          ))}
+          {question.choices.map(choice => {
+            const checked = Array.isArray(answer) ? answer.includes(choice.id) : false;
+            return (
+              <Checkbox
+                key={choice.id}
+                label={choice.label}
+                checked={checked}
+                onChange={editing
+                  ? () => {
+                      const current = Array.isArray(answer) ? answer : [];
+                      const next = checked
+                        ? current.filter(v => v !== choice.id)
+                        : [...current, choice.id];
+                      onAnswerChange?.(next);
+                    }
+                  : () => {}}
+                name={`ro-${question.id}`}
+                disabled={!editing}
+              />
+            );
+          })}
         </div>
       )}
 
