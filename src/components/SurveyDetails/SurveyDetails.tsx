@@ -515,7 +515,22 @@ const SurveyDetails: React.FC = () => {
                 <span className={`${styles.responseDetailScore} ${displayScore >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
                   Overall score:&nbsp;{displayScore.toFixed(1)}
                 </span>
-                {isEdited && <Chip type="tonal" color="grey">Edited</Chip>}
+                {isEdited && (
+                  <Chip
+                    type="tonal"
+                    color="grey"
+                    className="!font-medium"
+                    style={{
+                      height: '20px',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: 'rgba(85, 85, 85, 1)',
+                      backgroundColor: 'rgba(234, 234, 234, 1)',
+                    }}
+                  >
+                    Edited
+                  </Chip>
+                )}
               </div>
               <div className={styles.responseDetailRight}>
                 {isEditing ? (

@@ -232,7 +232,7 @@ function AllExpandedPanel({ active, onActive }: { active: string; onActive: (k: 
       <div className="flex-1 overflow-y-auto px-[8px] pt-3 pb-4">
         <button className={`${ROW} ${HOVER} text-[#212121] dark:text-[#e4e4e4] mb-[6px]`} style={{ fontSize: 14 }}>
           <span className="text-[14px]">Send a review request</span>
-          <div className="w-[18px] h-[18px] bg-[#1E44CC] rounded-full flex items-center justify-center shrink-0">
+          <div className="w-[18px] h-[18px] bg-[#1976D2] rounded-full flex items-center justify-center shrink-0">
             <span className="text-white text-[12px] leading-none select-none">+</span>
           </div>
         </button>
@@ -249,7 +249,7 @@ function AllExpandedPanel({ active, onActive }: { active: string; onActive: (k: 
                 <button
                   key={child}
                   onClick={() => onActive(key)}
-                  className={`${ROW} text-left ${isActive ? "text-[#1E44CC] dark:text-[#7fa8ff] bg-[#dce5ff] dark:bg-[#1e2d5e]" : `${HOVER} text-[#555] dark:text-[#9ba2b0]`}`}
+                  className={`${ROW} text-left ${isActive ? "text-[#1976D2] dark:text-[#7fa8ff] bg-[#dce5ff] dark:bg-[#1e2d5e]" : `${HOVER} text-[#555] dark:text-[#9ba2b0]`}`}
                   style={{ fontWeight: isActive ? 400 : 300 }}
                 >
                   {child}

@@ -52,7 +52,7 @@ function IconTile({
   };
 
   const sourceBadge: Record<string, string> = {
-    phosphor: "bg-[#dce5ff] text-[#1E44CC]",
+    phosphor: "bg-[#dce5ff] text-[#1976D2]",
     lucide:   "bg-[#e9f5e9] text-[#2da44e]",
     custom:   "bg-muted text-muted-foreground",
   };

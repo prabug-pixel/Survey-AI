@@ -36,7 +36,7 @@ const NPS_COLORS: Record<number, { bg: string; text: string }> = {
   10: { bg: '#e0f2e9', text: '#2e7d32' },
 };
 
-const EDIT_SELECTED_COLOR = 'var(--primary, #1e44cc)';
+const EDIT_SELECTED_COLOR = 'var(--primary, #1976D2)';
 const EDIT_SELECTED_BG    = 'var(--secondary, #e8edf9)';
 
 const RatingScale: React.FC<RatingScaleProps> = ({

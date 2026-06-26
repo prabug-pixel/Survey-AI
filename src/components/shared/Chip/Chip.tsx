@@ -39,6 +39,8 @@ export interface ChipProps {
   /** Optional leading icon (16 × 16). Only rendered for the tonal type. */
   iconLeft?: React.ReactNode;
   className?: string;
+  /** Optional inline style overrides, merged with the chip's computed styles. */
+  style?: React.CSSProperties;
 }
 
 // ─── Style maps (all values reference Aero tokens from tokens.css) ────────────
@@ -81,6 +83,7 @@ export function Chip({
   children,
   iconLeft,
   className = '',
+  style,
 }: ChipProps) {
   // ── Filled ─────────────────────────────────────────────────────────────────
   if (type === 'filled') {
@@ -89,7 +92,7 @@ export function Chip({
     return (
       <span
         className={`${BASE} text-white ${className}`}
-        style={{ backgroundColor: bg }}
+        style={{ backgroundColor: bg, ...style }}
       >
         {children}
       </span>
@@ -103,7 +106,7 @@ export function Chip({
     return (
       <span
         className={`${BASE} border border-solid bg-transparent ${className}`}
-        style={{ borderColor: accent, color: accent }}
+        style={{ borderColor: accent, color: accent, ...style }}
       >
         {children}
       </span>
@@ -117,7 +120,7 @@ export function Chip({
   return (
     <span
       className={`${BASE} ${className}`}
-      style={{ backgroundColor: bg, color: text }}
+      style={{ backgroundColor: bg, color: text, ...style }}
     >
       {iconLeft && (
         <span className="inline-flex items-center justify-center shrink-0 size-4">
