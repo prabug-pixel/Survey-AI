@@ -66,8 +66,8 @@ const TILES: SettingTile[] = [
   },
   {
     key: 'expiry',
-    title: 'Expiry settings',
-    description: 'Control when this survey closes and what respondents see after.',
+    title: 'Survey expiration',
+    description: 'Control when this survey stops accepting responses',
     icon: <ExpirySettingsIllustration size={100} />,
   },
 ];

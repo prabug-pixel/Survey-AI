@@ -311,4 +311,10 @@ export interface SurveyResponse {
   contactName: string;
   location: string;
   respondedOn: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  surveySentOn?: string;
+  completionStatus?: string;
+  assistedBy?: string;
+  answers?: Array<{ questionId: string; value: string | number | string[] }>;
 }

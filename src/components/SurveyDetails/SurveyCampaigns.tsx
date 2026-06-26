@@ -4,6 +4,7 @@ import Button from '@birdeye/elemental/core/atoms/Button';
 import Toggle from '@birdeye/elemental/core/atoms/Toggle';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
+import Tooltip from '@birdeye/elemental/core/atoms/Tooltip';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { CampaignConfig } from '../../types/survey.types';
@@ -322,7 +323,7 @@ const SurveyCampaigns: React.FC = () => {
           <div className={styles.statusCol}><StatusDot done={optionsDone} /></div>
           <div className={styles.body}>
             <div className={styles.collapsibleHeader}>
-              <h3 className={styles.sectionTitle}>Advanced options</h3>
+              <h3 className={styles.sectionTitle}>Expire settings</h3>
               <div className={styles.collapsibleHeaderRight}>
                 {isLive && (
                   <span className={styles.lockedNotice}>
@@ -353,6 +354,11 @@ const SurveyCampaigns: React.FC = () => {
               <div className={styles.fieldRow}>
                 <div className={styles.fieldLabelRow}>
                   <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Set amount of time</span>
+                  <Tooltip text="The survey request will expire based on the first communication sent. Reminder emails will not reset the expiration period." position="right" hideOnScroll>
+                    <button type="button" className={styles.infoIconBtn} aria-label="Set amount of time info">
+                      <IconInfo size={14} />
+                    </button>
+                  </Tooltip>
                 </div>
                 <div className={`${styles.fieldGroup} ${styles.endDateFieldGroup}`}>
                   <FormInput
@@ -370,6 +376,9 @@ const SurveyCampaigns: React.FC = () => {
                     }}
                     disabled={isLive}
                   />
+                  {(linkExpiry.value ?? 0) > 90 && (
+                    <span className={styles.fieldError}>You can only enter up to 90 days.</span>
+                  )}
                 </div>
               </div>
             )}

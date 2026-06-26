@@ -3,12 +3,16 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SurveyResponse } from '../../types/survey.types';
+import type { EditedResponseEntry } from '../../store/surveySlice';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
 import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
+import { Chip } from '../shared/Chip';
 import {
   IconArrowLeft,
   IconChevronDown,
   IconChevronUp,
+  IconChevronLeft,
+  IconChevronRight,
   IconExternalLink,
   IconMoreVert,
   IconLink,
@@ -28,9 +32,24 @@ type SortKey = keyof Pick<SurveyResponse, 'score' | 'contactName' | 'location' |
 type SortDir = 'asc' | 'desc';
 
 const MOCK_RESPONSES: SurveyResponse[] = [
-  { id: '1', score: 9.0, contactName: 'Prabu', location: 'Central style, California', respondedOn: 'Mar 10, 2026' },
-  { id: '2', score: 8.0, contactName: 'Rupa', location: '120, Kenal Road, California', respondedOn: 'Mar 10, 2026' },
-  { id: '3', score: 2.0, contactName: 'Raynil kumar', location: '30, Christed Alford, California', respondedOn: 'Mar 10, 2026' },
+  {
+    id: '1', score: 9.0, contactName: 'Prabu', location: 'Central style, California', respondedOn: 'Mar 10, 2026',
+    contactEmail: 'prabu@example.com', contactPhone: '+1 (555) 123-4567', surveySentOn: 'Mar 9, 2026',
+    completionStatus: 'Fully completed', assistedBy: '-',
+    answers: [{ questionId: 'q1', value: 9 }, { questionId: 'q2', value: 'choice-1' }],
+  },
+  {
+    id: '2', score: 8.0, contactName: 'Rupa', location: '120, Kenal Road, California', respondedOn: 'Mar 10, 2026',
+    contactEmail: '-', contactPhone: '-', surveySentOn: 'Mar 9, 2026',
+    completionStatus: 'Fully completed', assistedBy: '-',
+    answers: [{ questionId: 'q1', value: 8 }, { questionId: 'q2', value: 'choice-0' }],
+  },
+  {
+    id: '3', score: 2.0, contactName: 'Raynil kumar', location: '30, Christed Alford, California', respondedOn: 'Mar 10, 2026',
+    contactEmail: '-', contactPhone: '-', surveySentOn: 'Mar 9, 2026',
+    completionStatus: 'Partially completed', assistedBy: '-',
+    answers: [{ questionId: 'q1', value: 2 }],
+  },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -84,7 +103,13 @@ const SurveyDetails: React.FC = () => {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [actionsOpen, setActionsOpen] = useState(false);
+  const [selectedResponseId, setSelectedResponseId] = useState<string | null>(null);
+  const [detailMenuOpen, setDetailMenuOpen] = useState(false);
+  const [generatedAnswers, setGeneratedAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+
+  const editedResponses = useAppSelector(s => s.survey.editedResponses);
 
   // Distribute accordion
   const [distributeExpanded, setDistributeExpanded] = useState({
@@ -98,12 +123,12 @@ const SurveyDetails: React.FC = () => {
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
 
   const rowMenuRef = useRef<HTMLDivElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
+  const detailMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (rowMenuRef.current && !rowMenuRef.current.contains(e.target as Node)) setOpenMenuId(null);
-      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) setActionsOpen(false);
+      if (detailMenuRef.current && !detailMenuRef.current.contains(e.target as Node)) setDetailMenuOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -129,22 +154,81 @@ const SurveyDetails: React.FC = () => {
     else { setSortKey(key); setSortDir(key === 'score' ? 'desc' : 'asc'); }
   };
 
+  const computeScore = (answers: Array<{ questionId: string; value: string | number | string[] }>): number => {
+    const numeric: number[] = [];
+    for (const a of answers) {
+      const q = allQuestions.find(q => q.id === a.questionId);
+      if (!q || typeof a.value !== 'number') continue;
+      if (q.type === 'nps') {
+        numeric.push(a.value); // already 0–10
+      } else if (q.type === 'rating' && q.ratingConfig) {
+        numeric.push((a.value / q.ratingConfig.scale) * 10);
+      }
+    }
+    if (!numeric.length) return 0;
+    return Math.round((numeric.reduce((s, v) => s + v, 0) / numeric.length) * 10) / 10;
+  };
+
+  const openResponseDetail = (id: string) => {
+    setIsEditing(false);
+    const savedKey = `${survey.id}_${id}`;
+    if (editedResponses[savedKey]) {
+      setGeneratedAnswers(editedResponses[savedKey].answers);
+      setSelectedResponseId(id);
+      return;
+    }
+    const answers = allQuestions
+      .filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text', 'contact_info', 'location'].includes(q.type))
+      .map(q => {
+        let value: string | number | string[];
+        if (q.type === 'nps' && q.ratingConfig) {
+          value = Math.floor(Math.random() * 11);
+        } else if (q.type === 'rating' && q.ratingConfig) {
+          value = Math.floor(Math.random() * q.ratingConfig.scale) + 1;
+        } else if ((q.type === 'multiple_choice' || q.type === 'dropdown') && q.choices?.length) {
+          value = q.choices[Math.floor(Math.random() * q.choices.length)].id;
+        } else if (q.type === 'checkboxes' && q.choices?.length) {
+          const shuffled = [...q.choices].sort(() => Math.random() - 0.5);
+          value = shuffled.slice(0, Math.floor(Math.random() * 2) + 1).map(c => c.id);
+        } else if (q.type === 'review_collector') {
+          value = Math.floor(Math.random() * 5) + 1;
+        } else {
+          value = '';
+        }
+        return { questionId: q.id, value };
+      });
+    setGeneratedAnswers(answers);
+    setSelectedResponseId(id);
+  };
+
+  const handleStartEdit = () => {
+    setEditAnswers([...generatedAnswers]);
+    setIsEditing(true);
+    setDetailMenuOpen(false);
+  };
+
+  const handleEditAnswerChange = (questionId: string, value: string | number | string[]) => {
+    setEditAnswers(prev => prev.map(a => a.questionId === questionId ? { ...a, value } : a));
+  };
+
+  const handleSaveEdit = () => {
+    const newScore = computeScore(editAnswers);
+    const key = `${survey.id}_${selectedResponseId}`;
+    const entry: EditedResponseEntry = { answers: editAnswers, score: newScore };
+    dispatch(surveyActions.saveEditedResponse({ key, entry }));
+    setGeneratedAnswers(editAnswers);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
   const sorted = [...MOCK_RESPONSES].sort((a, b) => {
     const av = a[sortKey]; const bv = b[sortKey];
     const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv));
     return sortDir === 'asc' ? cmp : -cmp;
   });
-
-  const handleEdit = () => {
-    setActionsOpen(false);
-    if (survey.surveyData) dispatch(surveyActions.loadSurvey(survey.surveyData));
-    navigate('/surveys/create');
-  };
-
-  const handleDelete = () => {
-    dispatch(surveyActions.deleteSavedSurvey(survey.id));
-    navigate('/surveys');
-  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(surveyUrl).catch(() => {});
@@ -183,22 +267,32 @@ const SurveyDetails: React.FC = () => {
     view: 'View',
     distribute: 'Distribute',
     responses: 'Responses',
-    edit: 'Edit settings',
+    edit: 'Settings',
     reports: 'Reports',
   };
   const sectionFromUrl = searchParams.get('section');
   const SECTION_LABEL: Record<string, string> = { expiry: 'Expiry settings' };
   const surveyPath = `/surveys/${survey.id}`;
   const tabHref = (tab: DetailTab) => (tab === 'view' ? surveyPath : `${surveyPath}?tab=${tab}`);
+  const selectedResponse = MOCK_RESPONSES.find(r => r.id === selectedResponseId) ?? null;
+
   const crumbs: BreadcrumbItem[] = [
     { label: 'Surveys AI', to: '/surveys' },
     { label: survey.title, to: tabHref('view') },
   ];
   if (activeTab !== 'view') {
-    crumbs.push({ label: TAB_LABEL[activeTab], to: tabHref(activeTab) });
+    const isResponseDetail = activeTab === 'responses' && !!selectedResponseId;
+    crumbs.push(
+      isResponseDetail
+        ? { label: TAB_LABEL[activeTab], onClick: () => setSelectedResponseId(null) }
+        : { label: TAB_LABEL[activeTab], to: tabHref(activeTab) }
+    );
   }
   if (activeTab === 'edit' && sectionFromUrl && SECTION_LABEL[sectionFromUrl]) {
     crumbs.push({ label: SECTION_LABEL[sectionFromUrl] });
+  }
+  if (activeTab === 'responses' && selectedResponse) {
+    crumbs.push({ label: selectedResponse.contactName });
   }
 
   return (
@@ -216,33 +310,21 @@ const SurveyDetails: React.FC = () => {
         </div>
 
         <div className={styles.headerRight}>
-          <div className={styles.actionsContainer} ref={actionsRef}>
-            <button className={styles.actionsBtn} onClick={() => setActionsOpen(o => !o)}>
-              <span>Actions</span>
-              <IconChevronDown size={16} color="#424242" />
+          {isRunning && (
+            <button className={styles.actionsBtn} onClick={() => setCloseConfirmOpen(true)}>
+              Close now
             </button>
-            {actionsOpen && (
-              <div className={styles.actionsDropdown}>
-                <button className={styles.actionsItem} onClick={handleEdit}>Edit</button>
-                {isRunning && (
-                  <button className={`${styles.actionsItem} ${styles.warnItem}`} onClick={() => { setActionsOpen(false); setCloseConfirmOpen(true); }}>
-                    Close now
-                  </button>
-                )}
-                {isExpired && (
-                  <button className={styles.actionsItem} onClick={() => { setActionsOpen(false); setReopenDialogOpen(true); }}>
-                    Reopen
-                  </button>
-                )}
-                <button className={`${styles.actionsItem} ${styles.deleteItem}`} onClick={handleDelete}>Delete</button>
-              </div>
-            )}
-          </div>
+          )}
+          {isExpired && (
+            <button className={styles.actionsBtn} onClick={() => setReopenDialogOpen(true)}>
+              Reopen
+            </button>
+          )}
         </div>
       </div>
 
       {/* ── Tab bar ──────────────────────────────────────── */}
-      <div className={styles.tabBar}>
+      {!(activeTab === 'responses' && selectedResponseId) && <div className={styles.tabBar}>
         {(['view', 'distribute', 'responses', 'edit', 'reports'] as DetailTab[]).map(tab => (
           <button
             key={tab}
@@ -253,10 +335,10 @@ const SurveyDetails: React.FC = () => {
             {tab === 'reports' && (<>Reports<IconExternalLink size={14} color={activeTab === 'reports' ? '#1976d2' : '#9e9e9e'} /></>)}
             {tab === 'view' && 'View'}
             {tab === 'distribute' && 'Distribute'}
-            {tab === 'edit' && 'Edit settings'}
+            {tab === 'edit' && 'Settings'}
           </button>
         ))}
-      </div>
+      </div>}
 
       {/* ── View tab ─────────────────────────────────────── */}
       {activeTab === 'view' && (
@@ -350,7 +432,7 @@ const SurveyDetails: React.FC = () => {
       )}
 
       {/* ── Responses tab ────────────────────────────────── */}
-      {activeTab === 'responses' && (
+      {activeTab === 'responses' && !selectedResponseId && (
         <div className={styles.tableWrapper}>
           <div className={styles.table}>
             <div className={styles.headerRow}>
@@ -375,25 +457,40 @@ const SurveyDetails: React.FC = () => {
               <div
                 key={response.id}
                 className={`${styles.row} ${hoveredId === response.id ? styles.rowHover : ''}`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => openResponseDetail(response.id)}
                 onMouseEnter={() => setHoveredId(response.id)}
                 onMouseLeave={() => { setHoveredId(null); if (openMenuId === response.id) setOpenMenuId(null); }}
               >
-                <div className={`${styles.cell} ${styles.scoreCol} ${response.score >= 7 ? styles.scoreGreen : styles.scoreRed}`}>{response.score.toFixed(1)}</div>
+                {(() => {
+                  const rowKey = `${survey.id}_${response.id}`;
+                  const rowEdited = editedResponses[rowKey];
+                  const rowScore = rowEdited ? rowEdited.score : response.score;
+                  return (
+                    <div className={`${styles.cell} ${styles.scoreCol} ${rowScore >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
+                      {rowScore.toFixed(1)}
+                      {rowEdited && <span className={styles.editedLabel}>&nbsp;(Edited)</span>}
+                    </div>
+                  );
+                })()}
                 <div className={styles.cell}>{response.contactName}</div>
                 <div className={styles.cell}>{response.location}</div>
                 <div className={styles.cell}>{response.respondedOn}</div>
                 <div className={`${styles.cell} ${styles.actionsCol}`}>
                   {hoveredId === response.id && (
                     <div className={styles.moreContainer} ref={openMenuId === response.id ? rowMenuRef : undefined}>
-                      <button className={styles.moreBtn} onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === response.id ? null : response.id); }}>
+                      <button
+                        className={styles.moreBtn}
+                        onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === response.id ? null : response.id); }}
+                      >
                         <IconMoreVert size={16} color="#555" />
                       </button>
                       {openMenuId === response.id && (
                         <div className={styles.dropdown}>
-                          <button className={styles.dropdownItem}>View survey response</button>
-                          <button className={styles.dropdownItem}>Message contact</button>
-                          <button className={styles.dropdownItem}>Create ticket</button>
-                          <button className={`${styles.dropdownItem} ${styles.deleteItem}`}>Delete</button>
+                          <button className={styles.dropdownItem} onClick={e => { e.stopPropagation(); openResponseDetail(response.id); setOpenMenuId(null); }}>View survey response</button>
+                          <button className={styles.dropdownItem} onClick={e => e.stopPropagation()}>Message contact</button>
+                          <button className={styles.dropdownItem} onClick={e => e.stopPropagation()}>Create ticket</button>
+                          <button className={`${styles.dropdownItem} ${styles.deleteItem}`} onClick={e => e.stopPropagation()}>Delete</button>
                         </div>
                       )}
                     </div>
@@ -405,6 +502,132 @@ const SurveyDetails: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ── Response detail view ─────────────────────────── */}
+      {activeTab === 'responses' && selectedResponse && (() => {
+        const currentIdx = sorted.findIndex(r => r.id === selectedResponse.id);
+        const prevResponse = currentIdx > 0 ? sorted[currentIdx - 1] : null;
+        const nextResponse = currentIdx < sorted.length - 1 ? sorted[currentIdx + 1] : null;
+        const savedKey = `${survey.id}_${selectedResponse.id}`;
+        const isEdited = !!editedResponses[savedKey];
+        const displayScore = isEdited ? editedResponses[savedKey].score : selectedResponse.score;
+        const activeAnswers = isEditing ? editAnswers : generatedAnswers;
+        const filteredQs = allQuestions.filter(q =>
+          !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text'].includes(q.type)
+        );
+
+        return (
+          <div className={styles.responseDetail}>
+            {/* Detail header */}
+            <div className={styles.responseDetailHeader}>
+              <div className={styles.responseDetailLeft}>
+                <span className={styles.responseDetailName}>{selectedResponse.contactName}</span>
+                <span className={`${styles.responseDetailScore} ${displayScore >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
+                  Overall score:&nbsp;{displayScore.toFixed(1)}
+                </span>
+                {isEdited && (
+                  <Chip
+                    type="tonal"
+                    color="grey"
+                    className="!font-medium"
+                    style={{
+                      height: '20px',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: 'rgba(85, 85, 85, 1)',
+                      backgroundColor: 'rgba(234, 234, 234, 1)',
+                    }}
+                  >
+                    Edited
+                  </Chip>
+                )}
+              </div>
+              <div className={styles.responseDetailRight}>
+                {isEditing ? (
+                  <>
+                    <button className={styles.actionsBtn} onClick={handleCancelEdit}>Cancel</button>
+                    <button className={`${styles.actionsBtn} ${styles.actionsBtnPrimary}`} onClick={handleSaveEdit}>Save</button>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.moreContainer} ref={detailMenuRef}>
+                      <button className={styles.moreBtn} onClick={() => setDetailMenuOpen(o => !o)}>
+                        <IconMoreVert size={16} color="#555" />
+                      </button>
+                      {detailMenuOpen && (
+                        <div className={styles.dropdown}>
+                          <button className={styles.dropdownItem} onClick={handleStartEdit}>Edit responses</button>
+                          <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
+                          <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
+                        </div>
+                      )}
+                    </div>
+                    <button className={styles.actionsBtn}>Ticket response</button>
+                    <button
+                      className={styles.moreBtn}
+                      disabled={!prevResponse}
+                      onClick={() => prevResponse && openResponseDetail(prevResponse.id)}
+                      title="Previous response"
+                    >
+                      <IconChevronLeft size={16} color={prevResponse ? '#555' : '#ccc'} />
+                    </button>
+                    <button
+                      className={styles.moreBtn}
+                      disabled={!nextResponse}
+                      onClick={() => nextResponse && openResponseDetail(nextResponse.id)}
+                      title="Next response"
+                    >
+                      <IconChevronRight size={16} color={nextResponse ? '#555' : '#ccc'} />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Scrollable body */}
+            <div className={styles.responseDetailBody}>
+              {/* Contact information card */}
+              <p className={styles.responseSection}>CONTACT INFORMATION</p>
+              <div className={styles.responseContactCard}>
+                {[
+                  { label: 'Contact email', value: selectedResponse.contactEmail ?? '-' },
+                  { label: 'Contact phone', value: selectedResponse.contactPhone ?? '-' },
+                  { label: 'Survey sent on', value: selectedResponse.surveySentOn ?? '-' },
+                  { label: 'Location', value: selectedResponse.location },
+                  { label: 'Completion Status', value: selectedResponse.completionStatus ?? '-' },
+                  { label: 'Responded on', value: selectedResponse.respondedOn },
+                  { label: 'Assisted by', value: selectedResponse.assistedBy ?? '-' },
+                ].map(({ label, value }) => (
+                  <div key={label} className={styles.responseContactField}>
+                    <span className={styles.responseContactLabel}>{label}</span>
+                    <span className={styles.responseContactValue}>{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Survey responses */}
+              <p className={styles.responseSection}>SURVEY RESPONSE</p>
+              <div className={styles.responseQuestions}>
+                {filteredQs.map(q => {
+                  const ans = activeAnswers.find(a => a.questionId === q.id);
+                  return (
+                    <ReadOnlyQuestion
+                      key={q.id}
+                      question={q}
+                      answer={ans?.value}
+                      editing={isEditing}
+                      onAnswerChange={isEditing ? (v) => handleEditAnswerChange(q.id, v) : undefined}
+                    />
+                  );
+                })}
+                {filteredQs.length === 0 && (
+                  <p className={styles.emptyState}>No questions in this survey.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Edit Settings tab — landing page + sub-flows ──── */}
       {activeTab === 'edit' && (

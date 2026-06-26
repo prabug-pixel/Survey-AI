@@ -101,6 +101,83 @@ export const Colors: Story = {
         </div>
       </div>
 
+      <div>
+        <SectionLabel>Aero graph colours — Default &amp; Comparison</SectionLabel>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { name: "Hadfield Blue",   token: "--token-graph-hadfield-blue" },
+            { name: "Starfleet Blue",  token: "--token-graph-starfleet-blue" },
+            { name: "Pastel Violet",   token: "--token-graph-pastel-violet" },
+            { name: "Benevo Pink",     token: "--token-graph-benevo-pink" },
+            { name: "Sunflower",       token: "--token-graph-sunflower" },
+            { name: "Carrot",          token: "--token-graph-carrot" },
+            { name: "Bright Green",    token: "--token-graph-bright-green" },
+            { name: "Green",           token: "--token-graph-green" },
+            { name: "Turquoise",       token: "--token-graph-turquoise" },
+            { name: "Plum",            token: "--token-graph-plum" },
+            { name: "Indigo",          token: "--token-graph-indigo" },
+            { name: "Violet",          token: "--token-graph-violet" },
+            { name: "Aqua",            token: "--token-graph-aqua" },
+            { name: "Iron",            token: "--token-graph-iron" },
+            { name: "Red",             token: "--token-graph-red" },
+          ].map(({ name, token }) => (
+            <div key={token} className="flex flex-col gap-2">
+              <div className="flex gap-1 h-10">
+                <div className="flex-1 rounded-l-lg" style={{ backgroundColor: `var(${token})` }} />
+                <div className="flex-1 rounded-r-lg" style={{ backgroundColor: `var(${token}-compare)` }} />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm text-foreground">{name}</p>
+                <p className="font-mono text-xs text-muted-foreground">{token}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <SectionLabel>Aero rating colours (0–5 stars)</SectionLabel>
+        <div className="grid grid-cols-6 gap-4">
+          {[0, 1, 2, 3, 4, 5].map((star) => (
+            <div key={star} className="flex flex-col gap-2">
+              <div className="flex gap-1 h-10">
+                <div className="flex-1 rounded-l-lg" style={{ backgroundColor: `var(--token-rating-${star})` }} />
+                <div className="flex-1 rounded-r-lg" style={{ backgroundColor: `var(--token-rating-${star}-compare)` }} />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm text-foreground">{star}-Star</p>
+                <p className="font-mono text-xs text-muted-foreground">{`--token-rating-${star}`}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <SectionLabel>Aero social colours</SectionLabel>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { name: "Facebook",  token: "--token-social-facebook" },
+            { name: "Instagram", token: "--token-social-instagram" },
+            { name: "YouTube",   token: "--token-social-youtube" },
+            { name: "Google",    token: "--token-social-google" },
+            { name: "LinkedIn",  token: "--token-social-linkedin" },
+            { name: "X",         token: "--token-social-x" },
+          ].map(({ name, token }) => (
+            <div key={token} className="flex flex-col gap-2">
+              <div className="flex gap-1 h-10">
+                <div className="flex-1 rounded-l-lg" style={{ backgroundColor: `var(${token})` }} />
+                <div className="flex-1 rounded-r-lg" style={{ backgroundColor: `var(${token}-compare)` }} />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm text-foreground">{name}</p>
+                <p className="font-mono text-xs text-muted-foreground">{token}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   ),
 };

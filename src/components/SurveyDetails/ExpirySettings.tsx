@@ -23,8 +23,8 @@ const DEFAULT_CONFIG: ExpirationConfig = {
   gracePeriodEnabled: true,
   gracePeriodHours: 24,
   closedMessage: {
-    title: 'This survey has closed',
-    body: 'Thank you for your interest. This survey is no longer accepting responses.',
+    title: 'This survey is closed',
+    body: 'This survey is no longer accepting responses',
     ctaUrl: '',
   },
   notifications: {
@@ -230,8 +230,8 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
       <div className={styles.card}>
         <div className={`${styles.cardHeader} ${config.enabled ? styles.cardHeaderExpanded : ''}`}>
           <div className={styles.cardHeaderText}>
-            <h2 className={styles.cardTitle}>Survey Expiration</h2>
-            <p className={styles.cardDesc}>Control when your survey is available to respondents</p>
+            <h2 className={styles.cardTitle}>Survey expiration</h2>
+            <p className={styles.cardDesc}>Set when this survey stops accepting responses</p>
           </div>
           <Toggle
             name="expiration-enabled"
@@ -249,8 +249,8 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               <div className={styles.fieldGrid}>
                 <div className={styles.fieldGroup}>
                   <div className={styles.fieldLabelRow}>
-                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>End date</span>
-                    <Tooltip text="The survey closes automatically on this date" position="right" hideOnScroll>
+                    <span className={`${styles.fieldLabel} ${styles.requiredLabel}`}>Close survey on</span>
+                    <Tooltip text="Respondents can't start the survey after this date" position="right" hideOnScroll>
                       <button type="button" className={styles.infoIconBtn} aria-label="End date info">
                         <IconInfo size={14} />
                       </button>
@@ -296,7 +296,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 <div className={styles.fieldGroup}>
                   <div className={styles.fieldLabelRow}>
                     <span className={styles.fieldLabel}>Timezone</span>
-                    <Tooltip text="Account timezone. Contact your admin to change it." position="right" hideOnScroll>
+                    <Tooltip text="Uses your account timezone" position="right" hideOnScroll>
                       <button type="button" className={styles.infoIconBtn} aria-label="Timezone info">
                         <IconInfo size={14} />
                       </button>
@@ -318,9 +318,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 <div className={styles.sectionTitleText}>
                   <h3 className={styles.sectionTitle}>Grace period for in-progress sessions</h3>
                   <p className={styles.sectionDesc}>
-                    Applies to multi-page surveys. Respondents who answered at least one question before expiry
-                    can continue for this duration. After it ends, we save their partial responses and show
-                    them the closed-survey page.
+                    Respondents who started the survey before it closes can continue for a limited time
                   </p>
                 </div>
                 <Toggle
@@ -349,7 +347,7 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Closed survey page</h3>
                 <p className={styles.sectionDesc}>
-                  Respondents see this when the survey stops accepting responses.
+                  Respondents see this after the survey closes
                 </p>
               </div>
 
@@ -380,16 +378,16 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
               </div>
 
               <div className={styles.fieldGroup}>
+                <span className={styles.fieldLabel}>Redirect respondents to</span>
                 <FormInput
                   name="ctaUrl"
                   type="text"
-                  label="Auto-redirect URL"
-                  placeholder="https://aspendental.com"
+                  placeholder="www.yourwebsite.com"
                   value={config.closedMessage.ctaUrl ?? ''}
                   onChange={(_event: unknown, value: string) => patchMsg('ctaUrl', String(value ?? ''))}
                 />
                 <span className={styles.hint}>
-                  When set, we redirect respondents to this URL after a short delay.
+                  Redirect respondents to this page after the survey closes
                 </span>
                 {showFieldError('redirectUrl') && <span className={styles.errorText}>{errors.redirectUrl}</span>}
               </div>
@@ -399,9 +397,20 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
             <section className={styles.section}>
               <div className={styles.sectionTitleRow}>
                 <div className={styles.sectionTitleText}>
-                  <h3 className={styles.sectionTitle}>Email notifications</h3>
+                  <div className={styles.fieldLabelRow}>
+                    <h3 className={styles.sectionTitle}>Email notifications</h3>
+                    <Tooltip
+                      text="You'll be notified 72 hours, 24 hours before closing, and when the survey ends."
+                      position="right"
+                      hideOnScroll
+                    >
+                      <button type="button" className={styles.infoIconBtn} aria-label="Email notifications info">
+                        <IconInfo size={14} />
+                      </button>
+                    </Tooltip>
+                  </div>
                   <p className={styles.sectionDesc}>
-                    Sent to the survey owner ({survey.owner}).
+                    Send notifications to the survey owner
                   </p>
                 </div>
                 <Toggle
@@ -412,25 +421,6 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
                 />
               </div>
 
-              {config.notifications.enabled && (
-                <div className={styles.checkIndent}>
-                  {([
-                    { name: 'notif72h', field: 'hours72' as const, label: '72 hours before expiration' },
-                    { name: 'notif24h', field: 'hours24' as const, label: '24 hours before expiration' },
-                    { name: 'notifAuto', field: 'onAutoClose' as const, label: 'When survey auto-closes' },
-                  ] as const).map(({ name, field, label }) => (
-                    <label key={name} className={styles.checkboxRow}>
-                      <FormInput
-                        name={name}
-                        type="checkbox"
-                        checked={config.notifications[field]}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => patchNotif(field, e.target.checked)}
-                      />
-                      <span>{label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
             </section>
 
         </div>
@@ -448,16 +438,16 @@ const ExpirySettings: React.FC<Props> = ({ survey }) => {
 
       {/* ── Right-side closed-survey preview ────────────── */}
       <div className={styles.expiryRight}>
-        <span className={styles.previewLabel}>Preview</span>
+        <span className={styles.previewLabel}>Respondents see this page after the survey closes</span>
         <div className={styles.previewPanel}>
           <div className={styles.previewContent}>
             <div className={styles.closedPreview}>
               <div className={styles.previewLogo}>apt</div>
               <h2 className={styles.previewTitle}>
-                {config.closedMessage.title || 'This survey has closed'}
+                {config.closedMessage.title || 'This survey is closed'}
               </h2>
               <p className={styles.previewBody}>
-                {config.closedMessage.body || 'Thank you for your interest.'}
+                {config.closedMessage.body || 'This survey is no longer accepting responses.'}
               </p>
               {(() => {
                 const url = (config.closedMessage.ctaUrl ?? '').trim();

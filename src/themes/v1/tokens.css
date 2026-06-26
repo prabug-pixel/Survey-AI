@@ -6,7 +6,7 @@
 :root {
   /* Brand (also aligned with src/styles/theme.css --primary) */
   --token-brand: #2552ed;
-  --token-primary-light: #1e44cc;
+  --token-primary-light: #1976D2;
   --token-primary-dark: #2952e3;
 
   /* App shell (L1 strip + main chrome) */
@@ -36,6 +36,89 @@
 
   /* Focus / shadow */
   --token-shadow-focus: 0 0 0 2px rgba(25, 118, 210, 0.08);
+
+  /* ─── Aero graph colours (source: Figma › Aero Design System › New Graph colors) ─── */
+  /* Each colour has a Default (primary series) and Comparison (lighter series) variant. */
+  --token-graph-hadfield-blue: #1877f2;
+  --token-graph-hadfield-blue-compare: #93befd;
+  --token-graph-starfleet-blue: #0099ff;
+  --token-graph-starfleet-blue-compare: #9aceff;
+  --token-graph-pastel-violet: #6665dd;
+  --token-graph-pastel-violet-compare: #adb3f2;
+  --token-graph-benevo-pink: #db61db;
+  --token-graph-benevo-pink-compare: #f1b4ef;
+  --token-graph-sunflower: #fbc123;
+  --token-graph-sunflower-compare: #fee1a5;
+  --token-graph-carrot: #ff6a4d;
+  --token-graph-carrot-compare: #ffb9a7;
+  --token-graph-bright-green: #7ed321;
+  --token-graph-bright-green-compare: #c0eba2;
+  --token-graph-green: #4cae3d;
+  --token-graph-green-compare: #a9d8a2;
+  --token-graph-turquoise: #34d1bf;
+  --token-graph-turquoise-compare: #abe9df;
+  --token-graph-plum: #70156c;
+  --token-graph-plum-compare: #b98bb4;
+  --token-graph-indigo: #2c3e91;
+  --token-graph-indigo-compare: #8d9dca;
+  --token-graph-violet: #5a4c97;
+  --token-graph-violet-compare: #a7a3cc;
+  --token-graph-aqua: #0f7195;
+  --token-graph-aqua-compare: #91b7ca;
+  --token-graph-iron: #cccccc;
+  --token-graph-iron-compare: #e5e5e5;
+  --token-graph-red: #de1b0c;
+  --token-graph-red-compare: #f99e8f;
+
+  /* ─── Aero rating colours (0–5 stars, source: Figma › Ratings) ─── */
+  --token-rating-0: #cccccc;
+  --token-rating-0-compare: #e5e5e5;
+  --token-rating-1: #de1b0c;
+  --token-rating-1-compare: #f99e8f;
+  --token-rating-2: #ff6a4d;
+  --token-rating-2-compare: #ffb9a7;
+  --token-rating-3: #fbc123;
+  --token-rating-3-compare: #fee1a5;
+  --token-rating-4: #7ed321;
+  --token-rating-4-compare: #c0eba2;
+  --token-rating-5: #4cae3d;
+  --token-rating-5-compare: #a9d8a2;
+
+  /* ─── Aero chip semantic colours (source: Figma › Chips - Informative › node 6678:4519) ─── */
+  /* Filled backgrounds */
+  --token-chip-filled-green-bg: #4cae3d;
+  --token-chip-filled-yellow-bg: #fbc123;
+  --token-chip-filled-red-bg: #de1b0c;
+
+  /* Outline border + text */
+  --token-chip-outline-green: #4cae3d;
+  --token-chip-outline-yellow: #e6aa04;
+  --token-chip-outline-red: #de1b0c;
+  --token-chip-outline-ai: #6834b7;
+
+  /* Tonal backgrounds */
+  --token-chip-tonal-grey-bg: #eaeaea;
+  --token-chip-tonal-yellow-bg: #fef3d6;
+  --token-chip-tonal-red-bg: #fef6f5;
+
+  /* Tonal text */
+  --token-chip-tonal-grey-text: #555555;
+  --token-chip-tonal-yellow-text: #c69204;
+  --token-chip-tonal-red-text: #de1b0c;
+
+  /* ─── Aero social colours (source: Figma › Social palette colors) ─── */
+  --token-social-facebook: #1877f2;
+  --token-social-facebook-compare: #93befd;
+  --token-social-instagram: #db61db;
+  --token-social-instagram-compare: #f1b4ef;
+  --token-social-youtube: #ff6a4d;
+  --token-social-youtube-compare: #ffb9a7;
+  --token-social-google: #4cae3d;
+  --token-social-google-compare: #a9d8a2;
+  --token-social-linkedin: #2c3e91;
+  --token-social-linkedin-compare: #8d9dca;
+  --token-social-x: #252525;
+  --token-social-x-compare: #a3a3a3;
 }
 
 .dark {

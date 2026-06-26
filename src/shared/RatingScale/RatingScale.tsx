@@ -9,6 +9,8 @@ interface RatingScaleProps {
   onSelect?: (value: number) => void;
   disabled?: boolean;
   startFromZero?: boolean;
+  /** When true the selected cell uses the primary blue instead of the semantic colour. */
+  editMode?: boolean;
 }
 
 const SCALE_COLORS: Record<number, { bg: string; text: string }> = {
@@ -34,6 +36,9 @@ const NPS_COLORS: Record<number, { bg: string; text: string }> = {
   10: { bg: '#e0f2e9', text: '#2e7d32' },
 };
 
+const EDIT_SELECTED_COLOR = 'var(--primary, #1976D2)';
+const EDIT_SELECTED_BG    = 'var(--secondary, #e8edf9)';
+
 const RatingScale: React.FC<RatingScaleProps> = ({
   scale,
   lowLabel,
@@ -42,6 +47,7 @@ const RatingScale: React.FC<RatingScaleProps> = ({
   onSelect,
   disabled = false,
   startFromZero = false,
+  editMode = false,
 }) => {
   const values = startFromZero
     ? Array.from({ length: scale + 1 }, (_, i) => i)
@@ -62,9 +68,9 @@ const RatingScale: React.FC<RatingScaleProps> = ({
               type="button"
               className={`${styles.ratingBtn} ${isSelected ? styles.selected : ''}`}
               style={{
-                backgroundColor: colorMap.bg,
-                color: colorMap.text,
-                borderColor: isSelected ? colorMap.text : 'transparent',
+                backgroundColor: isSelected && editMode ? EDIT_SELECTED_BG : colorMap.bg,
+                color:           isSelected && editMode ? EDIT_SELECTED_COLOR : colorMap.text,
+                borderColor:     isSelected ? (editMode ? EDIT_SELECTED_COLOR : colorMap.text) : 'transparent',
               }}
               onClick={() => onSelect?.(val)}
               disabled={disabled}
