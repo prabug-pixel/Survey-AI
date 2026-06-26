@@ -462,7 +462,17 @@ const SurveyDetails: React.FC = () => {
                 onMouseEnter={() => setHoveredId(response.id)}
                 onMouseLeave={() => { setHoveredId(null); if (openMenuId === response.id) setOpenMenuId(null); }}
               >
-                <div className={`${styles.cell} ${styles.scoreCol} ${response.score >= 7 ? styles.scoreGreen : styles.scoreRed}`}>{response.score.toFixed(1)}</div>
+                {(() => {
+                  const rowKey = `${survey.id}_${response.id}`;
+                  const rowEdited = editedResponses[rowKey];
+                  const rowScore = rowEdited ? rowEdited.score : response.score;
+                  return (
+                    <div className={`${styles.cell} ${styles.scoreCol} ${rowScore >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
+                      {rowScore.toFixed(1)}
+                      {rowEdited && <span className={styles.editedLabel}>&nbsp;(Edited)</span>}
+                    </div>
+                  );
+                })()}
                 <div className={styles.cell}>{response.contactName}</div>
                 <div className={styles.cell}>{response.location}</div>
                 <div className={styles.cell}>{response.respondedOn}</div>
