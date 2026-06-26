@@ -6,6 +6,7 @@ import type { SurveyResponse } from '../../types/survey.types';
 import type { EditedResponseEntry } from '../../store/surveySlice';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
 import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
+import { Chip } from '../shared/Chip';
 import {
   IconArrowLeft,
   IconChevronDown,
@@ -514,7 +515,7 @@ const SurveyDetails: React.FC = () => {
                 <span className={`${styles.responseDetailScore} ${displayScore >= 7 ? styles.scoreGreen : styles.scoreRed}`}>
                   Overall score:&nbsp;{displayScore.toFixed(1)}
                 </span>
-                {isEdited && <span className={styles.editedTag}>Edited</span>}
+                {isEdited && <Chip type="tonal" color="grey">Edited</Chip>}
               </div>
               <div className={styles.responseDetailRight}>
                 {isEditing ? (

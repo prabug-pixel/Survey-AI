@@ -76,6 +76,7 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer, editing = false, 
             selectedValue={typeof answer === 'number' ? answer : null}
             onSelect={editing ? (v) => onAnswerChange?.(v) : undefined}
             disabled={!editing}
+            editMode={editing}
           />
         </div>
       )}
@@ -89,6 +90,7 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer, editing = false, 
             selectedValue={typeof answer === 'number' ? answer : null}
             onSelect={editing ? (v) => onAnswerChange?.(v) : undefined}
             disabled={!editing}
+            editMode={editing}
           />
         </div>
       )}
