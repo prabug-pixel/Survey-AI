@@ -214,7 +214,26 @@ const SurveyDetails: React.FC = () => {
   const handleSaveEdit = () => {
     const newScore = computeScore(editAnswers);
     const key = `${survey.id}_${selectedResponseId}`;
-    const entry: EditedResponseEntry = { answers: editAnswers, score: newScore };
+    const prevAnswers = generatedAnswers;
+    const changedIds = editAnswers
+      .filter(a => {
+        const prev = prevAnswers.find(p => p.questionId === a.questionId);
+        return !prev || JSON.stringify(prev.value) !== JSON.stringify(a.value);
+      })
+      .map(a => a.questionId);
+    // Preserve previously edited question IDs and merge with new ones
+    const existingEntry = editedResponses[key];
+    const mergedEditedIds = Array.from(new Set([
+      ...(existingEntry?.editedQuestionIds ?? []),
+      ...changedIds,
+    ]));
+    const entry: EditedResponseEntry = {
+      answers: editAnswers,
+      score: newScore,
+      editedAt: new Date().toISOString(),
+      editedBy: 'Prabu',
+      editedQuestionIds: mergedEditedIds,
+    };
     dispatch(surveyActions.saveEditedResponse({ key, entry }));
     setGeneratedAnswers(editAnswers);
     setIsEditing(false);
@@ -610,6 +629,8 @@ const SurveyDetails: React.FC = () => {
               <div className={styles.responseQuestions}>
                 {filteredQs.map(q => {
                   const ans = activeAnswers.find(a => a.questionId === q.id);
+                  const savedEntry = editedResponses[savedKey];
+                  const isQuestionEdited = !isEditing && !!savedEntry?.editedQuestionIds?.includes(q.id);
                   return (
                     <ReadOnlyQuestion
                       key={q.id}
@@ -617,6 +638,9 @@ const SurveyDetails: React.FC = () => {
                       answer={ans?.value}
                       editing={isEditing}
                       onAnswerChange={isEditing ? (v) => handleEditAnswerChange(q.id, v) : undefined}
+                      isEdited={isQuestionEdited}
+                      editedBy={isQuestionEdited ? savedEntry.editedBy : undefined}
+                      editedAt={isQuestionEdited ? savedEntry.editedAt : undefined}
                     />
                   );
                 })}

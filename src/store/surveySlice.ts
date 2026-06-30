@@ -21,6 +21,9 @@ import { SAMPLE_SURVEY } from '../constants/sampleSurvey';
 export interface EditedResponseEntry {
   answers: Array<{ questionId: string; value: string | number | string[] }>;
   score: number;
+  editedAt: string;
+  editedBy: string;
+  editedQuestionIds: string[];
 }
 
 interface SurveyState {

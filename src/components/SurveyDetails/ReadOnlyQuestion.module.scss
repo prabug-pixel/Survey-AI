@@ -38,6 +38,50 @@
   margin-left: $spacing-4;
 }
 
+.editedChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: $spacing-8;
+  padding: 2px $spacing-8;
+  border-radius: $radius-sm;
+  background: #eaeaea;
+  color: #555555;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: default;
+  line-height: 18px;
+}
+
+.editedTooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #212121;
+  color: #ffffff;
+  font-size: $font-size-xs;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #212121;
+  }
+}
+
 .body {
   padding-left: $spacing-20;
 }

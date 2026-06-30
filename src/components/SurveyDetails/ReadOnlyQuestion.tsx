@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Question } from '../../types/survey.types';
 import RatingScale from '../../shared/RatingScale/RatingScale';
 import RadioOption from '../../shared/RadioOption/RadioOption';
@@ -10,9 +10,19 @@ interface Props {
   answer?: string | number | string[];
   editing?: boolean;
   onAnswerChange?: (value: string | number | string[]) => void;
+  isEdited?: boolean;
+  editedBy?: string;
+  editedAt?: string;
 }
 
-const ReadOnlyQuestion: React.FC<Props> = ({ question, answer, editing = false, onAnswerChange }) => {
+const fmtEditedAt = (iso: string) =>
+  new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+const ReadOnlyQuestion: React.FC<Props> = ({
+  question, answer, editing = false, onAnswerChange,
+  isEdited = false, editedBy, editedAt,
+}) => {
+  const [tooltipVisible, setTooltipVisible] = useState(false);
   if (question.type === 'page_break') {
     return <hr className={styles.pageBreak} />;
   }
@@ -64,6 +74,20 @@ const ReadOnlyQuestion: React.FC<Props> = ({ question, answer, editing = false, 
           {question.text}
           {question.required && <span className={styles.required}>*</span>}
         </span>
+        {isEdited && (
+          <span
+            className={styles.editedChip}
+            onMouseEnter={() => setTooltipVisible(true)}
+            onMouseLeave={() => setTooltipVisible(false)}
+          >
+            Edited
+            {tooltipVisible && editedBy && editedAt && (
+              <span className={styles.editedTooltip}>
+                Edited by {editedBy}<br />{fmtEditedAt(editedAt)}
+              </span>
+            )}
+          </span>
+        )}
       </div>
 
       {question.type === 'nps' && question.ratingConfig && (
