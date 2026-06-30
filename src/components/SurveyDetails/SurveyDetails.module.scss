@@ -1020,6 +1020,40 @@ $col-actions: 60px;
   min-width: 0;
 }
 
+.editedChipWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.editedChipTooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #212121;
+  color: #ffffff;
+  font-size: $font-size-xs;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #212121;
+  }
+}
+
 .responseDetailName {
   font-size: $font-size-lg;
   font-weight: 500;

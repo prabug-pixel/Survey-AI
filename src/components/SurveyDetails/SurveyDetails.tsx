@@ -108,6 +108,7 @@ const SurveyDetails: React.FC = () => {
   const [generatedAnswers, setGeneratedAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+  const [editedChipTooltip, setEditedChipTooltip] = useState(false);
 
   const editedResponses = useAppSelector(s => s.survey.editedResponses);
 
@@ -545,20 +546,19 @@ const SurveyDetails: React.FC = () => {
                   Overall score:&nbsp;{displayScore.toFixed(1)}
                 </span>
                 {isEdited && (
-                  <Chip
-                    type="tonal"
-                    color="grey"
-                    className="!font-medium"
-                    style={{
-                      height: '20px',
-                      padding: '4px 8px',
-                      fontSize: '12px',
-                      color: 'rgba(85, 85, 85, 1)',
-                      backgroundColor: 'rgba(234, 234, 234, 1)',
-                    }}
+                  <span
+                    className={styles.editedChipWrapper}
+                    onMouseEnter={() => setEditedChipTooltip(true)}
+                    onMouseLeave={() => setEditedChipTooltip(false)}
                   >
-                    Edited
-                  </Chip>
+                    <Chip type="tonal" color="grey" className="!font-medium">Edited</Chip>
+                    {editedChipTooltip && editedResponses[savedKey] && (
+                      <span className={styles.editedChipTooltip}>
+                        Edited by {editedResponses[savedKey].editedBy}<br />
+                        {new Date(editedResponses[savedKey].editedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                    )}
+                  </span>
                 )}
               </div>
               <div className={styles.responseDetailRight}>
@@ -639,8 +639,6 @@ const SurveyDetails: React.FC = () => {
                       editing={isEditing}
                       onAnswerChange={isEditing ? (v) => handleEditAnswerChange(q.id, v) : undefined}
                       isEdited={isQuestionEdited}
-                      editedBy={isQuestionEdited ? savedEntry.editedBy : undefined}
-                      editedAt={isQuestionEdited ? savedEntry.editedAt : undefined}
                     />
                   );
                 })}
