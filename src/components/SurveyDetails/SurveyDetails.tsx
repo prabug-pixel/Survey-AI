@@ -21,6 +21,8 @@ import {
   IconCopy,
   IconBarChart,
   IconClock,
+  IconClose,
+  IconUsers,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
 import EditSettings from './EditSettings';
@@ -597,7 +599,7 @@ const SurveyDetails: React.FC = () => {
                         <div className={styles.dropdown}>
                           <button className={styles.dropdownItem} onClick={handleStartEdit}>Edit responses</button>
                           {isEdited && (
-                            <button className={styles.dropdownItem} onClick={() => { setHistoryPanelOpen(true); setDetailMenuOpen(false); }}>Edit history</button>
+                            <button className={styles.dropdownItem} onClick={() => { setHistoryPanelOpen(true); setDetailMenuOpen(false); }}>Audit trail</button>
                           )}
                           <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
                           <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
@@ -683,8 +685,10 @@ const SurveyDetails: React.FC = () => {
           <div className={styles.historyOverlay} onClick={() => setHistoryPanelOpen(false)}>
             <div className={styles.historyPanel} onClick={e => e.stopPropagation()}>
               <div className={styles.historyHeader}>
-                <span className={styles.historyTitle}>Edit history</span>
-                <button className={styles.historyClose} onClick={() => setHistoryPanelOpen(false)}>✕</button>
+                <span className={styles.historyTitle}>Audit trail</span>
+                <button className={styles.historyClose} onClick={() => setHistoryPanelOpen(false)}>
+                  <IconClose size={18} color="#424242" />
+                </button>
               </div>
               <div className={styles.historyBody}>
                 {history.length === 0 ? (
@@ -692,25 +696,32 @@ const SurveyDetails: React.FC = () => {
                 ) : (
                   [...history].reverse().map((h, i) => (
                     <div key={i} className={styles.historyEntry}>
-                      <div className={styles.historyEntryHeader}>
-                        <span className={styles.historyEntryBy}>{h.editedBy}</span>
-                        <span className={styles.historyEntryMeta}>
-                          {new Date(h.editedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
-                          &nbsp;·&nbsp;Score: {h.score.toFixed(1)}
+                      {/* Row: avatar + who + action */}
+                      <div className={styles.historyEntryRow}>
+                        <span className={styles.historyAvatar}>
+                          <IconUsers size={16} color="#555" />
                         </span>
+                        <span className={styles.historyEntryBy}>{h.editedBy}</span>
+                        <span className={styles.historyEntryAction}>edited response</span>
                       </div>
-                      <ul className={styles.historyChanges}>
-                        {h.changedQuestions.map((c, j) => (
-                          <li key={j} className={styles.historyChange}>
-                            <span className={styles.historyQText}>{c.questionText}</span>
-                            <span className={styles.historyFromTo}>
-                              <span className={styles.historyFrom}>{String(c.from)}</span>
-                              <span className={styles.historyArrow}>→</span>
-                              <span className={styles.historyTo}>{String(c.to)}</span>
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                      {/* Changed questions */}
+                      {h.changedQuestions.map((c, j) => (
+                        <div key={j} className={styles.historyImpactCard}>
+                          <span className={styles.historyImpactLabel}>{c.questionText}</span>
+                          <div className={styles.historyFromTo}>
+                            <span className={styles.historyFrom}>{String(c.from)}</span>
+                            <span className={styles.historyArrow}>→</span>
+                            <span className={styles.historyTo}>{String(c.to)}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {/* Timestamp */}
+                      <span className={styles.historyTimestamp}>
+                        {new Date(h.editedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {' at '}
+                        {new Date(h.editedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        &nbsp;·&nbsp;Score: {h.score.toFixed(1)}
+                      </span>
                     </div>
                   ))
                 )}
