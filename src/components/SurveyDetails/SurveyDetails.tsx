@@ -551,7 +551,7 @@ const SurveyDetails: React.FC = () => {
                     onMouseEnter={() => setEditedChipTooltip(true)}
                     onMouseLeave={() => setEditedChipTooltip(false)}
                   >
-                    <Chip type="tonal" color="grey" className="!font-medium">Edited</Chip>
+                    <Chip type="tonal" color="grey" className="!font-medium !text-xs !leading-[18px] !px-2 !py-1">Edited</Chip>
                     {editedChipTooltip && editedResponses[savedKey] && (
                       <span className={styles.editedChipTooltip}>
                         Edited by {editedResponses[savedKey].editedBy}<br />
