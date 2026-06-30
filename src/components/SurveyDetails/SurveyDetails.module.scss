@@ -1150,3 +1150,143 @@ $col-actions: 60px;
   gap: 0;
   max-width: 780px;
 }
+
+// ── Edit History Panel ────────────────────────────────────────────────────────
+
+.historyOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.32);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.historyPanel {
+  width: 420px;
+  max-width: 100vw;
+  height: 100%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.historyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-20 $spacing-24;
+  border-bottom: 1px solid $color-gray-200;
+  flex-shrink: 0;
+}
+
+.historyTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: #212121;
+}
+
+.historyClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: $font-size-md;
+  color: #757575;
+  padding: $spacing-4;
+  line-height: 1;
+
+  &:hover { color: #212121; }
+}
+
+.historyBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-16 $spacing-24;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+.historyEmpty {
+  font-size: $font-size-sm;
+  color: #9e9e9e;
+  text-align: center;
+  margin-top: $spacing-40;
+}
+
+.historyEntry {
+  border: 1px solid $color-gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.historyEntryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-12 $spacing-16;
+  background: #f9fafb;
+  border-bottom: 1px solid $color-gray-200;
+}
+
+.historyEntryBy {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: #212121;
+}
+
+.historyEntryMeta {
+  font-size: $font-size-xs;
+  color: #757575;
+}
+
+.historyChanges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.historyChange {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  padding: $spacing-12 $spacing-16;
+  border-bottom: 1px solid $color-gray-100;
+
+  &:last-child { border-bottom: none; }
+}
+
+.historyQText {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: #424242;
+}
+
+.historyFromTo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  flex-wrap: wrap;
+}
+
+.historyFrom {
+  font-size: $font-size-sm;
+  color: #d32f2f;
+  background: #fdecea;
+  padding: 2px $spacing-8;
+  border-radius: $radius-sm;
+}
+
+.historyArrow {
+  font-size: $font-size-sm;
+  color: #9e9e9e;
+}
+
+.historyTo {
+  font-size: $font-size-sm;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 2px $spacing-8;
+  border-radius: $radius-sm;
+}

@@ -18,12 +18,20 @@ import type {
 import { SAMPLE_SURVEY } from '../constants/sampleSurvey';
 
 
+export interface EditHistoryEntry {
+  editedAt: string;
+  editedBy: string;
+  score: number;
+  changedQuestions: Array<{ questionId: string; questionText: string; from: string | number | string[]; to: string | number | string[] }>;
+}
+
 export interface EditedResponseEntry {
   answers: Array<{ questionId: string; value: string | number | string[] }>;
   score: number;
   editedAt: string;
   editedBy: string;
   editedQuestionIds: string[];
+  history: EditHistoryEntry[];
 }
 
 interface SurveyState {

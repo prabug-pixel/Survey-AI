@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
 import type { SurveyResponse } from '../../types/survey.types';
-import type { EditedResponseEntry } from '../../store/surveySlice';
+import type { EditedResponseEntry, EditHistoryEntry } from '../../store/surveySlice';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
 import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
 import { Chip } from '../shared/Chip';
@@ -109,6 +109,7 @@ const SurveyDetails: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
   const [editedChipTooltip, setEditedChipTooltip] = useState(false);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
 
   const editedResponses = useAppSelector(s => s.survey.editedResponses);
 
@@ -216,24 +217,43 @@ const SurveyDetails: React.FC = () => {
     const newScore = computeScore(editAnswers);
     const key = `${survey.id}_${selectedResponseId}`;
     const prevAnswers = generatedAnswers;
-    const changedIds = editAnswers
+    const existingEntry = editedResponses[key];
+
+    const changedQuestions = editAnswers
       .filter(a => {
         const prev = prevAnswers.find(p => p.questionId === a.questionId);
         return !prev || JSON.stringify(prev.value) !== JSON.stringify(a.value);
       })
-      .map(a => a.questionId);
-    // Preserve previously edited question IDs and merge with new ones
-    const existingEntry = editedResponses[key];
+      .map(a => {
+        const prev = prevAnswers.find(p => p.questionId === a.questionId);
+        const q = allQuestions.find(q => q.id === a.questionId);
+        return {
+          questionId: a.questionId,
+          questionText: q?.text ?? a.questionId,
+          from: prev?.value ?? '',
+          to: a.value,
+        };
+      });
+
     const mergedEditedIds = Array.from(new Set([
       ...(existingEntry?.editedQuestionIds ?? []),
-      ...changedIds,
+      ...changedQuestions.map(c => c.questionId),
     ]));
+
+    const historyEntry: EditHistoryEntry = {
+      editedAt: new Date().toISOString(),
+      editedBy: 'Prabu',
+      score: newScore,
+      changedQuestions,
+    };
+
     const entry: EditedResponseEntry = {
       answers: editAnswers,
       score: newScore,
       editedAt: new Date().toISOString(),
       editedBy: 'Prabu',
       editedQuestionIds: mergedEditedIds,
+      history: [...(existingEntry?.history ?? []), historyEntry],
     };
     dispatch(surveyActions.saveEditedResponse({ key, entry }));
     setGeneratedAnswers(editAnswers);
@@ -551,7 +571,7 @@ const SurveyDetails: React.FC = () => {
                     onMouseEnter={() => setEditedChipTooltip(true)}
                     onMouseLeave={() => setEditedChipTooltip(false)}
                   >
-                    <Chip type="tonal" color="grey" className="!font-medium !text-xs !leading-[18px] !px-2 !py-1">Edited</Chip>
+                    <Chip type="tonal" color="grey" className="!h-5 !font-medium !text-xs !leading-[18px] !px-2 !py-1">Edited</Chip>
                     {editedChipTooltip && editedResponses[savedKey] && (
                       <span className={styles.editedChipTooltip}>
                         Edited by {editedResponses[savedKey].editedBy}<br />
@@ -576,6 +596,9 @@ const SurveyDetails: React.FC = () => {
                       {detailMenuOpen && (
                         <div className={styles.dropdown}>
                           <button className={styles.dropdownItem} onClick={handleStartEdit}>Edit responses</button>
+                          {isEdited && (
+                            <button className={styles.dropdownItem} onClick={() => { setHistoryPanelOpen(true); setDetailMenuOpen(false); }}>Edit history</button>
+                          )}
                           <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
                           <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
                         </div>
@@ -644,6 +667,52 @@ const SurveyDetails: React.FC = () => {
                 })}
                 {filteredQs.length === 0 && (
                   <p className={styles.emptyState}>No questions in this survey.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Edit History Panel ───────────────────────────── */}
+      {historyPanelOpen && selectedResponseId && (() => {
+        const hKey = `${survey.id}_${selectedResponseId}`;
+        const hEntry = editedResponses[hKey];
+        const history: EditHistoryEntry[] = hEntry?.history ?? [];
+        return (
+          <div className={styles.historyOverlay} onClick={() => setHistoryPanelOpen(false)}>
+            <div className={styles.historyPanel} onClick={e => e.stopPropagation()}>
+              <div className={styles.historyHeader}>
+                <span className={styles.historyTitle}>Edit history</span>
+                <button className={styles.historyClose} onClick={() => setHistoryPanelOpen(false)}>✕</button>
+              </div>
+              <div className={styles.historyBody}>
+                {history.length === 0 ? (
+                  <p className={styles.historyEmpty}>No edit history yet.</p>
+                ) : (
+                  [...history].reverse().map((h, i) => (
+                    <div key={i} className={styles.historyEntry}>
+                      <div className={styles.historyEntryHeader}>
+                        <span className={styles.historyEntryBy}>{h.editedBy}</span>
+                        <span className={styles.historyEntryMeta}>
+                          {new Date(h.editedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                          &nbsp;·&nbsp;Score: {h.score.toFixed(1)}
+                        </span>
+                      </div>
+                      <ul className={styles.historyChanges}>
+                        {h.changedQuestions.map((c, j) => (
+                          <li key={j} className={styles.historyChange}>
+                            <span className={styles.historyQText}>{c.questionText}</span>
+                            <span className={styles.historyFromTo}>
+                              <span className={styles.historyFrom}>{String(c.from)}</span>
+                              <span className={styles.historyArrow}>→</span>
+                              <span className={styles.historyTo}>{String(c.to)}</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
