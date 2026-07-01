@@ -1238,15 +1238,17 @@ $col-actions: 60px;
   flex-wrap: wrap;
 }
 
-// Small square icon container matching template
+// 16×16 container with 2px padding → 12×12 visible icon
 .historyIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
+  padding: 2px;
   flex-shrink: 0;
   color: #424242;
+  box-sizing: border-box;
 }
 
 // Inline text: name (normal) + bold action
@@ -1280,7 +1282,7 @@ $col-actions: 60px;
 // Timestamp line — grey, below the action row
 .historyTimestamp {
   margin-top: $spacing-4;
-  padding-left: 32px; // align with text, past the icon
+  padding-left: 24px; // 16px icon + 8px gap
   font-size: $font-size-sm;
   color: #9e9e9e;
   font-weight: 400;
@@ -1289,7 +1291,7 @@ $col-actions: 60px;
 // "View details" / "Hide details" link
 .historyViewDetails {
   margin-top: $spacing-4;
-  padding-left: 32px;
+  padding-left: 24px;
   background: none;
   border: none;
   cursor: pointer;
@@ -1305,7 +1307,7 @@ $col-actions: 60px;
 // Expanded diff section
 .historyDetails {
   margin-top: $spacing-12;
-  margin-left: 32px;
+  margin-left: 24px;
   display: flex;
   flex-direction: column;
   gap: $spacing-10;

@@ -707,7 +707,7 @@ const SurveyDetails: React.FC = () => {
                         {/* Icon + name + action + badge */}
                         <div className={styles.historyEntryRow}>
                           <span className={styles.historyIcon}>
-                            <IconEdit size={16} color="#555" />
+                            <IconEdit size={12} color="#555" />
                           </span>
                           <span className={styles.historyEntryText}>
                             <span className={styles.historyEntryBy}>{h.editedBy} </span>
