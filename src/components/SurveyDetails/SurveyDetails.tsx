@@ -23,6 +23,7 @@ import {
   IconClock,
   IconClose,
   IconUsers,
+  IconEdit,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
 import EditSettings from './EditSettings';
@@ -112,6 +113,7 @@ const SurveyDetails: React.FC = () => {
   const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
   const [editedChipTooltip, setEditedChipTooltip] = useState(false);
   const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
+  const [expandedHistoryIdx, setExpandedHistoryIdx] = useState<number | null>(null);
 
   const editedResponses = useAppSelector(s => s.survey.editedResponses);
 
@@ -676,54 +678,74 @@ const SurveyDetails: React.FC = () => {
         );
       })()}
 
-      {/* ── Edit History Panel ───────────────────────────── */}
+      {/* ── Audit Trail Panel ────────────────────────────── */}
       {historyPanelOpen && selectedResponseId && (() => {
         const hKey = `${survey.id}_${selectedResponseId}`;
         const hEntry = editedResponses[hKey];
         const history: EditHistoryEntry[] = hEntry?.history ?? [];
+        const reversed = [...history].reverse();
         return (
           <div className={styles.historyOverlay} onClick={() => setHistoryPanelOpen(false)}>
             <div className={styles.historyPanel} onClick={e => e.stopPropagation()}>
+              {/* Header: back arrow + title */}
               <div className={styles.historyHeader}>
-                <span className={styles.historyTitle}>Audit trail</span>
-                <button className={styles.historyClose} onClick={() => setHistoryPanelOpen(false)}>
-                  <IconClose size={18} color="#424242" />
+                <button className={styles.historyBack} onClick={() => setHistoryPanelOpen(false)}>
+                  <IconArrowLeft size={20} color="#212121" />
                 </button>
+                <span className={styles.historyTitle}>Change log</span>
               </div>
+
               <div className={styles.historyBody}>
                 {history.length === 0 ? (
                   <p className={styles.historyEmpty}>No edit history yet.</p>
                 ) : (
-                  [...history].reverse().map((h, i) => (
-                    <div key={i} className={styles.historyEntry}>
-                      {/* Row: avatar + who + action */}
-                      <div className={styles.historyEntryRow}>
-                        <span className={styles.historyAvatar}>
-                          <IconUsers size={16} color="#555" />
-                        </span>
-                        <span className={styles.historyEntryBy}>{h.editedBy}</span>
-                        <span className={styles.historyEntryAction}>edited response</span>
-                      </div>
-                      {/* Changed questions */}
-                      {h.changedQuestions.map((c, j) => (
-                        <div key={j} className={styles.historyImpactCard}>
-                          <span className={styles.historyImpactLabel}>{c.questionText}</span>
-                          <div className={styles.historyFromTo}>
-                            <span className={styles.historyFrom}>{String(c.from)}</span>
-                            <span className={styles.historyArrow}>→</span>
-                            <span className={styles.historyTo}>{String(c.to)}</span>
-                          </div>
+                  reversed.map((h, i) => {
+                    const isExpanded = expandedHistoryIdx === i;
+                    const ts = new Date(h.editedAt);
+                    const dateStr = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const timeStr = ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    return (
+                      <div key={i} className={styles.historyEntry}>
+                        {/* Icon + name + action + badge */}
+                        <div className={styles.historyEntryRow}>
+                          <span className={styles.historyIcon}>
+                            <IconEdit size={16} color="#555" />
+                          </span>
+                          <span className={styles.historyEntryText}>
+                            <span className={styles.historyEntryBy}>{h.editedBy} </span>
+                            <span className={styles.historyEntryAction}>edited the response</span>
+                          </span>
+                          {i === 0 && (
+                            <span className={styles.historyCurrentBadge}>Current version</span>
+                          )}
                         </div>
-                      ))}
-                      {/* Timestamp */}
-                      <span className={styles.historyTimestamp}>
-                        {new Date(h.editedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        {' at '}
-                        {new Date(h.editedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                        &nbsp;·&nbsp;Score: {h.score.toFixed(1)}
-                      </span>
-                    </div>
-                  ))
+                        {/* Timestamp */}
+                        <p className={styles.historyTimestamp}>{dateStr} at {timeStr}</p>
+                        {/* View / Hide details toggle */}
+                        <button
+                          className={styles.historyViewDetails}
+                          onClick={() => setExpandedHistoryIdx(isExpanded ? null : i)}
+                        >
+                          {isExpanded ? 'Hide details' : 'View details'}
+                        </button>
+                        {/* Expanded diff */}
+                        {isExpanded && (
+                          <div className={styles.historyDetails}>
+                            {h.changedQuestions.map((c, j) => (
+                              <div key={j} className={styles.historyDiffRow}>
+                                <span className={styles.historyDiffLabel}>{c.questionText}</span>
+                                <div className={styles.historyFromTo}>
+                                  <span className={styles.historyFrom}>{String(c.from)}</span>
+                                  <span className={styles.historyArrow}>→</span>
+                                  <span className={styles.historyTo}>{String(c.to)}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>
