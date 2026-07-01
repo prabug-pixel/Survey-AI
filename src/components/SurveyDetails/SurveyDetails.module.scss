@@ -1235,7 +1235,7 @@ $col-actions: 60px;
   display: flex;
   align-items: flex-start;
   gap: $spacing-8;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 // 16×16 container with 2px padding → 12×12 visible icon
@@ -1267,7 +1267,7 @@ $col-actions: 60px;
 }
 
 .historyEntryAction {
-  font-weight: 700;
+  font-weight: 500;
 }
 
 // "Current version" pill — inline after action text, 8px gap via row's gap
@@ -1315,13 +1315,13 @@ $col-actions: 60px;
   margin-left: 24px;
   display: flex;
   flex-direction: column;
-  gap: $spacing-10;
+  gap: $spacing-16;
 }
 
 .historyDiffRow {
   display: flex;
   flex-direction: column;
-  gap: $spacing-6;
+  gap: $spacing-8;
 }
 
 .historyDiffLabel {
@@ -1345,6 +1345,12 @@ $col-actions: 60px;
   border: 1px solid #bdbdbd;
   padding: 3px $spacing-10;
   border-radius: $radius-sm;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 24px;
 }
 
 .historyArrow {
@@ -1361,4 +1367,10 @@ $col-actions: 60px;
   border: 1.5px solid #4caf50;
   padding: 3px $spacing-10;
   border-radius: $radius-sm;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 24px;
 }

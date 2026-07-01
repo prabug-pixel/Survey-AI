@@ -599,7 +599,7 @@ const SurveyDetails: React.FC = () => {
                         <div className={styles.dropdown}>
                           <button className={styles.dropdownItem} onClick={handleStartEdit}>Edit responses</button>
                           {isEdited && (
-                            <button className={styles.dropdownItem} onClick={() => { setHistoryPanelOpen(true); setDetailMenuOpen(false); }}>Audit trail</button>
+                            <button className={styles.dropdownItem} onClick={() => { setHistoryPanelOpen(true); setDetailMenuOpen(false); }}>Change log</button>
                           )}
                           <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Direct message</button>
                           <button className={styles.dropdownItem} onClick={() => setDetailMenuOpen(false)}>Create ticket</button>
