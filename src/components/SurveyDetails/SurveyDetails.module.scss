@@ -1165,7 +1165,7 @@ $col-actions: 60px;
 }
 
 .historyPanel {
-  width: 480px;
+  width: 650px;
   max-width: 100vw;
   height: 100%;
   background: #fff;
@@ -1198,7 +1198,7 @@ $col-actions: 60px;
 }
 
 .historyTitle {
-  font-size: $font-size-2xl;
+  font-size: $font-size-lg;
   font-weight: 400;
   color: #212121;
   letter-spacing: -0.3px;
@@ -1233,7 +1233,7 @@ $col-actions: 60px;
 // Icon + name + bold action + optional badge — all on one line
 .historyEntryRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: $spacing-8;
   flex-wrap: wrap;
 }
@@ -1249,6 +1249,10 @@ $col-actions: 60px;
   flex-shrink: 0;
   color: #424242;
   box-sizing: border-box;
+
+  svg {
+    font-size: 48px;
+  }
 }
 
 // Inline text: name (normal) + bold action
@@ -1266,9 +1270,8 @@ $col-actions: 60px;
   font-weight: 700;
 }
 
-// "Current version" pill — grey, right side
+// "Current version" pill — inline after action text, 8px gap via row's gap
 .historyCurrentBadge {
-  margin-left: auto;
   font-size: $font-size-xs;
   font-weight: 400;
   color: #424242;
@@ -1277,6 +1280,8 @@ $col-actions: 60px;
   border-radius: $radius-sm;
   padding: 3px $spacing-10;
   white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 // Timestamp line — grey, below the action row

@@ -704,14 +704,14 @@ const SurveyDetails: React.FC = () => {
                     const timeStr = ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                     return (
                       <div key={i} className={styles.historyEntry}>
-                        {/* Icon + name + action + badge */}
+                        {/* Icon + name + action + score + badge */}
                         <div className={styles.historyEntryRow}>
                           <span className={styles.historyIcon}>
                             <IconEdit size={12} color="#555" />
                           </span>
                           <span className={styles.historyEntryText}>
                             <span className={styles.historyEntryBy}>{h.editedBy} </span>
-                            <span className={styles.historyEntryAction}>edited the response</span>
+                            <span className={styles.historyEntryAction}>edited the response. The overall score is now {h.score.toFixed(1)}</span>
                           </span>
                           {i === 0 && (
                             <span className={styles.historyCurrentBadge}>Current version</span>
