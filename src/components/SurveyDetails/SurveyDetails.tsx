@@ -21,8 +21,6 @@ import {
   IconCopy,
   IconBarChart,
   IconClock,
-  IconClose,
-  IconUsers,
   IconEdit,
 } from '../../shared/Icons/Icons';
 import ReadOnlyQuestion from './ReadOnlyQuestion';
