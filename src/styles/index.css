@@ -41,10 +41,15 @@
  * Elemental also sets `.tootip-parent > span { width: 100% }` unless the list
  * has `show-image-in-selection`; that squeezes the label into a few characters.
  * Mirror elemental's image-option layout so icon + label stay on one row. */
+[class*='SingleSelectView'] .label-cont {
+  justify-content: flex-start;
+}
+
 [class*='SingleSelectView'] .tootip-parent,
 .icon.tootip-parent {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
   width: auto;
   max-width: 100%;
@@ -64,6 +69,17 @@
   flex-shrink: 0;
 }
 
+/* Fixed icon slot so every option's label starts on the same column. */
+[class*='SingleSelectView'] .tootip-parent > span:has(img),
+.icon.tootip-parent > span:has(img) {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 16px !important;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 [class*='SingleSelectView'] .tootip-parent > span[class*='text'],
 .icon.tootip-parent > span[class*='text'] {
   flex: 1 1 auto;
@@ -74,9 +90,17 @@
 
 .tootip-parent > span > img,
 [class*='SingleSelectView'] .tootip-parent img {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
+  display: block;
+  width: 16px;
+  height: 16px;
   max-width: none;
-  vertical-align: middle;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* Aero: SingleSelect option labels with custom images ship at 15px from
+ * elemental; pin to 14px to match form-control body text. */
+[class*='SingleSelectView'] .use-nameId,
+[class*='SingleSelectView'] [class*='label-custom-image'] {
+  font-size: 14px;
 }

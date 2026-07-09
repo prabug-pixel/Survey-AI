@@ -919,7 +919,6 @@ export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string; img?: 
   { value: 'dropdown',     label: 'Single-select',            img: fieldTypeSingleSelectIcon },
   { value: 'user',         label: 'Users',                    img: fieldTypeUserIcon },
   { value: 'url',          label: 'Url',                      img: fieldTypeUrlIcon },
-  { value: 'checkbox',     label: 'Checkbox' },
 ];
 
 export const SOURCE_CHANNEL_LABELS: Record<SourceChannel, string> = {

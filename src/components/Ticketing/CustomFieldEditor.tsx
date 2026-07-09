@@ -2,7 +2,7 @@
 // CustomFieldEditor — modal used to create or edit a custom
 // ticket field. Mirrors the screenshots: a Field name, a type
 // dropdown (Text / Long text / Dropdown / Number / Date /
-// Checkbox / User), description, dropdown options when the
+// User / Url), description, dropdown options when the
 // type is "Dropdown", and three toggles (Required, Filterable,
 // Visible).
 // ============================================================
