@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { surveyActions } from '../../store/surveySlice';
-import type { SurveyResponse } from '../../types/survey.types';
+import type { AnswerValue, Question, SurveyResponse } from '../../types/survey.types';
 import type { EditedResponseEntry, EditHistoryEntry } from '../../store/surveySlice';
 import CommonDrawer from '@birdeye/elemental/core/atoms/CommonSideDrawer';
 import ConfirmDialog from '../shared/ConfirmDialog/ConfirmDialog';
@@ -79,6 +79,18 @@ const fmtDate = (iso: string) =>
 
 const VALID_TABS: DetailTab[] = ['view', 'distribute', 'responses', 'edit', 'reports'];
 
+const formatAnswerValue = (value: AnswerValue, question?: Question): string => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const rows = question?.matrixConfig?.rows ?? [];
+    const parts = Object.entries(value).map(([rowId, v]) => {
+      const rowLabel = rows.find(r => r.id === rowId)?.label ?? rowId;
+      return `${rowLabel}: ${v}`;
+    });
+    return parts.length ? parts.join(', ') : '-';
+  }
+  return String(value);
+};
+
 const SurveyDetails: React.FC = () => {
   const { surveyId } = useParams<{ surveyId: string }>();
   const navigate = useNavigate();
@@ -106,9 +118,9 @@ const SurveyDetails: React.FC = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(null);
   const [detailMenuOpen, setDetailMenuOpen] = useState(false);
-  const [generatedAnswers, setGeneratedAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+  const [generatedAnswers, setGeneratedAnswers] = useState<Array<{ questionId: string; value: AnswerValue }>>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: string | number | string[] }>>([]);
+  const [editAnswers, setEditAnswers] = useState<Array<{ questionId: string; value: AnswerValue }>>([]);
   const [editedChipTooltip, setEditedChipTooltip] = useState(false);
   const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
   const [expandedHistoryIdx, setExpandedHistoryIdx] = useState<number | null>(null);
@@ -158,7 +170,7 @@ const SurveyDetails: React.FC = () => {
     else { setSortKey(key); setSortDir(key === 'score' ? 'desc' : 'asc'); }
   };
 
-  const computeScore = (answers: Array<{ questionId: string; value: string | number | string[] }>): number => {
+  const computeScore = (answers: Array<{ questionId: string; value: AnswerValue }>): number => {
     const numeric: number[] = [];
     for (const a of answers) {
       const q = allQuestions.find(q => q.id === a.questionId);
@@ -184,7 +196,7 @@ const SurveyDetails: React.FC = () => {
     const answers = allQuestions
       .filter(q => !['welcome', 'thank_you', 'page_break', 'page_title', 'help_text', 'contact_info', 'location'].includes(q.type))
       .map(q => {
-        let value: string | number | string[];
+        let value: AnswerValue;
         if (q.type === 'nps' && q.ratingConfig) {
           value = Math.floor(Math.random() * 11);
         } else if (q.type === 'rating' && q.ratingConfig) {
@@ -196,6 +208,11 @@ const SurveyDetails: React.FC = () => {
           value = shuffled.slice(0, Math.floor(Math.random() * 2) + 1).map(c => c.id);
         } else if (q.type === 'review_collector') {
           value = Math.floor(Math.random() * 5) + 1;
+        } else if ((q.type === 'matrix_radio' || q.type === 'matrix_ratings') && q.matrixConfig) {
+          value = q.matrixConfig.rows.reduce((acc, row) => {
+            acc[row.id] = Math.floor(Math.random() * q.matrixConfig!.columnScale) + 1;
+            return acc;
+          }, {} as Record<string, number>);
         } else {
           value = '';
         }
@@ -211,7 +228,7 @@ const SurveyDetails: React.FC = () => {
     setDetailMenuOpen(false);
   };
 
-  const handleEditAnswerChange = (questionId: string, value: string | number | string[]) => {
+  const handleEditAnswerChange = (questionId: string, value: AnswerValue) => {
     setEditAnswers(prev => prev.map(a => a.questionId === questionId ? { ...a, value } : a));
   };
 
@@ -729,16 +746,19 @@ const SurveyDetails: React.FC = () => {
                         {/* Expanded diff */}
                         {isExpanded && (
                           <div className={styles.historyDetails}>
-                            {h.changedQuestions.map((c, j) => (
-                              <div key={j} className={styles.historyDiffRow}>
-                                <span className={styles.historyDiffLabel}>{c.questionText}</span>
-                                <div className={styles.historyFromTo}>
-                                  <span className={styles.historyFrom}>{String(c.from)}</span>
-                                  <span className={styles.historyArrow}>→</span>
-                                  <span className={styles.historyTo}>{String(c.to)}</span>
+                            {h.changedQuestions.map((c, j) => {
+                              const q = allQuestions.find(q => q.id === c.questionId);
+                              return (
+                                <div key={j} className={styles.historyDiffRow}>
+                                  <span className={styles.historyDiffLabel}>{c.questionText}</span>
+                                  <div className={styles.historyFromTo}>
+                                    <span className={styles.historyFrom}>{formatAnswerValue(c.from, q)}</span>
+                                    <span className={styles.historyArrow}>→</span>
+                                    <span className={styles.historyTo}>{formatAnswerValue(c.to, q)}</span>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>

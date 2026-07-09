@@ -154,15 +154,53 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, allQuestions }) =
       {/* Matrix Questions */}
       {(question.type === 'matrix_radio' || question.type === 'matrix_ratings' || question.type === 'matrix_dropdown') && question.matrixConfig && (
         <div className={styles.matrixBody}>
-          <div className={styles.matrixHeader}>
-            <div className={styles.rowLabelStub}></div>
-            {question.type !== 'matrix_dropdown' && question.matrixConfig.columnLabels.map((label, i) => (
-              <div key={i} className={styles.matrixColumnHeader}>{label}</div>
-            ))}
-          </div>
+          {question.type !== 'matrix_dropdown' && (
+            <div className={styles.matrixHeader}>
+              <div className={styles.rowLabelStub}></div>
+              <div className={styles.matrixScaleLabels}>
+                {isActive ? (
+                  <input
+                    className={styles.matrixLabelInput}
+                    value={question.matrixConfig.lowLabel ?? ''}
+                    placeholder="Low label"
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      dispatch(surveyActions.updateMatrixLabels({ questionId: question.id, lowLabel: e.target.value }))
+                    }
+                  />
+                ) : (
+                  <span className={styles.matrixLowLabel}>{question.matrixConfig.lowLabel}</span>
+                )}
+                {isActive ? (
+                  <input
+                    className={styles.matrixLabelInput}
+                    value={question.matrixConfig.highLabel ?? ''}
+                    placeholder="High label"
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      dispatch(surveyActions.updateMatrixLabels({ questionId: question.id, highLabel: e.target.value }))
+                    }
+                  />
+                ) : (
+                  <span className={styles.matrixHighLabel}>{question.matrixConfig.highLabel}</span>
+                )}
+              </div>
+            </div>
+          )}
           {question.matrixConfig.rows.map((row) => (
             <div key={row.id} className={styles.matrixRow}>
-              <div className={styles.rowLabel}>{row.label}</div>
+              {isActive ? (
+                <input
+                  className={styles.rowLabelInput}
+                  value={row.label}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) =>
+                    dispatch(surveyActions.updateMatrixRow({ questionId: question.id, rowId: row.id, label: e.target.value }))
+                  }
+                />
+              ) : (
+                <div className={styles.rowLabel}>{row.label}</div>
+              )}
               {question.type === 'matrix_dropdown' ? (
                 <div className={styles.matrixDropdownCell}>
                   <select
@@ -186,11 +224,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, allQuestions }) =
                   )}
                 </div>
               ) : (
-                question.matrixConfig!.columnLabels.map((_, i) => (
-                  <div key={i} className={styles.matrixCell}>
-                    <div className={styles.radioVisual} />
-                  </div>
-                ))
+                <>
+                  {Array.from({ length: question.matrixConfig!.columnScale }, (_, i) => (
+                    <div key={i} className={styles.matrixRatingCell}>{i + 1}</div>
+                  ))}
+                  {isActive && (
+                    <button className={styles.removeRowBtn} onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(surveyActions.removeMatrixRow({ questionId: question.id, rowId: row.id }));
+                    }}>
+                      <IconClose size={14} />
+                    </button>
+                  )}
+                </>
               )}
             </div>
           ))}

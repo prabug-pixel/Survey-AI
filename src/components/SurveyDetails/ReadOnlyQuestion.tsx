@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Question } from '../../types/survey.types';
+import type { AnswerValue, Question } from '../../types/survey.types';
 import RatingScale from '../../shared/RatingScale/RatingScale';
 import RadioOption from '../../shared/RadioOption/RadioOption';
 import Checkbox from '../../shared/Checkbox/Checkbox';
@@ -7,9 +7,9 @@ import styles from './ReadOnlyQuestion.module.scss';
 
 interface Props {
   question: Question;
-  answer?: string | number | string[];
+  answer?: AnswerValue;
   editing?: boolean;
-  onAnswerChange?: (value: string | number | string[]) => void;
+  onAnswerChange?: (value: AnswerValue) => void;
   isEdited?: boolean;
 }
 
@@ -168,20 +168,38 @@ const ReadOnlyQuestion: React.FC<Props> = ({
         <div className={styles.matrixBody}>
           <div className={styles.matrixHeader}>
             <div className={styles.matrixRowLabel} />
-            {question.matrixConfig.columnLabels.map((label, i) => (
-              <div key={i} className={styles.matrixColHeader}>{label}</div>
-            ))}
-          </div>
-          {question.matrixConfig.rows.map(row => (
-            <div key={row.id} className={styles.matrixRow}>
-              <div className={styles.matrixRowLabel}>{row.label}</div>
-              {question.matrixConfig!.columnLabels.map((_, i) => (
-                <div key={i} className={styles.matrixCell}>
-                  <div className={styles.radioVisual} />
-                </div>
-              ))}
+            <div className={styles.matrixScaleLabels}>
+              <span>{question.matrixConfig.lowLabel}</span>
+              <span>{question.matrixConfig.highLabel}</span>
             </div>
-          ))}
+          </div>
+          {question.matrixConfig.rows.map(row => {
+            const rowAnswers = answer && typeof answer === 'object' && !Array.isArray(answer)
+              ? (answer as Record<string, number>)
+              : undefined;
+            const selected = rowAnswers?.[row.id];
+            return (
+              <div key={row.id} className={styles.matrixRow}>
+                <div className={styles.matrixRowLabel}>{row.label}</div>
+                {Array.from({ length: question.matrixConfig!.columnScale }, (_, i) => {
+                  const value = i + 1;
+                  const isSelected = selected === value;
+                  return (
+                    <div
+                      key={i}
+                      className={`${styles.matrixCell} ${isSelected ? styles.matrixCellSelected : ''} ${editing ? styles.matrixCellEditable : ''}`}
+                      onClick={editing
+                        ? () => onAnswerChange?.({ ...(rowAnswers ?? {}), [row.id]: value })
+                        : undefined}
+                      role={editing ? 'button' : undefined}
+                    >
+                      {value}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       )}
 

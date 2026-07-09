@@ -166,9 +166,40 @@
   min-width: 60px;
 }
 
+.matrixScaleLabels {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #303030;
+}
+
+.matrixLowLabel, .matrixHighLabel {
+  font-size: 14px;
+  color: #303030;
+}
+
+.matrixLabelInput {
+  font-size: 14px;
+  color: #303030;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 6px;
+  background: transparent;
+  outline: none;
+  max-width: 200px;
+
+  &:hover, &:focus {
+    border-color: #e0e0e0;
+    background: #fff;
+  }
+}
+
 .matrixRow {
   display: flex;
   align-items: center;
+  gap: 8px;
   height: 48px;
   border-bottom: 1px solid #f0f0f0;
 
@@ -184,6 +215,21 @@
   color: #303030;
 }
 
+.rowLabelInput {
+  width: 150px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: #303030;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  outline: none;
+
+  &:focus {
+    border-color: #2552ED;
+  }
+}
+
 .matrixCell {
   flex: 1;
   display: flex;
@@ -196,6 +242,20 @@
   height: 18px;
   border: 1.5px solid #bdbdbd;
   border-radius: 50%;
+}
+
+.matrixRatingCell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 36px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #303030;
+  background: #fff;
 }
 
 .matrixDropdownCell {

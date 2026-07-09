@@ -51,7 +51,8 @@ export interface MatrixRow {
 export interface MatrixConfig {
   rows: MatrixRow[];
   columnScale: number;
-  columnLabels: string[];
+  lowLabel?: string;
+  highLabel?: string;
 }
 
 export interface ContactInfoField {
@@ -305,6 +306,8 @@ export interface SavedSurvey {
   campaign?: CampaignConfig;
 }
 
+export type AnswerValue = string | number | string[] | Record<string, number>;
+
 export interface SurveyResponse {
   id: string;
   score: number;
@@ -316,5 +319,5 @@ export interface SurveyResponse {
   surveySentOn?: string;
   completionStatus?: string;
   assistedBy?: string;
-  answers?: Array<{ questionId: string; value: string | number | string[] }>;
+  answers?: Array<{ questionId: string; value: AnswerValue }>;
 }

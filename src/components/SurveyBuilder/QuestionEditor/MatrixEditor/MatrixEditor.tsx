@@ -41,7 +41,7 @@ const MatrixEditor: React.FC<MatrixEditorProps> = ({ question }) => {
     <div className={styles.matrixEditor}>
       {question.type !== 'matrix_dropdown' && (
         <div className={styles.field}>
-          <label className={styles.label}>Column scale</label>
+          <label className={styles.label}>Scale</label>
           <select
             name="matrixScale"
             className={styles.nativeSelect}
@@ -55,34 +55,34 @@ const MatrixEditor: React.FC<MatrixEditorProps> = ({ question }) => {
         </div>
       )}
 
-      <div className={styles.section}>
-        <label className={styles.sectionLabel}>
-          {question.type === 'matrix_dropdown' ? 'Category' : 'Rows'}
-        </label>
-        <div className={styles.rowsList}>
-          {config.rows.map((row: MatrixRow) => (
-            <div key={row.id} className={styles.rowItem}>
-              <input
-                name={`row-${row.id}`}
-                type="text"
-                value={row.label}
-                onChange={(e) => handleRowChange(row.id, e.target.value)}
-                className={styles.rowInput}
-              />
-              <button 
-                className={styles.removeBtn} 
-                onClick={() => handleRemoveRow(row.id)}
-                aria-label="Remove row"
-              >
-                <IconClose size={14} color="#757575" />
-              </button>
-            </div>
-          ))}
+      {question.type === 'matrix_dropdown' && (
+        <div className={styles.section}>
+          <label className={styles.sectionLabel}>Category</label>
+          <div className={styles.rowsList}>
+            {config.rows.map((row: MatrixRow) => (
+              <div key={row.id} className={styles.rowItem}>
+                <input
+                  name={`row-${row.id}`}
+                  type="text"
+                  value={row.label}
+                  onChange={(e) => handleRowChange(row.id, e.target.value)}
+                  className={styles.rowInput}
+                />
+                <button
+                  className={styles.removeBtn}
+                  onClick={() => handleRemoveRow(row.id)}
+                  aria-label="Remove row"
+                >
+                  <IconClose size={14} color="#757575" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button className={styles.addBtn} onClick={handleAddRow}>
+            + Add rows
+          </button>
         </div>
-        <button className={styles.addBtn} onClick={handleAddRow}>
-          + Add rows
-        </button>
-      </div>
+      )}
 
       {question.type === 'matrix_dropdown' && question.choices && (
         <div className={styles.section}>

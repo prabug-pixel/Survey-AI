@@ -1334,6 +1334,7 @@ $col-actions: 60px;
   display: flex;
   align-items: center;
   gap: $spacing-8;
+  flex-wrap: wrap;
 }
 
 // Plain bordered pill for "from" value
@@ -1349,13 +1350,15 @@ $col-actions: 60px;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 32px;
+  min-width: 32px;
   height: 24px;
+  white-space: nowrap;
 }
 
 .historyArrow {
   font-size: $font-size-md;
   color: #9e9e9e;
+  flex-shrink: 0;
 }
 
 // Green bordered pill for "to" value
@@ -1371,6 +1374,7 @@ $col-actions: 60px;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 32px;
+  min-width: 32px;
   height: 24px;
+  white-space: nowrap;
 }

@@ -181,6 +181,15 @@
   min-width: 60px;
 }
 
+.matrixScaleLabels {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
 .matrixRow {
   display: flex;
   align-items: center;
@@ -195,15 +204,31 @@
 .matrixCell {
   flex: 1;
   display: flex;
+  align-items: center;
   justify-content: center;
-  min-width: 60px;
+  min-width: 48px;
+  height: 36px;
+  margin: 0 4px;
+  border: 1px solid $color-gray-150;
+  border-radius: 6px;
+  font-size: $font-size-sm;
+  color: $color-gray-800;
+  background: $color-white;
 }
 
-.radioVisual {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid $color-gray-400;
-  border-radius: 50%;
+.matrixCellEditable {
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-primary;
+  }
+}
+
+.matrixCellSelected {
+  border-color: $color-primary;
+  background: rgba($color-primary, 0.08);
+  color: $color-primary;
+  font-weight: 600;
 }
 
 // ── Contact info ──────────────────────────────────────────────

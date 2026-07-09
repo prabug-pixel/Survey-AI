@@ -14,6 +14,7 @@ import type {
   ExpirationConfig,
   AuditLogEntry,
   CampaignConfig,
+  AnswerValue,
 } from '../types/survey.types';
 import { SAMPLE_SURVEY } from '../constants/sampleSurvey';
 
@@ -22,11 +23,11 @@ export interface EditHistoryEntry {
   editedAt: string;
   editedBy: string;
   score: number;
-  changedQuestions: Array<{ questionId: string; questionText: string; from: string | number | string[]; to: string | number | string[] }>;
+  changedQuestions: Array<{ questionId: string; questionText: string; from: AnswerValue; to: AnswerValue }>;
 }
 
 export interface EditedResponseEntry {
-  answers: Array<{ questionId: string; value: string | number | string[] }>;
+  answers: Array<{ questionId: string; value: AnswerValue }>;
   score: number;
   editedAt: string;
   editedBy: string;
@@ -142,8 +143,9 @@ const surveySlice = createSlice({
               { id: uuid(), label: 'Row 2' },
               { id: uuid(), label: 'Row 3' },
             ],
-            columnScale: 3,
-            columnLabels: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral'],
+            columnScale: 5,
+            lowLabel: 'Poor',
+            highLabel: 'Excellent',
           };
         }
         if (newType === 'matrix_dropdown' && !question.matrixConfig) {
@@ -154,7 +156,6 @@ const surveySlice = createSlice({
               { id: uuid(), label: 'Category 3' },
             ],
             columnScale: 0,
-            columnLabels: [],
           };
           if (!question.choices) {
             question.choices = [
@@ -408,8 +409,9 @@ const surveySlice = createSlice({
             { id: uuid(), label: 'Row 2' },
             { id: uuid(), label: 'Row 3' },
           ],
-          columnScale: 3,
-          columnLabels: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral'],
+          columnScale: 5,
+          lowLabel: 'Poor',
+          highLabel: 'Excellent',
         };
       }
       if (qType === 'matrix_dropdown') {
@@ -420,7 +422,6 @@ const surveySlice = createSlice({
             { id: uuid(), label: 'Category 3' },
           ],
           columnScale: 0,
-          columnLabels: [],
         };
         newQ.choices = [
           { id: uuid(), label: 'Good' },
@@ -517,14 +518,20 @@ const surveySlice = createSlice({
     updateMatrixColumnScale(state, action: PayloadAction<{ questionId: string; scale: number }>) {
       const question = findQuestion(state.survey, action.payload.questionId);
       if (question?.matrixConfig) {
-        const scale = action.payload.scale;
-        question.matrixConfig.columnScale = scale;
-        const LABELS_MAP: Record<number, string[]> = {
-          3: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral'],
-          5: ['Extremely unsatisfactory', 'Unsatisfactory', 'Neutral', 'Satisfactory', 'Extremely satisfactory'],
-          7: ['Extremely unsatisfactory', 'Very unsatisfactory', 'Unsatisfactory', 'Neutral', 'Satisfactory', 'Very satisfactory', 'Extremely satisfactory'],
-        };
-        question.matrixConfig.columnLabels = LABELS_MAP[scale] || LABELS_MAP[3];
+        question.matrixConfig.columnScale = action.payload.scale;
+      }
+    },
+
+    // Matrix: update low/high rating labels
+    updateMatrixLabels(state, action: PayloadAction<{ questionId: string; lowLabel?: string; highLabel?: string }>) {
+      const question = findQuestion(state.survey, action.payload.questionId);
+      if (question?.matrixConfig) {
+        if (action.payload.lowLabel !== undefined) {
+          question.matrixConfig.lowLabel = action.payload.lowLabel;
+        }
+        if (action.payload.highLabel !== undefined) {
+          question.matrixConfig.highLabel = action.payload.highLabel;
+        }
       }
     },
 
