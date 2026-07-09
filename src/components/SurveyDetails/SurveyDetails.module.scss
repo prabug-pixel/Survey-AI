@@ -1337,6 +1337,12 @@ $col-actions: 60px;
   flex-wrap: wrap;
 }
 
+.historyDiffRowLabel {
+  font-size: $font-size-sm;
+  color: #616161;
+  min-width: 90px;
+}
+
 // Plain bordered pill for "from" value
 .historyFrom {
   font-size: $font-size-sm;

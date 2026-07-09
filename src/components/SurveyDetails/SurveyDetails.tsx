@@ -748,6 +748,26 @@ const SurveyDetails: React.FC = () => {
                           <div className={styles.historyDetails}>
                             {h.changedQuestions.map((c, j) => {
                               const q = allQuestions.find(q => q.id === c.questionId);
+                              const isMatrix = q?.matrixConfig
+                                && typeof c.from === 'object' && !Array.isArray(c.from)
+                                && typeof c.to === 'object' && !Array.isArray(c.to);
+                              if (isMatrix) {
+                                const fromRec = c.from as Record<string, number>;
+                                const toRec = c.to as Record<string, number>;
+                                return (
+                                  <div key={j} className={styles.historyDiffRow}>
+                                    <span className={styles.historyDiffLabel}>{c.questionText}</span>
+                                    {q!.matrixConfig!.rows.map(row => (
+                                      <div key={row.id} className={styles.historyFromTo}>
+                                        <span className={styles.historyDiffRowLabel}>{row.label}</span>
+                                        <span className={styles.historyFrom}>{fromRec[row.id] ?? '-'}</span>
+                                        <span className={styles.historyArrow}>→</span>
+                                        <span className={styles.historyTo}>{toRec[row.id] ?? '-'}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              }
                               return (
                                 <div key={j} className={styles.historyDiffRow}>
                                   <span className={styles.historyDiffLabel}>{c.questionText}</span>
