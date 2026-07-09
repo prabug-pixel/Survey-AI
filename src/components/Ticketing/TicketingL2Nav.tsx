@@ -15,7 +15,7 @@ interface NavLink {
 // the pages still mount at /ticketing/settings/{sources,assignment,sla}
 // so direct links work, but they're hidden from the L2 nav for v1.0.
 const SETTINGS_LINKS: NavLink[] = [
-  { label: 'Fields', path: '/ticketing/settings/fields' },
+  { label: 'Manage fields', path: '/ticketing/settings/fields' },
 ];
 
 // Agent productivity is kept as a back-pocket route — the page still mounts at

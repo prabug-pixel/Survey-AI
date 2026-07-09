@@ -72,7 +72,7 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
     }
   }, [isOpen, initial]);
 
-  const isDropdown = type === 'dropdown';
+  const isDropdown = type === 'dropdown' || type === 'multiSelect';
   const isValid =
     name.trim().length > 0 &&
     (!isDropdown || options.filter(o => o.trim()).length >= 1);
@@ -100,13 +100,18 @@ const CustomFieldEditor: React.FC<Props> = ({ isOpen, initial, onClose, onSave }
         onCloseModal: onClose,
         shouldCloseOnOverlayClick: true,
         shouldCloseOnEsc: true,
-        // Cap the popup height so a long Options list scrolls inside the
-        // body while the header and footer stay pinned.
+        // Cap the popup height and clip at that box — the library's
+        // default `overflow: initial` on `.content` let long content (e.g.
+        // a long Options list) spill outside the dialog box instead of
+        // scrolling. The header/footer are fixed flex children; `.body`
+        // (see CustomFieldEditor.module.scss) is the one that scrolls,
+        // so they stay pinned in place instead of scrolling with it.
         dialogStyles: {
           content: {
             maxHeight: 600,
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           },
         },
       }}

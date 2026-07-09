@@ -5,16 +5,26 @@
 // settings page share state without prop-drilling.
 // ============================================================
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import fieldTypeTextIcon from '../../assets/icons/FieldTypeText.svg';
+import fieldTypeLongTextIcon from '../../assets/icons/FieldTypeLongText.svg';
+import fieldTypeSingleSelectIcon from '../../assets/icons/FieldTypeSingleSelect.svg';
+import fieldTypeNumberIcon from '../../assets/icons/FieldTypeNumber.svg';
+import fieldTypeDateIcon from '../../assets/icons/FieldTypeDate.svg';
+import fieldTypeUserIcon from '../../assets/icons/FieldTypeUser.svg';
+import fieldTypeMultiSelectIcon from '../../assets/icons/FieldTypeMultiSelect.svg';
+import fieldTypeUrlIcon from '../../assets/icons/FieldTypeUrl.svg';
 
 // ── Custom fields ──────────────────────────────────────────
 export type CustomFieldType =
   | 'text'
   | 'longText'
   | 'dropdown'
+  | 'multiSelect'
   | 'number'
   | 'date'
   | 'checkbox'
-  | 'user';
+  | 'user'
+  | 'url';
 
 export type CustomFieldKind =
   // Customer-info system fields
@@ -891,21 +901,25 @@ export const useCustomFields = (): CustomFieldsContextValue => {
 export const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   text: 'Text',
   longText: 'Long text',
-  dropdown: 'Dropdown',
+  dropdown: 'Single-select',
+  multiSelect: 'Multi-select',
   number: 'Number',
   date: 'Date',
   checkbox: 'Checkbox',
-  user: 'User',
+  user: 'Users',
+  url: 'Url',
 };
 
-export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string }[] = [
-  { value: 'text',     label: 'Text' },
-  { value: 'longText', label: 'Long text' },
-  { value: 'dropdown', label: 'Dropdown' },
-  { value: 'number',   label: 'Number' },
-  { value: 'date',     label: 'Date' },
-  { value: 'checkbox', label: 'Checkbox' },
-  { value: 'user',     label: 'User' },
+export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string; img?: string }[] = [
+  { value: 'text',        label: 'Text',                     img: fieldTypeTextIcon },
+  { value: 'number',       label: 'Number',                  img: fieldTypeNumberIcon },
+  { value: 'date',         label: 'Date',                    img: fieldTypeDateIcon },
+  { value: 'longText',     label: 'Long text',                img: fieldTypeLongTextIcon },
+  { value: 'multiSelect',  label: 'Multi-select',  img: fieldTypeMultiSelectIcon },
+  { value: 'dropdown',     label: 'Single-select',            img: fieldTypeSingleSelectIcon },
+  { value: 'user',         label: 'Users',                    img: fieldTypeUserIcon },
+  { value: 'url',          label: 'Url',                      img: fieldTypeUrlIcon },
+  { value: 'checkbox',     label: 'Checkbox' },
 ];
 
 export const SOURCE_CHANNEL_LABELS: Record<SourceChannel, string> = {

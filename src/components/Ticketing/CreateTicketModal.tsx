@@ -11,6 +11,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '@birdeye/elemental/core/atoms/Modal';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
+import Multiselect from '@birdeye/elemental/core/atoms/Multiselect';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Button from '@birdeye/elemental/core/atoms/Button';
@@ -31,7 +32,7 @@ interface Props {
 }
 
 /** Values keyed by CustomField.id — mirrors TicketRecord.customValues. */
-export type TicketDraftValues = Record<string, string | boolean>;
+export type TicketDraftValues = Record<string, string | boolean | string[]>;
 
 // User-picker options. Activity modal already uses the same shape, so
 // kind='user' fields render against this list in both places.
@@ -62,7 +63,7 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
     if (isOpen) setValues({});
   }, [isOpen]);
 
-  const setValue = (id: string, v: string | boolean) =>
+  const setValue = (id: string, v: string | boolean | string[]) =>
     setValues(prev => ({ ...prev, [id]: v }));
 
   // Required-field check, derived directly from the shared config.
@@ -174,7 +175,7 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
 // added by admins automatically flow into a clean 2-col layout with
 // no trailing whitespace gaps.
 const isIntrinsicallyFull = (field: CustomField) =>
-  field.type === 'longText' || field.type === 'checkbox';
+  field.type === 'longText' || field.type === 'checkbox' || field.type === 'multiSelect';
 
 const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
   const flags = sectionFields.map(isIntrinsicallyFull);
@@ -213,8 +214,8 @@ const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
 // checkboxes span the full row; everything else fits the 2-col grid.
 interface FieldRowProps {
   field: CustomField;
-  value: string | boolean | undefined;
-  onChange: (v: string | boolean) => void;
+  value: string | boolean | string[] | undefined;
+  onChange: (v: string | boolean | string[]) => void;
   /** When true, render this field across both grid columns. */
   forceFullWidth?: boolean;
 }
@@ -253,8 +254,8 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, value, onChange, forceFullWi
 
 const renderControl = (
   field: CustomField,
-  value: string | boolean | undefined,
-  onChange: (v: string | boolean) => void,
+  value: string | boolean | string[] | undefined,
+  onChange: (v: string | boolean | string[]) => void,
 ) => {
   switch (field.type) {
     case 'dropdown': {
@@ -266,6 +267,27 @@ const renderControl = (
           options={opts}
           selected={typeof value === 'string' ? value : ''}
           onChange={(option) => onChange(String(option.value))}
+          showSearch={false}
+          isAeroDesign
+        />
+      );
+    }
+    case 'multiSelect': {
+      const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
+      const selectedValues = Array.isArray(value) ? value : [];
+      const selectedOptions = opts.filter(o => selectedValues.includes(String(o.value)));
+      return (
+        <Multiselect
+          name={`new-${field.id}`}
+          label={field.name}
+          options={opts}
+          selected={selectedOptions}
+          onOptionClickCb={(checked, option) => {
+            const next = checked
+              ? [...selectedValues, String(option.value)]
+              : selectedValues.filter(v => v !== String(option.value));
+            onChange(next);
+          }}
           showSearch={false}
           isAeroDesign
         />
@@ -305,14 +327,15 @@ const renderControl = (
         />
       );
     case 'number':
+    case 'url':
     case 'text':
     default:
       return (
         <FormInput
           name={`new-${field.id}`}
-          type={field.type === 'number' ? 'number' : 'text'}
+          type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'}
           value={typeof value === 'string' ? value : ''}
-          placeholder={field.type === 'number' ? 'Number' : 'Text'}
+          placeholder={field.type === 'number' ? 'Number' : field.type === 'url' ? 'https://' : 'Text'}
           onChange={(_e: unknown, v: string) => onChange(String(v ?? ''))}
         />
       );

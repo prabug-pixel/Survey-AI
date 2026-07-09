@@ -72,8 +72,43 @@ declare module '@birdeye/elemental/core/atoms/SingleSelect' {
     customSize?: string;
     largeSelectBox?: boolean;
     showEllipsis?: boolean;
+    /** Lay out option `img` icons inline beside labels (adds `show-image-in-selection`). */
+    showImageInSelection?: boolean;
   }
   export default class SingleSelect extends React.Component<SingleSelectProps> {}
+}
+
+declare module '@birdeye/elemental/core/atoms/Multiselect' {
+  import React from 'react';
+  interface MultiselectOption {
+    value: string | number;
+    label: string;
+    [key: string]: unknown;
+  }
+  interface MultiselectProps {
+    options: MultiselectOption[] | Record<string, MultiselectOption[]>;
+    selected?: MultiselectOption[];
+    label?: string;
+    onOptionClickCb?: (checked: boolean, option: MultiselectOption) => void;
+    onBlur?: (
+      selectedOptions: MultiselectOption[],
+      selectedValues: (string | number)[],
+      excludeBizIds?: unknown,
+      excludeBizOptions?: unknown
+    ) => void;
+    emptyPlaceholder?: string;
+    disabled?: boolean;
+    showSearch?: boolean;
+    size?: string;
+    name?: string;
+    className?: string;
+    selectionLimit?: number;
+    ctaButtonsEnabled?: boolean;
+    enableSelectNone?: boolean;
+    sortSelected?: boolean;
+    isAeroDesign?: boolean;
+  }
+  export default class Multiselect extends React.Component<MultiselectProps> {}
 }
 
 declare module '@birdeye/elemental/core/atoms/FormInput' {

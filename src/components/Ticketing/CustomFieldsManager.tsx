@@ -14,6 +14,7 @@ import {
   IconEdit,
   IconTrash,
   IconMoreVert,
+  IconTool,
 } from '../../shared/Icons/Icons';
 import AeroTable from '../../shared/components/AeroTable';
 import AeroBanner from '../../shared/components/AeroBanner';
@@ -175,7 +176,11 @@ const CustomFieldsManager: React.FC = () => {
       render: field => (
         <span className={styles.fieldName}>
           {field.name}
-          {isCustomField(field) && <span className={styles.customTag}>Custom</span>}
+          {isCustomField(field) && (
+            <span className={styles.customIcon} title="Custom field">
+              <IconTool />
+            </span>
+          )}
         </span>
       ),
     },
@@ -294,7 +299,11 @@ const CustomFieldsManager: React.FC = () => {
                     <td className={styles.rearrangeTd}>
                       <span className={styles.fieldName}>
                         {field.name}
-                        {isCustomField(field) && <span className={styles.customTag}>Custom</span>}
+                        {isCustomField(field) && (
+            <span className={styles.customIcon} title="Custom field">
+              <IconTool />
+            </span>
+          )}
                       </span>
                     </td>
                     <td className={styles.rearrangeTd}>{FIELD_TYPE_LABELS[field.type]}</td>

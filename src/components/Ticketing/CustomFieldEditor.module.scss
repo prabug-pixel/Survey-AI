@@ -6,7 +6,7 @@
   justify-content: space-between;
   margin: (-$spacing-12) (-$spacing-12) $spacing-16;
   padding: 0 0 $spacing-12;
-  border-bottom: 1px solid $color-border-light;
+  border-bottom: none;
   flex-shrink: 0;
 }
 
@@ -33,6 +33,11 @@
   &:hover { background: $color-gray-100; }
 }
 
+// The dialog's `.content` box (see CustomFieldEditor.tsx dialogStyles)
+// caps at 600px tall and clips overflow, with header/footer as fixed
+// flex children — so `.body` is the one that scrolls once the form (e.g.
+// a long Options list) grows past the available height, and the header
+// and footer never move.
 .body {
   flex: 1;
   min-height: 0;
@@ -73,6 +78,8 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-8;
+  max-height: 260px;
+  overflow-y: auto;
 }
 
 .optionRow {

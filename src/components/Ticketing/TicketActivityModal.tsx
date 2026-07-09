@@ -11,6 +11,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Modal from '@birdeye/elemental/core/atoms/Modal';
 import SingleSelect from '@birdeye/elemental/core/atoms/SingleSelect';
+import Multiselect from '@birdeye/elemental/core/atoms/Multiselect';
 import FormInput from '@birdeye/elemental/core/atoms/FormInput';
 import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Button from '@birdeye/elemental/core/atoms/Button';
@@ -170,8 +171,8 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
     });
     return ordered.filter(Boolean);
   }, [customFields, tableColumnOrder]);
-  const [customValues, setCustomValues] = useState<Record<string, string | boolean>>({});
-  const setCustomValue = (id: string, v: string | boolean) =>
+  const [customValues, setCustomValues] = useState<Record<string, string | boolean | string[]>>({});
+  const setCustomValue = (id: string, v: string | boolean | string[]) =>
     setCustomValues(prev => ({ ...prev, [id]: v }));
 
   // Reset local controls when the active ticket changes. Pull in any
@@ -651,8 +652,8 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
 // field's `type` (text, dropdown, number, etc.).
 interface CustomFieldControlProps {
   field: CustomField;
-  value: string | boolean | undefined;
-  onChange: (v: string | boolean) => void;
+  value: string | boolean | string[] | undefined;
+  onChange: (v: string | boolean | string[]) => void;
 }
 
 const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, onChange }) => {
@@ -675,6 +676,30 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
             options={opts}
             selected={typeof value === 'string' ? value : ''}
             onChange={(option) => onChange(String(option.value))}
+            showSearch={false}
+            isAeroDesign
+          />
+        </div>
+      );
+    }
+    case 'multiSelect': {
+      const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
+      const selectedValues = Array.isArray(value) ? value : [];
+      const selectedOptions = opts.filter(o => selectedValues.includes(String(o.value)));
+      return (
+        <div className={styles.sideField}>
+          {label}
+          <Multiselect
+            name={`cf-${field.id}`}
+            label={field.name}
+            options={opts}
+            selected={selectedOptions}
+            onOptionClickCb={(checked, option) => {
+              const next = checked
+                ? [...selectedValues, String(option.value)]
+                : selectedValues.filter(v => v !== String(option.value));
+              onChange(next);
+            }}
             showSearch={false}
             isAeroDesign
           />
@@ -742,6 +767,7 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
         </div>
       );
     case 'number':
+    case 'url':
     case 'text':
     default:
       return (
@@ -749,9 +775,9 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
           {label}
           <FormInput
             name={`cf-${field.id}`}
-            type={field.type === 'number' ? 'number' : 'text'}
+            type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'}
             value={typeof value === 'string' ? value : ''}
-            placeholder={field.description ?? ''}
+            placeholder={field.type === 'url' ? 'https://' : (field.description ?? '')}
             onChange={(_e: unknown, v: string) => onChange(String(v ?? ''))}
           />
         </div>

@@ -3,6 +3,7 @@
 // ============================================================
 
 import React from 'react';
+import customFieldBuildIcon from '../../assets/icons/CustomFieldBuild.svg';
 
 interface IconProps {
   size?: number;
@@ -331,6 +332,20 @@ export const IconSearch: React.FC<IconProps> = ({ size = 20, color = 'currentCol
     <circle cx="11" cy="11" r="7" stroke={color} strokeWidth="1.5" />
     <path d="M21 21l-4.35-4.35" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
   </svg>
+);
+
+// Build / wrench glyph — flags business-added custom fields in the Manage
+// fields list. Renders the provided asset as-is (no fill/stroke overrides).
+export const IconTool: React.FC<IconProps> = ({ size = 14, className }) => (
+  <img
+    src={customFieldBuildIcon}
+    width={size}
+    height={size}
+    className={className}
+    alt=""
+    aria-hidden="true"
+    draggable={false}
+  />
 );
 
 export const IconPlusCircle: React.FC<IconProps> = ({ size = 20, color = '#1976d2', className }) => (

@@ -32,3 +32,51 @@
 [class*='Breadcrumb__label-outside__'] {
   margin-bottom: 0;
 }
+
+/* Tailwind Preflight sets `img { display: block; max-width: 100%; height: auto }`,
+ * which breaks elemental SingleSelect's inline option icons (the leading `img`
+ * next to an option label) — the icon stretches full-width and wraps onto its
+ * own line above the label instead of sitting inline beside it.
+ *
+ * Elemental also sets `.tootip-parent > span { width: 100% }` unless the list
+ * has `show-image-in-selection`; that squeezes the label into a few characters.
+ * Mirror elemental's image-option layout so icon + label stay on one row. */
+[class*='SingleSelectView'] .tootip-parent,
+.icon.tootip-parent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  max-width: 100%;
+}
+
+/* elemental has its own deeply-scoped selector for this same span —
+ * `.SingleSelectView__filter-dropdown__xxx ul .SingleSelectView__tooltip-wrapper__xxx
+ * .tootip-parent > span { width: 100% }` — which chains 4 classes and beats the
+ * 2-class override above on specificity alone, silently winning back the
+ * full-width layout and squeezing the label span to 0. `!important` here is
+ * deliberate: there's no selector we can author against elemental's hashed,
+ * build-specific class names that's guaranteed to out-specificity theirs. */
+[class*='SingleSelectView'] .tootip-parent > span,
+.icon.tootip-parent > span {
+  width: auto !important;
+  max-width: none !important;
+  flex-shrink: 0;
+}
+
+[class*='SingleSelectView'] .tootip-parent > span[class*='text'],
+.icon.tootip-parent > span[class*='text'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none !important;
+  width: auto !important;
+}
+
+.tootip-parent > span > img,
+[class*='SingleSelectView'] .tootip-parent img {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  max-width: none;
+  vertical-align: middle;
+}
