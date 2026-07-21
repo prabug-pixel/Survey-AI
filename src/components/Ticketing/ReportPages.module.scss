@@ -58,22 +58,49 @@ $aero-border:    #eaeaea;
 
 .cardHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: $spacing-12;
 }
 
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+  min-width: 0;
+}
+
 // Figma: card "Title" = 14 px, Inter SemiBold / #212121.
+// Sentence-style titles (with an inline field dropdown) use normal
+// inline flow so "broken down by Severity ▾" wraps as a unit instead
+// of flex-orphaning the dropdown onto its own line.
 .cardTitle {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   color: #212121;
   margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-8;
   letter-spacing: -0.28px;
   line-height: 1.4;
+}
+
+.cardTitleWithBadge {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-8;
+}
+
+// Keeps "broken down by {field ▾}" together when the title wraps.
+.titleBreakdown {
+  white-space: nowrap;
+}
+
+// Description line under a sentence-style title (e.g. "What is the ticket
+// count …, broken down by Severity ▾").
+.cardSubtitle {
+  font-size: $font-size-sm;
+  color: #555;
+  margin: 0;
 }
 
 .cardBadge {
@@ -192,4 +219,83 @@ $aero-border:    #eaeaea;
 .dateCell {
   color: #212121;
   font-weight: 400;
+}
+
+.mutedCell {
+  color: $color-gray-500;
+}
+
+// ── Inline custom-field dropdown (Ticket count widgets) ─────
+// Lets the user pick which custom field's values become the table's
+// columns right from the card title — e.g. "…broken down by Severity ▾".
+.inlineDropdown {
+  position: relative;
+  display: inline;
+}
+
+.inlineDropdownTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: inherit;
+  letter-spacing: inherit;
+  vertical-align: baseline;
+  color: $color-primary;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+    border-radius: $radius-sm;
+  }
+}
+
+.inlineDropdownMenu {
+  position: absolute;
+  top: calc(100% + #{$spacing-4});
+  left: 0;
+  z-index: 20;
+  min-width: 200px;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: $spacing-4;
+  list-style: none;
+  background: $color-white;
+  border: 1px solid $aero-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-dropdown;
+}
+
+.inlineDropdownOption {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: $spacing-8 $spacing-12;
+  border-radius: $radius-sm;
+  font-size: $font-size-md;
+  font-weight: 400;
+  color: #212121;
+  cursor: pointer;
+
+  &:hover { background: $color-gray-50; }
+}
+
+.inlineDropdownOptionActive {
+  font-weight: 600;
+  color: $color-primary;
+  background: $color-primary-light;
+
+  &:hover { background: $color-primary-light; }
 }

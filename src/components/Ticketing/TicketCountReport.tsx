@@ -7,12 +7,14 @@
 // shared AeroBarChart primitive — no bespoke chart code lives
 // here.
 // ============================================================
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import AeroTable from '../../shared/components/AeroTable';
 import type { AeroColumn } from '../../shared/components/AeroTable';
 import AeroBarChart, { AERO_CHART_COLORS } from '../../shared/components/AeroBarChart';
 import type { AeroBarDatum, AeroBarSeries } from '../../shared/components/AeroBarChart';
-import { IconCustomize, IconMoreVertical } from '../../shared/Icons/Icons';
+import { IconCustomize, IconMoreVertical, IconChevronDown } from '../../shared/Icons/Icons';
+import { useCustomFields, isCustomField } from './CustomFieldsContext';
+import type { CustomField } from './CustomFieldsContext';
 import styles from './ReportPages.module.scss';
 
 const formatCount = (n: number): string => {
@@ -147,55 +149,318 @@ const CLOSED_ROWS: ClosedRow[] = [
   { date: 'Apr 13, 2026', values: [16, 12, 14, 10, 15, 11, 12] },
 ];
 
+// ── Custom-field breakdown widgets — row axes ─────────────────────
+// Reuses the same dates as the "closed by user" table above so the
+// three breakdown widgets read as one consistent reporting window.
+const OVER_TIME_PERIODS = CLOSED_ROWS.map(r => r.date);
+
+const ASSIGNEES = ['Abhinav R.', 'Priyanshi', 'Sahil Gupta', 'Prabu G', 'Daniela Cruz', 'Brad Pierce'];
+
+// Deterministic fake counts so a widget looks lived-in but never changes
+// between renders or when the same field is re-selected.
+const pseudoCount = (a: string, b: string, mod = 40): number => {
+  const s = `${a}::${b}`;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h) % mod;
+};
+
+// Some custom fields (Root cause has 70+ options) would otherwise blow the
+// table out to dozens of columns. Cap it the same way AgentProductivityReport
+// compresses its date-column long tail: keep the highest-volume values as
+// their own columns and fold everything past the cap into "Other".
+const MAX_VALUE_COLUMNS = 8;
+
+const truncateLabel = (s: string, max = 24): string => (s.length > max ? `${s.slice(0, max - 1)}…` : s);
+
+interface BreakdownRow {
+  row: string;
+  cells: number[];
+  total: number;
+}
+
+interface InlineFieldDropdownProps {
+  value: CustomField | undefined;
+  options: CustomField[];
+  onChange: (id: string) => void;
+}
+
+// Sentence-style dropdown trigger — renders inline inside a card title
+// (e.g. "…broken down by Severity ▾") so switching the breakdown field
+// happens right in the heading instead of a separate toolbar control.
+const InlineFieldDropdown: React.FC<InlineFieldDropdownProps> = ({ value, options, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [open]);
+
+  return (
+    <span className={styles.inlineDropdown} ref={wrapRef}>
+      <button
+        type="button"
+        className={styles.inlineDropdownTrigger}
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {value?.name ?? 'Select field'}
+        <IconChevronDown size={14} color="currentColor" />
+      </button>
+      {open && (
+        <ul className={styles.inlineDropdownMenu} role="listbox">
+          {options.map(f => (
+            <li key={f.id}>
+              <button
+                type="button"
+                className={`${styles.inlineDropdownOption} ${f.id === value?.id ? styles.inlineDropdownOptionActive : ''}`}
+                role="option"
+                aria-selected={f.id === value?.id}
+                onClick={() => { onChange(f.id); setOpen(false); }}
+              >
+                {f.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </span>
+  );
+};
+
+interface FieldBreakdownCardProps {
+  /** Sentence fragment completing "What is the ticket count …" (e.g. "over time"). */
+  titlePrefix: string;
+  /** Plain-text title for aria-labels — the sentence with the default field name filled in. */
+  ariaTitle: string;
+  /** Description line rendered under the title. */
+  subtitle: string;
+  /** Header label for the row-axis column (e.g. "Date", "Location", "Assignee"). */
+  rowColumnLabel: string;
+  /** Row axis values. */
+  rows: string[];
+  /** Field id pre-selected on first render. */
+  defaultFieldId: string;
+  range?: string;
+}
+
+// Generic table widget: rows = a fixed axis (time / location / assignee),
+// columns = the distinct values of whichever custom field the user picks
+// via the inline dropdown embedded in the title. Powers all three
+// "reporting based on custom fields" widgets below with one implementation.
+const FieldBreakdownCard: React.FC<FieldBreakdownCardProps> = ({
+  titlePrefix,
+  ariaTitle,
+  subtitle,
+  rowColumnLabel,
+  rows,
+  defaultFieldId,
+  range,
+}) => {
+  const { fields } = useCustomFields();
+
+  // Only fields with a fixed, known value set can become columns.
+  const selectableFields = useMemo(
+    () => fields.filter(f => isCustomField(f) && (f.type === 'dropdown' || f.type === 'multiSelect') && (f.options?.length ?? 0) > 0),
+    [fields],
+  );
+
+  const [fieldId, setFieldId] = useState(defaultFieldId);
+  const selectedField = selectableFields.find(f => f.id === fieldId) ?? selectableFields[0];
+  const values = useMemo(() => selectedField?.options ?? [], [selectedField]);
+
+  // When a field has more values than MAX_VALUE_COLUMNS, keep the
+  // highest-volume ones as columns and collapse the rest into "Other".
+  const { displayValues, hasOtherColumn } = useMemo(() => {
+    if (values.length <= MAX_VALUE_COLUMNS) return { displayValues: values, hasOtherColumn: false };
+    const fieldKey = selectedField?.id ?? '';
+    const byVolume = [...values].sort(
+      (a, b) => rows.reduce((acc, row) => acc + pseudoCount(row, `${fieldKey}:${b}`), 0)
+        - rows.reduce((acc, row) => acc + pseudoCount(row, `${fieldKey}:${a}`), 0),
+    );
+    const kept = new Set(byVolume.slice(0, MAX_VALUE_COLUMNS - 1));
+    return { displayValues: values.filter(v => kept.has(v)), hasOtherColumn: true };
+  }, [values, rows, selectedField]);
+
+  const otherValues = useMemo(
+    () => values.filter(v => !displayValues.includes(v)),
+    [values, displayValues],
+  );
+
+  const tableRows = useMemo<BreakdownRow[]>(() => {
+    const fieldKey = selectedField?.id ?? '';
+    return rows.map(row => {
+      const cells = displayValues.map(v => pseudoCount(row, `${fieldKey}:${v}`));
+      if (hasOtherColumn) {
+        cells.push(otherValues.reduce((acc, v) => acc + pseudoCount(row, `${fieldKey}:${v}`), 0));
+      }
+      const total = cells.reduce((a, b) => a + b, 0);
+      return { row, cells, total };
+    });
+  }, [rows, displayValues, otherValues, hasOtherColumn, selectedField]);
+
+  const columns = useMemo<AeroColumn<BreakdownRow>[]>(() => {
+    const cols: AeroColumn<BreakdownRow>[] = [
+      {
+        key: 'row',
+        label: rowColumnLabel,
+        minWidth: 160,
+        sortable: true,
+        sortValue: r => r.row.toLowerCase(),
+        render: r => <span className={styles.dateCell}>{r.row}</span>,
+      },
+    ];
+    const columnLabels = hasOtherColumn ? [...displayValues, 'Other'] : displayValues;
+    columnLabels.forEach((v, idx) => {
+      cols.push({
+        key: `v-${idx}`,
+        label: v,
+        // Some fields (Root cause) carry long descriptive option strings —
+        // truncate the header so columns don't visually collide, and keep
+        // the full text reachable via the native title tooltip.
+        renderHeader: () => <span title={v}>{truncateLabel(v)}</span>,
+        align: 'right',
+        minWidth: 100,
+        sortable: true,
+        sortValue: r => r.cells[idx] ?? 0,
+        render: r => {
+          const n = r.cells[idx] ?? 0;
+          return n === 0 ? <span className={styles.mutedCell}>—</span> : n;
+        },
+      });
+    });
+    cols.push({
+      key: 'total',
+      label: 'Total',
+      align: 'right',
+      minWidth: 90,
+      sortable: true,
+      sortValue: r => r.total,
+      render: r => r.total,
+    });
+    return cols;
+  }, [displayValues, hasOtherColumn, rowColumnLabel]);
+
+  const grandTotal = tableRows.reduce((acc, r) => acc + r.total, 0);
+
+  const titleNode = (
+    <>
+      What is the ticket count {titlePrefix},{' '}
+      <span className={styles.titleBreakdown}>
+        broken down by{' '}
+        <InlineFieldDropdown value={selectedField} options={selectableFields} onChange={setFieldId} />
+      </span>
+    </>
+  );
+
+  const subtitleNode = hasOtherColumn
+    ? `${subtitle} Showing the top ${MAX_VALUE_COLUMNS - 1} of ${values.length} values — the rest are grouped into "Other".`
+    : subtitle;
+
+  return (
+    <ReportCard
+      title={titleNode}
+      ariaTitle={ariaTitle}
+      range={range}
+      subtitle={subtitleNode}
+      headline={[{ value: String(grandTotal), label: 'Total tickets' }]}
+    >
+      <AeroTable<BreakdownRow>
+        ariaLabel={ariaTitle}
+        columns={columns}
+        data={tableRows}
+        getRowKey={r => r.row}
+        hoverable
+        flush
+        emptyTitle="No tickets in this range"
+      />
+    </ReportCard>
+  );
+};
+
 interface ReportCardProps {
-  title: string;
+  title: React.ReactNode;
+  /** Plain-text title used for aria-labels when `title` is rich content. Falls back to `title` when omitted (title must then be a string). */
+  ariaTitle?: string;
   badge?: string;
+  /** Description line rendered under the title. */
+  subtitle?: React.ReactNode;
   headline: { value: string; label: string }[];
   range?: string;
   children: React.ReactNode;
 }
 
-const ReportCard: React.FC<ReportCardProps> = ({ title, badge, headline, range = 'Last 12 months', children }) => (
-  <section className={styles.reportCard}>
-    <header className={styles.cardHeader}>
-      <h2 className={styles.cardTitle}>
-        {title}
-        {badge && <span className={styles.cardBadge}>{badge}</span>}
-      </h2>
-      <div className={styles.headerActions}>
-        <button className={styles.rangeChip} type="button">{range}</button>
-        <button
-          className={styles.iconBtn}
-          type="button"
-          aria-label={`Customize ${title}`}
-        >
-          <IconCustomize size={16} color="#212121" />
-        </button>
-        <button
-          className={styles.iconBtn}
-          type="button"
-          aria-label={`More options for ${title}`}
-          aria-haspopup="menu"
-        >
-          <IconMoreVertical size={16} color="#212121" />
-        </button>
-      </div>
-    </header>
-
-    <div className={styles.headlineRow}>
-      {headline.map(h => (
-        <div key={h.label} className={styles.headlineItem}>
-          <span className={styles.headlineValue}>{h.value}</span>
-          <span className={styles.headlineLabel}>{h.label}</span>
+const ReportCard: React.FC<ReportCardProps> = ({
+  title,
+  ariaTitle,
+  badge,
+  subtitle,
+  headline,
+  range = 'Last 12 months',
+  children,
+}) => {
+  const a11yTitle = ariaTitle ?? (typeof title === 'string' ? title : '');
+  return (
+    <section className={styles.reportCard}>
+      <header className={styles.cardHeader}>
+        <div className={styles.titleGroup}>
+          <h2 className={badge ? `${styles.cardTitle} ${styles.cardTitleWithBadge}` : styles.cardTitle}>
+            {title}
+            {badge && <span className={styles.cardBadge}>{badge}</span>}
+          </h2>
+          {subtitle && <p className={styles.cardSubtitle}>{subtitle}</p>}
         </div>
-      ))}
-    </div>
+        <div className={styles.headerActions}>
+          <button className={styles.rangeChip} type="button">{range}</button>
+          <button
+            className={styles.iconBtn}
+            type="button"
+            aria-label={`Customize ${a11yTitle}`}
+          >
+            <IconCustomize size={16} color="#212121" />
+          </button>
+          <button
+            className={styles.iconBtn}
+            type="button"
+            aria-label={`More options for ${a11yTitle}`}
+            aria-haspopup="menu"
+          >
+            <IconMoreVertical size={16} color="#212121" />
+          </button>
+        </div>
+      </header>
 
-    <div className={styles.chartArea}>{children}</div>
-  </section>
-);
+      <div className={styles.headlineRow}>
+        {headline.map(h => (
+          <div key={h.label} className={styles.headlineItem}>
+            <span className={styles.headlineValue}>{h.value}</span>
+            <span className={styles.headlineLabel}>{h.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.chartArea}>{children}</div>
+    </section>
+  );
+};
 
 const TicketCountReport: React.FC = () => {
+  const { fields } = useCustomFields();
+
+  // Location rows for the "by location/hierarchy" breakdown widget come
+  // straight from the configured Location field's option list, so the
+  // widget always matches whatever locations Settings > Fields defines.
+  const locationRows = useMemo(
+    () => fields.find(f => f.kind === 'location')?.options ?? [],
+    [fields],
+  );
+
   // Columns for the AeroTable — one per user plus the date column.
   // Totals row is appended manually (AeroTable doesn't have a built-in
   // summary row, and the screenshot expects bold totals at the bottom).
@@ -365,6 +630,34 @@ const TicketCountReport: React.FC = () => {
           summaryRow={['Total', ...totals]}
         />
       </ReportCard>
+
+      <FieldBreakdownCard
+        titlePrefix="over time"
+        ariaTitle="What is the ticket count over time, broken down by Severity"
+        subtitle="Track ticket volume trends over time, segmented by the selected field."
+        rowColumnLabel="Date"
+        rows={OVER_TIME_PERIODS}
+        defaultFieldId="cf-severity"
+        range="Last 30 days"
+      />
+
+      <FieldBreakdownCard
+        titlePrefix="by location"
+        ariaTitle="What is the ticket count by location, broken down by Severity"
+        subtitle="Compare ticket volume across locations, segmented by the selected field."
+        rowColumnLabel="Location"
+        rows={locationRows}
+        defaultFieldId="cf-severity"
+      />
+
+      <FieldBreakdownCard
+        titlePrefix="by assignee"
+        ariaTitle="What is the ticket count by assignee, broken down by Severity"
+        subtitle="Compare ticket volume across assignees, segmented by the selected field."
+        rowColumnLabel="Assignee"
+        rows={ASSIGNEES}
+        defaultFieldId="cf-severity"
+      />
     </div>
   );
 };

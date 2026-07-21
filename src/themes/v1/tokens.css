@@ -6,7 +6,7 @@
 :root {
   /* Brand (also aligned with src/styles/theme.css --primary) */
   --token-brand: #2552ed;
-  --token-primary-light: #1e44cc;
+  --token-primary-light: #1976d2;
   --token-primary-dark: #2952e3;
 
   /* App shell (L1 strip + main chrome) */
