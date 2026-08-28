@@ -1,0 +1,117 @@
+@use '../../styles/variables' as *;
+
+$tile-size: 104px;
+
+.tileGrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: $spacing-12;
+  border-radius: $radius-lg;
+  transition: background $transition-fast;
+}
+
+.tileGridDragOver {
+  background: $color-primary-light;
+}
+
+.tile {
+  position: relative;
+  width: $tile-size;
+  height: $tile-size;
+  flex-shrink: 0;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: $color-gray-100;
+
+  &:hover .tileRemove,
+  &:focus-within .tileRemove {
+    opacity: 1;
+  }
+}
+
+.tileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tileDoc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-8;
+  width: 100%;
+  height: 100%;
+  padding: $spacing-8;
+}
+
+.tileDocName {
+  max-width: 100%;
+  font-size: $font-size-xs;
+  color: $color-gray-700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tileRemove {
+  position: absolute;
+  top: $spacing-4;
+  right: $spacing-4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: $radius-full;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity $transition-fast, background $transition-fast;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.tileAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $tile-size;
+  height: $tile-size;
+  flex-shrink: 0;
+  border: 1px dashed $color-gray-400;
+  border-radius: $radius-lg;
+  background: $color-gray-50;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: $color-primary;
+    background: $color-primary-light;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.tileAddCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid $color-gray-400;
+  border-radius: $radius-full;
+}
+
+.hiddenInput {
+  display: none;
+}

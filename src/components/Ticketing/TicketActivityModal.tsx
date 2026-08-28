@@ -32,8 +32,9 @@ import {
   IconArrowLeft,
 } from '../../shared/Icons/Icons';
 import { useCustomFields } from './CustomFieldsContext';
-import type { CustomField } from './CustomFieldsContext';
+import type { CustomField, CustomFieldFileValue } from './CustomFieldsContext';
 import TicketDateField from './TicketDateField';
+import TicketFileField from './TicketFileField';
 import styles from './TicketActivityModal.module.scss';
 
 export interface TicketActivityEntry {
@@ -59,7 +60,7 @@ export interface TicketRecord {
   channel: string;
   activity: TicketActivityEntry[];
   /** Pre-populated values for built-in custom fields (severity, sentiment, etc.). */
-  customValues?: Record<string, string | boolean>;
+  customValues?: Record<string, string | boolean | CustomFieldFileValue[]>;
   /** Review-only fields. Set on tickets that came in from a review source
    *  (Google, Facebook, etc.) so the drawer swaps the bulb/title treatment
    *  for the red-avatar + star-row header. Leave undefined on other types. */
@@ -173,8 +174,8 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
     return ordered.filter(Boolean);
   }, [customFields, tableColumnOrder]);
 
-  const [customValues, setCustomValues] = useState<Record<string, string | boolean>>({});
-  const setCustomValue = (id: string, v: string | boolean) =>
+  const [customValues, setCustomValues] = useState<Record<string, string | boolean | CustomFieldFileValue[]>>({});
+  const setCustomValue = (id: string, v: string | boolean | CustomFieldFileValue[]) =>
     setCustomValues(prev => ({ ...prev, [id]: v }));
 
   // Accordion open/close state — all open by default.
@@ -798,8 +799,8 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
 // ── CustomFieldControl ──────────────────────────────────────
 interface CustomFieldControlProps {
   field: CustomField;
-  value: string | boolean | undefined;
-  onChange: (v: string | boolean) => void;
+  value: string | boolean | CustomFieldFileValue[] | undefined;
+  onChange: (v: string | boolean | CustomFieldFileValue[]) => void;
 }
 
 const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, onChange }) => {
@@ -884,6 +885,17 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
             value={typeof value === 'string' ? value : ''}
             onChange={onChange}
             placeholder="MM/DD/YYYY"
+          />
+        </div>
+      );
+    case 'files':
+      return (
+        <div className={styles.sideField}>
+          {label}
+          <TicketFileField
+            name={`cf-${field.id}`}
+            value={Array.isArray(value) ? value : []}
+            onChange={onChange}
           />
         </div>
       );

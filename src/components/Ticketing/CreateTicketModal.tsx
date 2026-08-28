@@ -16,12 +16,13 @@ import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import { IconClose } from '../../shared/Icons/Icons';
 import TicketDateField from './TicketDateField';
+import TicketFileField from './TicketFileField';
 import {
   useCustomFields,
   FIELD_SECTION_LABELS,
   FIELD_SECTION_ORDER,
 } from './CustomFieldsContext';
-import type { CustomField, FieldSection } from './CustomFieldsContext';
+import type { CustomField, CustomFieldFileValue, FieldSection } from './CustomFieldsContext';
 import styles from './CreateTicketModal.module.scss';
 
 interface Props {
@@ -31,7 +32,7 @@ interface Props {
 }
 
 /** Values keyed by CustomField.id — mirrors TicketRecord.customValues. */
-export type TicketDraftValues = Record<string, string | boolean>;
+export type TicketDraftValues = Record<string, string | boolean | CustomFieldFileValue[]>;
 
 // User-picker options. Activity modal already uses the same shape, so
 // kind='user' fields render against this list in both places.
@@ -62,7 +63,7 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
     if (isOpen) setValues({});
   }, [isOpen]);
 
-  const setValue = (id: string, v: string | boolean) =>
+  const setValue = (id: string, v: string | boolean | CustomFieldFileValue[]) =>
     setValues(prev => ({ ...prev, [id]: v }));
 
   // Required-field check, derived directly from the shared config.
@@ -72,6 +73,8 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
       const v = values[f.id];
       if (f.type === 'checkbox') {
         if (v !== true) return false;
+      } else if (f.type === 'files') {
+        if (!Array.isArray(v) || v.length === 0) return false;
       } else if (typeof v !== 'string' || !v.trim()) {
         return false;
       }
@@ -174,7 +177,7 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
 // added by admins automatically flow into a clean 2-col layout with
 // no trailing whitespace gaps.
 const isIntrinsicallyFull = (field: CustomField) =>
-  field.type === 'longText' || field.type === 'checkbox';
+  field.type === 'longText' || field.type === 'checkbox' || field.type === 'files';
 
 const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
   const flags = sectionFields.map(isIntrinsicallyFull);
@@ -213,8 +216,8 @@ const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
 // checkboxes span the full row; everything else fits the 2-col grid.
 interface FieldRowProps {
   field: CustomField;
-  value: string | boolean | undefined;
-  onChange: (v: string | boolean) => void;
+  value: string | boolean | CustomFieldFileValue[] | undefined;
+  onChange: (v: string | boolean | CustomFieldFileValue[]) => void;
   /** When true, render this field across both grid columns. */
   forceFullWidth?: boolean;
 }
@@ -253,10 +256,18 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, value, onChange, forceFullWi
 
 const renderControl = (
   field: CustomField,
-  value: string | boolean | undefined,
-  onChange: (v: string | boolean) => void,
+  value: string | boolean | CustomFieldFileValue[] | undefined,
+  onChange: (v: string | boolean | CustomFieldFileValue[]) => void,
 ) => {
   switch (field.type) {
+    case 'files':
+      return (
+        <TicketFileField
+          name={`new-${field.id}`}
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+        />
+      );
     case 'dropdown': {
       const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
       return (

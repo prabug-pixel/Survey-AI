@@ -14,7 +14,25 @@ export type CustomFieldType =
   | 'number'
   | 'date'
   | 'checkbox'
-  | 'user';
+  | 'user'
+  | 'files';
+
+/** One attached file on a `files`-type custom field. `url` is a local
+ *  object URL — this mock app has no upload backend, so attachments only
+ *  live for the lifetime of the page (consistent with the rest of the
+ *  Ticketing mock, which is client-state only). */
+export interface CustomFieldFileValue {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+}
+
+/** Extensions accepted by the Files field, shared by the `<input>` accept
+ *  attribute and the helper text shown in the dropzone. */
+export const FILES_FIELD_ACCEPT =
+  '.png,.jpg,.jpeg,.pdf,.xls,.xlsx,.csv,.doc,.docx,.ppt,.pptx,.txt';
 
 export type CustomFieldKind =
   // Customer-info system fields
@@ -896,6 +914,7 @@ export const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   date: 'Date',
   checkbox: 'Checkbox',
   user: 'User',
+  files: 'Files',
 };
 
 export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string }[] = [
@@ -906,6 +925,7 @@ export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string }[] = [
   { value: 'date',     label: 'Date' },
   { value: 'checkbox', label: 'Checkbox' },
   { value: 'user',     label: 'User' },
+  { value: 'files',    label: 'Files' },
 ];
 
 export const SOURCE_CHANNEL_LABELS: Record<SourceChannel, string> = {
