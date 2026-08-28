@@ -29,6 +29,8 @@ import {
 import { useCustomFields } from './CustomFieldsContext';
 import type { CustomField } from './CustomFieldsContext';
 import TicketDateField from './TicketDateField';
+import TicketFilesField from './TicketFilesField';
+import type { TicketFileValue } from './TicketFilesField';
 import styles from './TicketActivityModal.module.scss';
 
 export interface TicketActivityEntry {
@@ -54,7 +56,7 @@ export interface TicketRecord {
   channel: string;
   activity: TicketActivityEntry[];
   /** Pre-populated values for built-in custom fields (severity, sentiment, etc.). */
-  customValues?: Record<string, string | boolean>;
+  customValues?: Record<string, string | boolean | string[] | TicketFileValue[]>;
   /** Review-only fields. Set on tickets that came in from a review source
    *  (Google, Facebook, etc.) so the modal swaps the bulb/title treatment
    *  for the red-avatar + star-row header. Leave undefined on other types. */
@@ -171,8 +173,8 @@ const TicketActivityModal: React.FC<Props> = ({ isOpen, ticket, onClose }) => {
     });
     return ordered.filter(Boolean);
   }, [customFields, tableColumnOrder]);
-  const [customValues, setCustomValues] = useState<Record<string, string | boolean | string[]>>({});
-  const setCustomValue = (id: string, v: string | boolean | string[]) =>
+  const [customValues, setCustomValues] = useState<Record<string, string | boolean | string[] | TicketFileValue[]>>({});
+  const setCustomValue = (id: string, v: string | boolean | string[] | TicketFileValue[]) =>
     setCustomValues(prev => ({ ...prev, [id]: v }));
 
   // Reset local controls when the active ticket changes. Pull in any
@@ -652,8 +654,8 @@ const ScopedSelect: React.FC<ScopedSelectProps> = (props) => {
 // field's `type` (text, dropdown, number, etc.).
 interface CustomFieldControlProps {
   field: CustomField;
-  value: string | boolean | string[] | undefined;
-  onChange: (v: string | boolean | string[]) => void;
+  value: string | boolean | string[] | TicketFileValue[] | undefined;
+  onChange: (v: string | boolean | string[] | TicketFileValue[]) => void;
 }
 
 const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, onChange }) => {
@@ -665,6 +667,17 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
   );
 
   switch (field.type) {
+    case 'files':
+      return (
+        <div className={styles.sideField}>
+          {label}
+          <TicketFilesField
+            name={`cf-${field.id}`}
+            value={Array.isArray(value) ? (value as TicketFileValue[]) : undefined}
+            onChange={onChange}
+          />
+        </div>
+      );
     case 'dropdown': {
       const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
       return (
@@ -684,7 +697,7 @@ const CustomFieldControl: React.FC<CustomFieldControlProps> = ({ field, value, o
     }
     case 'multiSelect': {
       const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
-      const selectedValues = Array.isArray(value) ? value : [];
+      const selectedValues = (Array.isArray(value) ? value : []) as string[];
       const selectedOptions = opts.filter(o => selectedValues.includes(String(o.value)));
       return (
         <div className={styles.sideField}>

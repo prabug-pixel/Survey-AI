@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IconChevronDown, IconChevronUp, IconPlusCircle } from '../../shared/Icons/Icons';
 import CreateTicketModal from './CreateTicketModal';
+import { useTickets } from './TicketsContext';
 import styles from './TicketingL2Nav.module.scss';
 
 type TicketingView = 'my' | 'all';
@@ -32,6 +33,7 @@ const TicketingL2Nav: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [activeView, setActiveView] = useState<TicketingView>('all');
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
+  const { addTicket } = useTickets();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,7 +75,10 @@ const TicketingL2Nav: React.FC = () => {
         <CreateTicketModal
           isOpen={createTicketOpen}
           onClose={() => setCreateTicketOpen(false)}
-          onSave={() => setCreateTicketOpen(false)}
+          onSave={values => {
+            addTicket(values);
+            setCreateTicketOpen(false);
+          }}
         />
 
         <button

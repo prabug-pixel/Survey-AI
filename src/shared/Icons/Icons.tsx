@@ -202,6 +202,24 @@ export const IconAttach: React.FC<IconProps> = ({ size = 18, color = 'currentCol
   </svg>
 );
 
+// Generic document/file glyph — used by non-image tiles in the Files
+// custom-field picker (Ticketing) to represent PDFs, spreadsheets, etc.
+export const IconFileGeneric: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 2v6h6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// Download-to-tray glyph — used by the file/image preview lightbox
+// (Ticketing Files field) to download the original attachment.
+export const IconDownload: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // Aero "Code blocks" glyph — code brackets inside a card.
 // Used for the Embed on website row in the Distribute tab.
 export const IconCode: React.FC<IconProps> = ({ size = 18, color = 'currentColor', className }) => (
@@ -352,6 +370,15 @@ export const IconPlusCircle: React.FC<IconProps> = ({ size = 20, color = '#1976d
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
     <circle cx="12" cy="12" r="10" fill={color} />
     <path d="M12 7v10M7 12h10" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+// Outline plus-in-circle (Material add_circle_outline) — used where a
+// filled badge would be too heavy, e.g. the ticket Files add tile.
+export const IconPlusCircleOutline: React.FC<IconProps> = ({ size = 20, color = 'currentColor', className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.5" />
+    <path d="M12 8v8M8 12h8" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
 

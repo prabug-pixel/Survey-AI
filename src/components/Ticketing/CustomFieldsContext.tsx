@@ -13,6 +13,7 @@ import fieldTypeDateIcon from '../../assets/icons/FieldTypeDate.svg';
 import fieldTypeUserIcon from '../../assets/icons/FieldTypeUser.svg';
 import fieldTypeMultiSelectIcon from '../../assets/icons/FieldTypeMultiSelect.svg';
 import fieldTypeUrlIcon from '../../assets/icons/FieldTypeUrl.svg';
+import fieldTypeFilesIcon from '../../assets/icons/FieldTypeFiles.svg';
 
 // ── Custom fields ──────────────────────────────────────────
 export type CustomFieldType =
@@ -24,7 +25,8 @@ export type CustomFieldType =
   | 'date'
   | 'checkbox'
   | 'user'
-  | 'url';
+  | 'url'
+  | 'files';
 
 export type CustomFieldKind =
   // Customer-info system fields
@@ -908,6 +910,7 @@ export const FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   checkbox: 'Checkbox',
   user: 'Users',
   url: 'Url',
+  files: 'Files',
 };
 
 export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string; img?: string }[] = [
@@ -919,6 +922,7 @@ export const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string; img?: 
   { value: 'dropdown',     label: 'Single-select',            img: fieldTypeSingleSelectIcon },
   { value: 'user',         label: 'Users',                    img: fieldTypeUserIcon },
   { value: 'url',          label: 'Url',                      img: fieldTypeUrlIcon },
+  { value: 'files',        label: 'Files',                    img: fieldTypeFilesIcon },
 ];
 
 export const SOURCE_CHANNEL_LABELS: Record<SourceChannel, string> = {

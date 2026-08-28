@@ -14,29 +14,32 @@ import AgentProductivityReport from './components/Ticketing/AgentProductivityRep
 import TicketResolutionTimeReport from './components/Ticketing/TicketResolutionTimeReport';
 import TicketCountReport from './components/Ticketing/TicketCountReport';
 import { CustomFieldsProvider } from './components/Ticketing/CustomFieldsContext';
+import { TicketsProvider } from './components/Ticketing/TicketsContext';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 const App: React.FC = () => (
   <BrowserRouter>
     <CustomFieldsProvider>
-      <AppLayout>
-        <Routes>
-          <Route path="/surveys" element={<ErrorBoundary><AllSurveys /></ErrorBoundary>} />
-          <Route path="/surveys/create" element={<ErrorBoundary><SurveyBuilder /></ErrorBoundary>} />
-          <Route path="/surveys/:surveyId" element={<ErrorBoundary><SurveyDetails /></ErrorBoundary>} />
-          <Route path="/surveys/:surveyId/campaigns" element={<ErrorBoundary><SurveyCampaigns /></ErrorBoundary>} />
-          <Route path="/ticketing" element={<ErrorBoundary><TicketingLanding /></ErrorBoundary>} />
-          <Route path="/ticketing/settings/fields"     element={<ErrorBoundary><CustomFieldsManager /></ErrorBoundary>} />
-          <Route path="/ticketing/settings/sources"    element={<ErrorBoundary><SourcesManager /></ErrorBoundary>} />
-          <Route path="/ticketing/settings/assignment" element={<ErrorBoundary><AssignmentRulesManager /></ErrorBoundary>} />
-          <Route path="/ticketing/settings/sla"        element={<ErrorBoundary><SlaRulesManager /></ErrorBoundary>} />
-          <Route path="/ticketing/reports/agent-productivity" element={<ErrorBoundary><AgentProductivityReport /></ErrorBoundary>} />
-          <Route path="/ticketing/reports/resolution-time"    element={<ErrorBoundary><TicketResolutionTimeReport /></ErrorBoundary>} />
-          <Route path="/ticketing/reports/ticket-count"       element={<ErrorBoundary><TicketCountReport /></ErrorBoundary>} />
-          <Route path="/survey/create" element={<Navigate to="/surveys/create" replace />} />
-          <Route path="*" element={<Navigate to="/surveys" replace />} />
-        </Routes>
-      </AppLayout>
+      <TicketsProvider>
+        <AppLayout>
+          <Routes>
+            <Route path="/surveys" element={<ErrorBoundary><AllSurveys /></ErrorBoundary>} />
+            <Route path="/surveys/create" element={<ErrorBoundary><SurveyBuilder /></ErrorBoundary>} />
+            <Route path="/surveys/:surveyId" element={<ErrorBoundary><SurveyDetails /></ErrorBoundary>} />
+            <Route path="/surveys/:surveyId/campaigns" element={<ErrorBoundary><SurveyCampaigns /></ErrorBoundary>} />
+            <Route path="/ticketing" element={<ErrorBoundary><TicketingLanding /></ErrorBoundary>} />
+            <Route path="/ticketing/settings/fields"     element={<ErrorBoundary><CustomFieldsManager /></ErrorBoundary>} />
+            <Route path="/ticketing/settings/sources"    element={<ErrorBoundary><SourcesManager /></ErrorBoundary>} />
+            <Route path="/ticketing/settings/assignment" element={<ErrorBoundary><AssignmentRulesManager /></ErrorBoundary>} />
+            <Route path="/ticketing/settings/sla"        element={<ErrorBoundary><SlaRulesManager /></ErrorBoundary>} />
+            <Route path="/ticketing/reports/agent-productivity" element={<ErrorBoundary><AgentProductivityReport /></ErrorBoundary>} />
+            <Route path="/ticketing/reports/resolution-time"    element={<ErrorBoundary><TicketResolutionTimeReport /></ErrorBoundary>} />
+            <Route path="/ticketing/reports/ticket-count"       element={<ErrorBoundary><TicketCountReport /></ErrorBoundary>} />
+            <Route path="/survey/create" element={<Navigate to="/surveys/create" replace />} />
+            <Route path="*" element={<Navigate to="/surveys" replace />} />
+          </Routes>
+        </AppLayout>
+      </TicketsProvider>
     </CustomFieldsProvider>
   </BrowserRouter>
 );

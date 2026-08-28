@@ -17,6 +17,8 @@ import TextArea from '@birdeye/elemental/core/atoms/TextArea';
 import Button from '@birdeye/elemental/core/atoms/Button';
 import { IconClose } from '../../shared/Icons/Icons';
 import TicketDateField from './TicketDateField';
+import TicketFilesField from './TicketFilesField';
+import type { TicketFileValue } from './TicketFilesField';
 import {
   useCustomFields,
   FIELD_SECTION_LABELS,
@@ -32,11 +34,11 @@ interface Props {
 }
 
 /** Values keyed by CustomField.id — mirrors TicketRecord.customValues. */
-export type TicketDraftValues = Record<string, string | boolean | string[]>;
+export type TicketDraftValues = Record<string, string | boolean | string[] | TicketFileValue[]>;
 
 // User-picker options. Activity modal already uses the same shape, so
 // kind='user' fields render against this list in both places.
-const ASSIGNEE_OPTIONS = [
+export const ASSIGNEE_OPTIONS = [
   { value: 'prabu',     label: 'prabu G' },
   { value: 'abhinav',   label: 'Abhinav R.' },
   { value: 'priyanshi', label: 'Priyanshi' },
@@ -63,7 +65,7 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
     if (isOpen) setValues({});
   }, [isOpen]);
 
-  const setValue = (id: string, v: string | boolean | string[]) =>
+  const setValue = (id: string, v: string | boolean | string[] | TicketFileValue[]) =>
     setValues(prev => ({ ...prev, [id]: v }));
 
   // Required-field check, derived directly from the shared config.
@@ -73,6 +75,8 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
       const v = values[f.id];
       if (f.type === 'checkbox') {
         if (v !== true) return false;
+      } else if (f.type === 'files') {
+        if (!Array.isArray(v) || v.length === 0) return false;
       } else if (typeof v !== 'string' || !v.trim()) {
         return false;
       }
@@ -175,7 +179,7 @@ const CreateTicketModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
 // added by admins automatically flow into a clean 2-col layout with
 // no trailing whitespace gaps.
 const isIntrinsicallyFull = (field: CustomField) =>
-  field.type === 'longText' || field.type === 'checkbox' || field.type === 'multiSelect';
+  field.type === 'longText' || field.type === 'checkbox' || field.type === 'multiSelect' || field.type === 'files';
 
 const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
   const flags = sectionFields.map(isIntrinsicallyFull);
@@ -214,8 +218,8 @@ const computeFullWidthFlags = (sectionFields: CustomField[]): boolean[] => {
 // checkboxes span the full row; everything else fits the 2-col grid.
 interface FieldRowProps {
   field: CustomField;
-  value: string | boolean | string[] | undefined;
-  onChange: (v: string | boolean | string[]) => void;
+  value: string | boolean | string[] | TicketFileValue[] | undefined;
+  onChange: (v: string | boolean | string[] | TicketFileValue[]) => void;
   /** When true, render this field across both grid columns. */
   forceFullWidth?: boolean;
 }
@@ -254,10 +258,18 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, value, onChange, forceFullWi
 
 const renderControl = (
   field: CustomField,
-  value: string | boolean | string[] | undefined,
-  onChange: (v: string | boolean | string[]) => void,
+  value: string | boolean | string[] | TicketFileValue[] | undefined,
+  onChange: (v: string | boolean | string[] | TicketFileValue[]) => void,
 ) => {
   switch (field.type) {
+    case 'files':
+      return (
+        <TicketFilesField
+          name={`new-${field.id}`}
+          value={Array.isArray(value) ? (value as TicketFileValue[]) : undefined}
+          onChange={onChange}
+        />
+      );
     case 'dropdown': {
       const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
       return (
@@ -274,7 +286,7 @@ const renderControl = (
     }
     case 'multiSelect': {
       const opts = (field.options ?? []).map(o => ({ value: o, label: o }));
-      const selectedValues = Array.isArray(value) ? value : [];
+      const selectedValues = (Array.isArray(value) ? value : []) as string[];
       const selectedOptions = opts.filter(o => selectedValues.includes(String(o.value)));
       return (
         <Multiselect
